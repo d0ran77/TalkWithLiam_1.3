@@ -1,0 +1,135 @@
+export interface PhotoItem {
+  id: string;
+  index: number;
+  title: string;
+  category: string;
+  location: string;
+  specs: string;
+  src: string;
+  fallbackSrcs?: string[];
+  videoSrc?: string;
+  captionTitle: string;
+  captionText: string;
+  fullDescription?: string;
+}
+
+export const PHOTOS: PhotoItem[] = [
+  {
+    id: 'beacon-path',
+    index: 0,
+    title: 'The Beacon Path',
+    category: 'Landscape & Calm',
+    location: 'Salt Marsh Way',
+    specs: '35mm • f/5.6 • 1/320s',
+    src: '/8.webp',
+    fallbackSrcs: ['/8.webp', '/8.jpg', '/8.jpeg', '/8.png', '/assets/8.webp', '/assets/8.jpg'],
+    captionTitle: 'A Place to Pause:',
+    captionText: 'A solitary wooden bench along the gravel path to the red coastal beacon.',
+    fullDescription: 'Slowing down to take a seat, breathe in the open marshland air, and let mental chatter settle.',
+  },
+  {
+    id: 'humber-mist',
+    index: 1,
+    title: 'Perimeter & Mist',
+    category: 'Industrial & Solitude',
+    location: 'Humber Bridge',
+    specs: '28mm • f/5.6 • 1/320s',
+    src: '/1.webp',
+    fallbackSrcs: ['/1.webp', '/1.jpg', '/1.jpeg', '/1.png', '/assets/1.webp', '/assets/1.jpg'],
+    captionTitle: 'Boundaries in the Mist:',
+    captionText: 'Monumental concrete rising quietly into thick river fog.',
+    fullDescription: 'A reminder that firm boundaries can be calm, still, and grounded, holding space amidst the unknown.',
+  },
+  {
+    id: 'left-behind',
+    index: 2,
+    title: 'Left Behind',
+    category: 'Traces & Horizon',
+    location: 'Estuary Foreshore',
+    specs: '35mm • f/2.8 • 1/500s',
+    src: '/2.webp',
+    fallbackSrcs: ['/2.webp', '/2.jpg', '/2.jpeg', '/2.png', '/assets/2.webp', '/assets/2.jpg'],
+    captionTitle: 'Traces of Human Transit:',
+    captionText: 'A single shoe resting at the water’s quiet verge.',
+    fullDescription: 'Quiet moments of absence and arrival, where human traces meet an infinite grey horizon.',
+  },
+  {
+    id: 'riverside-cottages',
+    index: 3,
+    title: 'Riverside Cottages',
+    category: 'Color & Architecture',
+    location: 'Hessle Foreshore',
+    specs: '24mm • f/8.0 • 1/200s',
+    src: '/3.webp',
+    fallbackSrcs: ['/3.webp', '/3.jpg', '/3.jpeg', '/3.png', '/assets/3.webp', '/assets/3.jpg'],
+    captionTitle: 'Color Beneath the Span:',
+    captionText: 'Vibrant porch doorways sheltered beneath the looming suspension bridge.',
+    fullDescription: 'Domestic warmth, pastel rhythm, and quiet resilience framed against monumental scale.',
+  },
+  {
+    id: 'estuary-sentinel',
+    index: 4,
+    title: 'The Estuary Watcher',
+    category: 'Street Art & Estuary',
+    location: 'Humber Estuary Wall',
+    specs: '35mm • f/2.8 • 1/320s',
+    src: '/4.webp',
+    videoSrc: '/4.mp4',
+    fallbackSrcs: ['/4.webp', '/4.jpg', '/4.jpeg', '/4.png', '/assets/4.webp', '/assets/4.jpg'],
+    captionTitle: 'The Bear & The Gulls:',
+    captionText: 'Street art of a bear watching over the Humber Estuary, as opportunistic seagulls gather for a greedy visit.',
+    fullDescription: 'Painted stillness meeting living motion: a street-art guardian watching the grey estuary waters while hungry gulls circle close.',
+  },
+  {
+    id: 'lifeboat-approach',
+    index: 5,
+    title: 'Lifeboat Way',
+    category: 'Street & Movement',
+    location: 'Slipway Road',
+    specs: '35mm • f/4.0 • 1/250s',
+    src: '/5.webp',
+    fallbackSrcs: ['/5.webp', '/5.jpg', '/5.jpeg', '/5.png', '/assets/5.webp', '/assets/5.jpg'],
+    captionTitle: 'Shared Momentum:',
+    captionText: 'Cyclists and riders navigating the yellow road markings under morning fog.',
+    fullDescription: 'Moving forward side by side through the mist, finding rhythm in everyday journeys.',
+  },
+  {
+    id: 'passage-to-light',
+    index: 6,
+    title: 'Passage to Light',
+    category: 'High Contrast & Shadow',
+    location: 'Pedestrian Tunnel',
+    specs: '28mm • f/2.0 • 1/125s',
+    src: '/6.webp',
+    fallbackSrcs: ['/6.webp', '/6.jpg', '/6.jpeg', '/6.png', '/assets/6.webp', '/assets/6.jpg'],
+    captionTitle: 'Threshold & Silhouette:',
+    captionText: 'Figures stepping through deep tunnel shadow toward daylight.',
+    fullDescription: 'Therapy is much like moving through an underpass: passing through darkness to arrive at open daylight.',
+  },
+  {
+    id: 'suspension-and-scale',
+    index: 7,
+    title: 'Suspension & Scale',
+    category: 'Atmosphere & Stillness',
+    location: 'Embankment Sea Wall',
+    specs: '24mm • f/8.0 • 1/400s',
+    src: '/7.webp',
+    fallbackSrcs: ['/7.webp', '/7.jpg', '/7.jpeg', '/7.png', '/assets/7.webp', '/assets/7.jpg'],
+    captionTitle: 'Standing at the Water’s Edge:',
+    captionText: 'Two figures looking up at the immense suspension cables under dramatic skies.',
+    fullDescription: 'Looking up at monumental structures that bridge distant shores, grounded by companionship.',
+  },
+  {
+    id: 'threshold-view',
+    index: 8,
+    title: 'Threshold View',
+    category: 'Street & Solitude',
+    location: 'Urban Rooftop',
+    specs: '35mm • f/4.0 • 1/200s',
+    src: '/9.webp',
+    fallbackSrcs: ['/9.webp', '/9.jpg', '/9.jpeg', '/9.png', '/assets/9.webp', '/assets/9.jpg'],
+    captionTitle: 'Contemplation at the Verge:',
+    captionText: 'Framed by weathered brick and graffiti, looking out into open expanse.',
+    fullDescription: 'Standing at the doorway between inner shelter and outer reality, seeing without a filter.',
+  },
+];

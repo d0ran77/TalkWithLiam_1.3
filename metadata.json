@@ -1,0 +1,6 @@
+{
+  "name": "Liam Doran Psychotherapy",
+  "description": "Editorial monograph website for Liam Doran, UKCP trainee psychotherapeutic counsellor in Willerby, East Yorkshire and online.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

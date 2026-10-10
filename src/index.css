@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Newsreader', Georgia, Cambria, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-canvas: #FAF9F5;
+  --color-surface: #FFFFFF;
+  --color-stone-surface: #F2EFE9;
+  --color-ink: #18181B;
+  --color-ink-muted: #71717A;
+  --color-green-intake: #2D5A43;
+
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+}
+
+@layer base {
+  html, body {
+    background-color: #FAF9F5;
+    color: #18181B;
+    font-family: var(--font-sans);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom minimal scrollbar for cards */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 113, 108, 0.2);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 113, 108, 0.4);
+}
+
+/* Hide scrollbar for carousel container */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Gabriel Beaugonin & Locomotive Style: Box Decoration Break & Highlight */
+.box-decoration-clone {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.editorial-mark {
+  background-color: #18181B;
+  color: #FAF9F5;
+  padding: 0.12em 0.38em;
+  border-radius: 4px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  font-weight: 500;
+  display: inline;
+}
+
+@keyframes reflectionAmbientGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px 1px rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 18px 3px rgba(255, 255, 255, 0.45);
+    border-color: rgba(255, 255, 255, 0.65);
+    background-color: rgba(255, 255, 255, 0.22);
+  }
+}
+
+@keyframes reflectionActiveGlow {
+  0%, 100% {
+    box-shadow: 0 0 18px 3px rgba(255, 255, 255, 0.6), 0 0 32px 6px rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(255, 255, 255, 0.28);
+  }
+  50% {
+    box-shadow: 0 0 26px 5px rgba(255, 255, 255, 0.8), 0 0 42px 10px rgba(255, 255, 255, 0.4);
+    border-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.38);
+  }
+}
+
+.animate-reflection-ambient {
+  animation: reflectionAmbientGlow 3s ease-in-out infinite;
+}
+
+.animate-reflection-active {
+  animation: reflectionActiveGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float-gentle {
+  animation: floatGentle 3.5s ease-in-out infinite;
+}
+
+@keyframes dotPulseSequence {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-dot-1 {
+  display: inline-block;
+  animation: dotPulseSequence 1.4s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.animate-dot-2 {
+  display: inline-block;
+  animation: dotPulseSequence 1.4s ease-in-out infinite;
+  animation-delay: 0.25s;
+}
+
+.animate-dot-3 {
+  display: inline-block;
+  animation: dotPulseSequence 1.4s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+
+
