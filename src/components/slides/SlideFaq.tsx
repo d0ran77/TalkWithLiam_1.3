@@ -45,8 +45,8 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({ onNavigate }) => {
       id="slide-faq-content"
       className="h-full flex flex-col justify-between select-text overflow-y-auto custom-scrollbar pr-0.5 sm:pr-3 pb-4 sm:pb-8 space-y-5 sm:space-y-8"
     >
-      {/* Top Header Region */}
-      <div className="pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
+      {/* Top Header Region (Hidden on mobile where card header displays [06 / 06] • PRACTICE GUIDE & FAQS) */}
+      <div className="hidden lg:block pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
         <div className="flex items-center space-x-2 mb-1.5 sm:mb-2">
           <span className="font-mono text-[9.5px] sm:text-[10px] md:text-[11px] tracking-widest text-[#71717A] font-semibold">
             [06 / 06]

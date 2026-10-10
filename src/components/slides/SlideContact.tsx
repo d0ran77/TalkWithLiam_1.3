@@ -88,6 +88,7 @@ export const SlideContact: React.FC<SlideContactProps> = ({
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
+        _replyto: formData.email.trim(),
         phone: formData.phone?.trim() || 'Not provided',
         formatPreference: selectedFormatLabel,
         inquiryPathway: selectedStepLabel,
@@ -140,8 +141,8 @@ export const SlideContact: React.FC<SlideContactProps> = ({
       id="slide-contact-content"
       className="h-full flex flex-col justify-between select-text overflow-y-auto custom-scrollbar pr-0.5 sm:pr-2 pb-2 sm:pb-4 space-y-5 sm:space-y-6"
     >
-      {/* Top Slide Header */}
-      <div className="pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
+      {/* Top Slide Header (Hidden on mobile where card header displays [05 / 06] • GET IN TOUCH) */}
+      <div className="hidden lg:block pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
         <div className="flex items-center space-x-2 mb-1.5 sm:mb-2">
           <span className="font-mono text-[9.5px] sm:text-[10px] md:text-[11px] tracking-widest text-[#71717A] font-semibold">
             [05 / 06]
@@ -370,25 +371,28 @@ export const SlideContact: React.FC<SlideContactProps> = ({
           </form>
         )}
 
-        {/* Direct Email Action Bar (No raw text email displayed) */}
+        {/* Direct Email Action Bar with explicit professional recipient address */}
         <div className="pt-4 sm:pt-5 border-t border-stone-200/80 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <a
-              href={`mailto:${PRACTICAL_DETAILS.email}`}
-              title="Email Liam directly"
+              href={`mailto:${PRACTICAL_DETAILS.email}?subject=${encodeURIComponent('Therapy Inquiry — Talk with Liam')}`}
+              title={`Email Liam directly at ${PRACTICAL_DETAILS.email}`}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#FAF9F5] hover:bg-[#F2EFE9] border border-stone-200/90 text-stone-800 hover:text-[#18181B] transition-colors cursor-pointer text-xs sm:text-[12.5px] font-medium"
-              aria-label="Send direct email"
+              aria-label={`Send direct email to ${PRACTICAL_DETAILS.email}`}
             >
-              <Mail className="w-3.5 h-3.5 text-stone-700" />
-              <span>Direct Email</span>
+              <Mail className="w-3.5 h-3.5 text-stone-700 shrink-0" />
+              <span>Direct Email:</span>
+              <span className="font-mono text-stone-600 text-[11px] sm:text-xs font-normal">
+                {PRACTICAL_DETAILS.email}
+              </span>
             </a>
 
             <button
               type="button"
               onClick={onCopyEmail}
-              title="Copy email to clipboard"
+              title={`Copy ${PRACTICAL_DETAILS.email} to clipboard`}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#FAF9F5] hover:bg-[#F2EFE9] border border-stone-200/90 text-stone-600 hover:text-[#18181B] transition-colors cursor-pointer text-xs sm:text-[12.5px]"
-              aria-label="Copy email address"
+              aria-label={`Copy email address ${PRACTICAL_DETAILS.email}`}
             >
               {copied ? (
                 <Check className="w-3.5 h-3.5 text-emerald-700" />

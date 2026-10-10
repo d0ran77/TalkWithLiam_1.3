@@ -131,6 +131,26 @@ export default function App() {
     };
   }, []);
 
+  // Close Connect drawer on outside click or touch tap
+  useEffect(() => {
+    if (!isSocialOpen) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        !target.closest('[id*="social-channels-drawer"]') &&
+        !target.closest('[id*="speech-bubble"]')
+      ) {
+        setIsSocialOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isSocialOpen]);
+
   // Scroll-to-top helper that resets window and any scrollable containers
   const scrollToTop = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -383,6 +403,16 @@ export default function App() {
         setCurrentSlideIndex(index);
         handleSelectViewMode('carousel');
         scrollToTop();
+        // On mobile, scroll smoothly to the target slide card in the vertical stream
+        setTimeout(() => {
+          const slideId = SLIDES[index]?.id;
+          if (slideId) {
+            const mobileTarget = document.getElementById(`mobile-slide-${slideId}`);
+            if (mobileTarget) {
+              mobileTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }, 60);
       }
     },
     [currentSlideIndex, handleSelectViewMode, scrollToTop]
@@ -466,6 +496,8 @@ export default function App() {
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      // Deactivate touch swipe flinging on mobile screens (< 1024px) - allow users to scroll down naturally
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
       if (touchStartY.current === null || touchStartX.current === null) return;
       const touchEndY = e.changedTouches[0].clientY;
       const touchEndX = e.changedTouches[0].clientX;
@@ -594,7 +626,7 @@ export default function App() {
             /* Minimal Landing View (Centered on Mobile, Left-aligned on Desktop, with exquisite tactile buttons) */
             <div
               key="minimal-landing-layout-wrapper"
-              className="w-full max-w-[2200px] mx-auto flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative overflow-visible min-h-0 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 my-auto p-2"
+              className="w-full max-w-[2200px] mx-auto flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative overflow-y-auto lg:overflow-visible min-h-0 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 my-auto p-2 custom-scrollbar"
             >
               {/* Floating ambient highlighted words in negative space */}
               <AmbientNegativeSpaceWords />
@@ -635,7 +667,7 @@ export default function App() {
 
                 {/* Refined Tactile Toolbar Buttons */}
                 <div
-                  className="mt-6 sm:mt-8 2xl:mt-11 3xl:mt-14 flex items-center justify-center lg:justify-start gap-3.5 sm:gap-4.5 2xl:gap-6 3xl:gap-7 relative p-1 overflow-visible"
+                  className="mt-4 sm:mt-8 2xl:mt-11 3xl:mt-14 flex items-center justify-center lg:justify-start gap-3 sm:gap-4.5 2xl:gap-6 3xl:gap-7 relative p-1 overflow-visible"
                 >
                   {/* 1. Carousel / Monograph Book Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -644,7 +676,7 @@ export default function App() {
                       whileTap={{ scale: 0.94 }}
                       id="minimal-carousel-toggle-btn"
                       onClick={handleToggleCarousel}
-                      className="group/icon relative w-13 h-13 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      className="group/icon relative w-12 h-12 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
                       aria-label="Open slide carousel"
                     >
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
@@ -662,7 +694,7 @@ export default function App() {
                       whileTap={{ scale: 0.94 }}
                       id="minimal-portrait-toggle-btn"
                       onClick={() => handleSelectViewMode('portrait')}
-                      className="group/icon relative w-13 h-13 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      className="group/icon relative w-12 h-12 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
                       aria-label="About Liam"
                     >
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
@@ -683,7 +715,7 @@ export default function App() {
                         onClick={() => {
                           setIsSocialOpen((prev) => !prev);
                         }}
-                        className={`group/icon relative w-13 h-13 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                        className={`group/icon relative w-12 h-12 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
                           isSocialOpen
                             ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
                             : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
@@ -727,16 +759,16 @@ export default function App() {
                       )}
                     </div>
 
-                    {/* Social Channels Slide-out drawer */}
+                    {/* Social Channels Slide-out drawer with glassmorphism */}
                     <AnimatePresence>
                       {isSocialOpen && (
                         <motion.div
                           id="minimal-social-channels-drawer"
-                          initial={{ opacity: 0, x: -10, scale: 0.92 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          exit={{ opacity: 0, x: -10, scale: 0.92 }}
+                          initial={{ opacity: 0, y: -8, scale: 0.94 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -8, scale: 0.94 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="ml-3 2xl:ml-4 flex items-center gap-2 2xl:gap-3 p-1.5 2xl:p-2 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-full shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-30"
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-3 2xl:lg:ml-4 flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2 2xl:lg:gap-3 p-1.5 lg:p-1.5 2xl:lg:p-2 bg-white/45 lg:bg-white/95 backdrop-blur-xl border border-white/60 lg:border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
                         >
                           {/* Email link / contact form trigger */}
                           <div className="relative group/tooltip flex flex-col items-center">
@@ -744,13 +776,16 @@ export default function App() {
                               whileHover={{ scale: 1.1, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="minimal-channel-mail-btn"
-                              onClick={handleMailClick}
-                              className="w-10 h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              onClick={() => {
+                                handleMailClick();
+                                setIsSocialOpen(false);
+                              }}
+                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Go to contact form"
                             >
-                              <Mail className="w-5 h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
+                              <Mail className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
                             </motion.button>
-                            <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Email
                             </span>
                           </div>
@@ -764,12 +799,13 @@ export default function App() {
                               href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              onClick={() => setIsSocialOpen(false)}
+                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on Psychology Today"
                             >
-                              <PsychologyTodayIcon className="w-5 h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
+                              <PsychologyTodayIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
                             </motion.a>
-                            <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Psychology Today
                             </span>
                           </div>
@@ -783,12 +819,13 @@ export default function App() {
                               href="https://x.com"
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              onClick={() => setIsSocialOpen(false)}
+                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on X"
                             >
-                              <XTwitterIcon className="w-5 h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
+                              <XTwitterIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
                             </motion.a>
-                            <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               X (Twitter)
                             </span>
                           </div>
@@ -802,29 +839,33 @@ export default function App() {
                               href={PRACTICAL_DETAILS.social.youtube}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              onClick={() => setIsSocialOpen(false)}
+                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on YouTube"
                             >
-                              <Youtube className="w-5 h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
+                              <Youtube className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
                             </motion.a>
-                            <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               YouTube
                             </span>
                           </div>
 
-                          {/* Location & Parking Guide link */}
-                          <div className="relative group/tooltip flex flex-col items-center">
+                          {/* Location & Parking Guide link (Desktop toolbar) */}
+                          <div className="hidden lg:flex relative group/tooltip flex-col items-center">
                             <motion.button
                               whileHover={{ scale: 1.1, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="minimal-channel-location-btn"
-                              onClick={() => setIsLocationOpen(true)}
-                              className="w-10 h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              onClick={() => {
+                                setIsLocationOpen(true);
+                                setIsSocialOpen(false);
+                              }}
+                              className="w-9 h-9 sm:w-10 sm:h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Location & Parking Guide"
                             >
-                              <MapPin className="w-5 h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
+                              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
                             </motion.button>
-                            <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Parking
                             </span>
                           </div>
@@ -843,10 +884,242 @@ export default function App() {
               key="carousel-layout-wrapper"
               className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative overflow-hidden min-h-0 gap-3 sm:gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20"
             >
-              {/* Left Side: Brand & Hero Toolbar */}
+              {/* Mobile View: Continuous vertical scroll stream (< lg) without swipe hijacking */}
+              <div
+                id="carousel-mobile-scroll-container"
+                className="lg:hidden w-full h-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar px-2 sm:px-4 py-1 select-text"
+              >
+                {/* 1. Mobile Top Brand Header */}
+                <div className="flex flex-col items-center justify-center text-center pt-1 pb-2.5 shrink-0 select-none gap-2">
+                  <button
+                    id="brand-home-trigger-mobile"
+                    onClick={() => handleSelectViewMode('minimal')}
+                    className="flex flex-col items-center text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-xl transition-all cursor-pointer"
+                    aria-label="Return to minimal landing page"
+                  >
+                    <h1 className="text-[19px] sm:text-[22px] font-medium tracking-[0.12em] uppercase text-[#18181B] leading-[1.08] text-center group-hover:text-stone-700 transition-colors">
+                      TALK WITH LIAM
+                    </h1>
+                    <p className="text-[11px] sm:text-xs text-[#71717A] tracking-wider mt-0.5 font-normal text-center">
+                      Psychotherapeutic Counselling
+                    </p>
+                  </button>
+
+                  {/* Centered Heroicons Toolbar under H2 */}
+                  <div className="flex items-center justify-center gap-2 relative shrink-0 p-1 overflow-visible">
+                    {/* 1. Slides Heroicon (Active) */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-carousel-toggle-btn-mobile"
+                        onClick={handleToggleCarousel}
+                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0"
+                        aria-label="Slide carousel active"
+                      >
+                        <BookOpen className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                      </motion.button>
+                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        Slides
+                      </span>
+                    </div>
+
+                    {/* 2. Person Heroicon: About Liam */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-portrait-toggle-btn-mobile-c"
+                        onClick={() => {
+                          setIsSocialOpen(false);
+                          handleTogglePortrait();
+                        }}
+                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0"
+                        aria-label="About Liam"
+                      >
+                        <User className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
+                      </motion.button>
+                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        About Liam
+                      </span>
+                    </div>
+
+                    {/* 3. Speech Bubble / Connect (Opens downward on mobile) */}
+                    <div className="relative flex items-center overflow-visible">
+                      <div className="relative group/tooltip flex flex-col items-center">
+                        <motion.button
+                          whileHover={{ scale: 1.08, y: -2 }}
+                          whileTap={{ scale: 0.94 }}
+                          id="speech-bubble-toggle-btn-carousel-mobile"
+                          onClick={() => setIsSocialOpen((prev) => !prev)}
+                          className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0 ${
+                            isSocialOpen
+                              ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                              : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)]'
+                          }`}
+                          aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
+                          aria-expanded={isSocialOpen}
+                        >
+                          <AnimatePresence mode="wait" initial={false}>
+                            {isSocialOpen ? (
+                              <motion.div
+                                key="icon-close"
+                                initial={{ rotate: -90, opacity: 0 }}
+                                animate={{ rotate: 0, opacity: 1 }}
+                                exit={{ rotate: 90, opacity: 0 }}
+                                transition={{ duration: 0.15 }}
+                              >
+                                <X className="w-4 h-4" />
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                key="icon-chat"
+                                initial={{ rotate: 90, opacity: 0 }}
+                                animate={{ rotate: 0, opacity: 1 }}
+                                exit={{ rotate: 90, opacity: 0 }}
+                                transition={{ duration: 0.15 }}
+                              >
+                                <MessageCircle className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.button>
+                        {!isSocialOpen && (
+                          <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                            Connect
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Channels Drawer - Opens DOWN on mobile with glassmorphism */}
+                      <AnimatePresence>
+                        {isSocialOpen && (
+                          <motion.div
+                            id="social-channels-drawer-carousel-mobile"
+                            initial={{ opacity: 0, y: -8, scale: 0.94 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -8, scale: 0.94 }}
+                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 p-1.5 bg-white/45 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-40"
+                          >
+                            {/* Mail */}
+                            <motion.button
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-mail-btn-mobile-c"
+                              onClick={() => {
+                                handleMailClick();
+                                setIsSocialOpen(false);
+                              }}
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
+                              aria-label="Go to contact form"
+                            >
+                              <Mail className="w-4 h-4" />
+                            </motion.button>
+
+                            {/* Psychology Today */}
+                            <motion.a
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-psychology-today-link-mobile-c"
+                              href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => setIsSocialOpen(false)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
+                              aria-label="Visit Liam on Psychology Today"
+                            >
+                              <PsychologyTodayIcon className="w-4 h-4" />
+                            </motion.a>
+
+                            {/* X */}
+                            <motion.a
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-x-account-link-mobile-c"
+                              href="https://x.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => setIsSocialOpen(false)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
+                              aria-label="Visit Liam on X"
+                            >
+                              <XTwitterIcon className="w-4 h-4" />
+                            </motion.a>
+
+                            {/* YouTube */}
+                            <motion.a
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-youtube-account-link-mobile-c"
+                              href={PRACTICAL_DETAILS.social.youtube}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => setIsSocialOpen(false)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
+                              aria-label="Visit Liam on YouTube"
+                            >
+                              <Youtube className="w-4 h-4" />
+                            </motion.a>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sticky Mobile Chapter Jump Bar */}
+                <div className="sticky top-0 z-20 -mx-2 px-2 py-1.5 bg-[#FAF9F5]/95 backdrop-blur-md border-b border-stone-200/80 mb-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  {SLIDES.map((slide) => (
+                    <button
+                      key={`mobile-nav-${slide.id}`}
+                      onClick={() => {
+                        const el = document.getElementById(`mobile-slide-${slide.id}`);
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-mono tracking-wider uppercase border border-stone-200/90 bg-white hover:bg-stone-100 text-stone-700 transition-colors cursor-pointer"
+                    >
+                      {slide.numberString.split(' ')[0]} {slide.shortTitle}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Slide Cards Stream - Native Momentum Scrolling Down */}
+                <div className="flex flex-col gap-5 pb-12">
+                  {SLIDES.map((slide, idx) => (
+                    <article
+                      key={`mobile-card-${slide.id}`}
+                      id={`mobile-slide-${slide.id}`}
+                      className="w-full bg-white rounded-2xl border border-stone-200/90 shadow-sm p-3.5 sm:p-5 select-text scroll-mt-14"
+                    >
+                      <div className="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-[#71717A] font-semibold">
+                          {slide.superheader}
+                        </span>
+                        <button
+                          onClick={() => {
+                            document.getElementById('carousel-mobile-scroll-container')?.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-700 cursor-pointer"
+                          aria-label="Scroll to top"
+                        >
+                          Top ↑
+                        </button>
+                      </div>
+                      <div className="w-full">
+                        {renderSlideContent(idx)}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              {/* Left Side: Brand & Hero Toolbar (Desktop >= lg) */}
               <div
                 id="hero-brand-block"
-                className="w-full lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex flex-col items-center justify-center text-center lg:items-start lg:justify-center lg:text-left select-none z-20 pt-0.5 pb-1 lg:py-0 lg:my-auto"
+                className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-center text-left select-none z-20 py-0 my-auto"
               >
                 <button
                   id="brand-home-trigger"
@@ -1127,14 +1400,14 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right Side: 3D Rolodex Stage Container */}
+              {/* Right Side: 3D Rolodex Stage Container (Desktop >= lg) */}
               <div
                 id="main-stage-dynamic-area"
                 ref={setStageRef}
                 onWheel={handleWheel}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
-                className="w-full flex-1 h-full flex items-center justify-center relative overflow-hidden min-h-0 py-1"
+                className="hidden lg:flex w-full flex-1 h-full items-center justify-center relative overflow-hidden min-h-0 py-1"
                 style={{ perspective: '1300px', perspectiveOrigin: 'center center' }}
               >
                 <motion.div
@@ -1319,29 +1592,32 @@ export default function App() {
                         )}
                       </div>
 
-                      {/* Slide-out drawer */}
+                      {/* Slide-out drawer with Glassmorphism so portrait is visible underneath */}
                       <AnimatePresence>
                         {isSocialOpen && (
                           <motion.div
                             id="social-channels-drawer-mobile"
-                            initial={{ opacity: 0, x: -8, scale: 0.92 }}
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            exit={{ opacity: 0, x: -8, scale: 0.92 }}
-                            transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                            className="ml-2 flex items-center gap-1.5 p-1 bg-white/95 backdrop-blur-sm border border-stone-200/90 rounded-full shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-30"
+                            initial={{ opacity: 0, y: -8, scale: 0.94 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -8, scale: 0.94 }}
+                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 p-1.5 bg-white/45 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.14)] z-40"
                           >
                             <div className="relative group/tooltip flex flex-col items-center">
                               <motion.button
                                 whileHover={{ scale: 1.12, y: -1 }}
                                 whileTap={{ scale: 0.95 }}
                                 id="channel-mail-btn-mobile"
-                                onClick={handleMailClick}
-                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                                onClick={() => {
+                                  handleMailClick();
+                                  setIsSocialOpen(false);
+                                }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                                 aria-label="Go to contact form"
                               >
-                                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <Mail className="w-4 h-4" />
                               </motion.button>
-                              <span className="pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                                 Email
                               </span>
                             </div>
@@ -1354,12 +1630,13 @@ export default function App() {
                                 href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                                onClick={() => setIsSocialOpen(false)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                                 aria-label="Visit Liam on Psychology Today"
                               >
-                                <PsychologyTodayIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <PsychologyTodayIcon className="w-4 h-4" />
                               </motion.a>
-                              <span className="pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                                 Psychology Today
                               </span>
                             </div>
@@ -1372,12 +1649,13 @@ export default function App() {
                                 href="https://x.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                                onClick={() => setIsSocialOpen(false)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                                 aria-label="Visit Liam on X"
                               >
-                                <XTwitterIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <XTwitterIcon className="w-4 h-4" />
                               </motion.a>
-                              <span className="pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                                 X (Twitter)
                               </span>
                             </div>
@@ -1390,12 +1668,13 @@ export default function App() {
                                 href={PRACTICAL_DETAILS.social.youtube}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                                onClick={() => setIsSocialOpen(false)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
                                 aria-label="Visit Liam on YouTube"
                               >
-                                <Youtube className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <Youtube className="w-4 h-4" />
                               </motion.a>
-                              <span className="pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                                 YouTube
                               </span>
                             </div>
@@ -1789,24 +2068,27 @@ export default function App() {
                       {isSocialOpen && (
                         <motion.div
                           id="social-channels-drawer-booking"
-                          initial={{ opacity: 0, x: -8, scale: 0.92 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          exit={{ opacity: 0, x: -8, scale: 0.92 }}
-                          transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                          className="ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 bg-white/95 backdrop-blur-sm border border-stone-200/90 rounded-full shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-30"
+                          initial={{ opacity: 0, y: -8, scale: 0.94 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -8, scale: 0.94 }}
+                          transition={{ duration: 0.18, ease: 'easeOut' }}
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-2 2xl:lg:ml-3 flex flex-col lg:flex-row items-center gap-1.5 lg:gap-1.5 2xl:lg:gap-2 p-1.5 2xl:lg:p-1.5 bg-white/45 lg:bg-white/95 backdrop-blur-xl border border-white/60 lg:border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-40"
                         >
                           <div className="relative group/tooltip flex flex-col items-center">
                             <motion.button
                               whileHover={{ scale: 1.12, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="channel-mail-btn-booking"
-                              onClick={handleMailClick}
+                              onClick={() => {
+                                handleMailClick();
+                                setIsSocialOpen(false);
+                              }}
                               className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Go to contact form"
                             >
                               <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                             </motion.button>
-                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Email
                             </span>
                           </div>
@@ -1820,12 +2102,13 @@ export default function App() {
                               href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => setIsSocialOpen(false)}
                               className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on Psychology Today"
                             >
                               <PsychologyTodayIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                             </motion.a>
-                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Psychology Today
                             </span>
                           </div>
@@ -1838,12 +2121,13 @@ export default function App() {
                               href="https://x.com"
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => setIsSocialOpen(false)}
                               className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on X"
                             >
                               <XTwitterIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                             </motion.a>
-                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               X (Twitter)
                             </span>
                           </div>
@@ -1856,12 +2140,13 @@ export default function App() {
                               href={PRACTICAL_DETAILS.social.youtube}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => setIsSocialOpen(false)}
                               className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on YouTube"
                             >
                               <Youtube className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                             </motion.a>
-                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               YouTube
                             </span>
                           </div>
@@ -1938,7 +2223,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full shrink-0"
+            className="w-full shrink-0 flex items-center justify-center"
           >
             <Footer
               onOpenPrivacy={() => setIsPrivacyOpen(true)}

@@ -12,8 +12,8 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({ onNavigate }) => {
       id="slide-approach-content"
       className="h-full flex flex-col justify-between select-text overflow-y-auto custom-scrollbar pr-0.5 sm:pr-3 pb-4 sm:pb-8 space-y-6 sm:space-y-9"
     >
-      {/* Top Header Region */}
-      <div className="pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
+      {/* Top Header Region (Hidden on mobile where card header displays [02 / 06] • HOW WE WORK TOGETHER) */}
+      <div className="hidden lg:block pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
         <div className="flex items-center space-x-2 mb-1.5 sm:mb-2">
           <span className="font-mono text-[9.5px] sm:text-[10px] md:text-[11px] tracking-widest text-[#71717A] font-semibold">
             [02 / 06]

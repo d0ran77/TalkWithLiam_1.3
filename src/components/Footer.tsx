@@ -18,13 +18,13 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer
       id="app-main-footer"
-      className={`w-full flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 py-2 md:py-2.5 px-1 md:px-2 z-30 select-none text-[10px] md:text-[11.5px] transition-colors duration-700 ${
+      className={`w-full flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-x-4 gap-y-2 py-2 md:py-2.5 px-2 md:px-3 z-30 select-none text-[10.5px] md:text-[11.5px] transition-colors duration-700 ${
         isDark ? 'text-stone-300' : 'text-[#18181B]'
       }`}
     >
-      {/* Left: Location & Find Me Parking Guide Trigger */}
+      {/* Left (centered on mobile): Location & Find Me Parking Guide Trigger */}
       <div
-        className={`flex items-center gap-2 font-normal transition-colors duration-700 ${
+        className={`flex items-center justify-center gap-2 font-normal transition-colors duration-700 ${
           isDark ? 'text-stone-400' : 'text-stone-600'
         }`}
       >
@@ -59,9 +59,9 @@ export const Footer: React.FC<FooterProps> = ({
         )}
       </div>
 
-      {/* Right: Privacy Policy & Crisis Support */}
+      {/* Right (centered on mobile): Privacy Policy & Crisis Support */}
       <div
-        className={`flex items-center gap-2.5 transition-colors duration-700 ${
+        className={`flex items-center justify-center gap-2.5 transition-colors duration-700 ${
           isDark ? 'text-stone-400' : 'text-[#71717A]'
         }`}
       >
