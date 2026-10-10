@@ -7,18 +7,45 @@ import {
   Info,
   Calendar,
   Mail,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { PRACTICAL_DETAILS } from '../data/content.ts';
+import { Footer } from './Footer.tsx';
 
 interface BookingPortalViewProps {
   onGoToContact?: () => void;
   onGoToSlides?: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenHelpline?: () => void;
+  onOpenLocation?: () => void;
 }
 
 export const BookingPortalView: React.FC<BookingPortalViewProps> = ({
   onGoToContact,
+  onOpenPrivacy,
+  onOpenHelpline,
+  onOpenLocation,
 }) => {
   const [selectedType, setSelectedType] = useState<'in-person' | 'online'>('in-person');
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyDiaryLink = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://talkwithliam.co.uk';
+    const diaryUrl = `${origin}/diary`;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(diaryUrl).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2400);
+      }).catch(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2400);
+      });
+    } else {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2400);
+    }
+  };
 
   const schedules = {
     'in-person': {
@@ -50,21 +77,44 @@ export const BookingPortalView: React.FC<BookingPortalViewProps> = ({
       id="booking-portal-content"
       className="h-full flex flex-col justify-between select-text overflow-y-auto custom-scrollbar pr-0.5 sm:pr-3 pb-4 sm:pb-8 space-y-6 sm:space-y-8 text-left"
     >
-      {/* Top Header Region (Identical to slide headers) */}
+      {/* Top Header Region */}
       <div className="pt-0.5 border-b border-stone-200/80 pb-3 sm:pb-5 shrink-0">
-        <div className="flex flex-wrap items-center space-x-2 mb-1.5 sm:mb-2">
-          <span className="font-mono text-[9.5px] sm:text-[10px] md:text-[11px] tracking-widest text-[#71717A] font-semibold">
-            [ PRACTICE DIARY ]
-          </span>
-          <span className="w-1 h-1 rounded-full bg-stone-300"></span>
-          <span className="text-[9.5px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.16em] font-semibold text-[#71717A]">
-            APPOINTMENTS
-          </span>
-          <span className="w-1 h-1 rounded-full bg-stone-300"></span>
-          <span className="inline-flex items-center gap-1 font-mono text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-100/90 text-emerald-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            Live Google Calendar Sync
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 sm:mb-2">
+          <div className="flex flex-wrap items-center space-x-2">
+            <span className="font-mono text-[9.5px] sm:text-[10px] md:text-[11px] tracking-widest text-[#71717A] font-semibold">
+              [ PRACTICE DIARY ]
+            </span>
+            <span className="w-1 h-1 rounded-full bg-stone-300"></span>
+            <span className="text-[9.5px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.16em] font-semibold text-[#71717A]">
+              APPOINTMENTS
+            </span>
+            <span className="w-1 h-1 rounded-full bg-stone-300"></span>
+            <span className="inline-flex items-center gap-1 font-mono text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-100/90 text-emerald-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              Live Google Calendar Sync
+            </span>
+          </div>
+
+          {/* Copy Direct Shareable Diary URL Button */}
+          <button
+            type="button"
+            onClick={handleCopyDiaryLink}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10.5px] font-mono tracking-wider border border-stone-200/90 bg-stone-50 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-all cursor-pointer shadow-2xs"
+            title="Copy direct shareable diary URL (https://talkwithliam.co.uk/diary)"
+            aria-label="Copy direct shareable diary link"
+          >
+            {copiedLink ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-emerald-700 font-semibold">Diary Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5 text-stone-500" />
+                <span>Copy Diary URL</span>
+              </>
+            )}
+          </button>
         </div>
 
         <h1 className="text-[20px] sm:text-[26px] md:text-[32px] lg:text-[36px] leading-[1.1] font-medium tracking-[0.03em] sm:tracking-[0.04em] text-[#18181B] uppercase">
@@ -282,6 +332,15 @@ export const BookingPortalView: React.FC<BookingPortalViewProps> = ({
             </motion.button>
           )}
         </div>
+      </div>
+
+      {/* Non-sticky Footer at the end of booking portal content */}
+      <div className="w-full pt-6 pb-2 border-t border-stone-200/80 mt-6 flex justify-center shrink-0">
+        <Footer
+          onOpenPrivacy={onOpenPrivacy || (() => {})}
+          onOpenHelpline={onOpenHelpline || (() => {})}
+          onOpenLocation={onOpenLocation}
+        />
       </div>
     </div>
   );

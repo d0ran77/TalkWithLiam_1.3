@@ -65,19 +65,35 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child'>(() => {
     try {
       if (typeof window !== 'undefined') {
+        const path = window.location.pathname.toLowerCase();
         const hash = window.location.hash.toLowerCase();
+        const search = window.location.search.toLowerCase();
         if (
+          path === '/diary' ||
+          path.startsWith('/diary') ||
+          path === '/booking' ||
+          path.startsWith('/booking') ||
           hash === '#booking' ||
           hash === '#client-booking' ||
           hash === '#clients' ||
           hash === '#appointments' ||
           hash === '#schedule' ||
           hash === '#diary' ||
-          hash === '#portal'
+          hash === '#portal' ||
+          search.includes('view=diary') ||
+          search.includes('view=booking') ||
+          search.includes('diary=true') ||
+          search.includes('booking=true')
         ) {
           return 'booking';
         }
-        if (hash === '#free-child' || hash === '#freechild' || hash === '#camera' || hash === '#instagram') {
+        if (path === '/slides' || path === '/carousel' || hash === '#slides' || hash === '#carousel') {
+          return 'carousel';
+        }
+        if (path === '/about' || path === '/portrait' || hash === '#about' || hash === '#portrait') {
+          return 'portrait';
+        }
+        if (path === '/free-child' || hash === '#free-child' || hash === '#freechild' || hash === '#camera' || hash === '#instagram') {
           return 'free-child';
         }
       }
@@ -101,12 +117,17 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
   const [isLocationOpen, setIsLocationOpen] = useState<boolean>(false);
 
-  // Listen for hash and query parameter changes in URL (e.g. direct private client links like /#booking or /?view=booking)
+  // Listen for pathname, hash and query parameter changes in URL (e.g. /diary, #diary, ?view=diary)
   useEffect(() => {
     const handleUrlCheck = () => {
+      const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search.toLowerCase();
       if (
+        path === '/diary' ||
+        path.startsWith('/diary') ||
+        path === '/booking' ||
+        path.startsWith('/booking') ||
         hash === '#booking' ||
         hash === '#client-booking' ||
         hash === '#clients' ||
@@ -120,6 +141,10 @@ export default function App() {
         search.includes('diary=true')
       ) {
         setViewMode('booking');
+      } else if (path === '/slides' || path === '/carousel' || hash === '#slides' || hash === '#carousel') {
+        setViewMode('carousel');
+      } else if (path === '/about' || path === '/portrait' || hash === '#about' || hash === '#portrait') {
+        setViewMode('portrait');
       }
     };
     handleUrlCheck();
@@ -130,6 +155,39 @@ export default function App() {
       window.removeEventListener('popstate', handleUrlCheck);
     };
   }, []);
+
+  // Synchronize browser address bar with viewMode (clean /diary URL when in booking mode)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (viewMode === 'booking') {
+      const currentPath = window.location.pathname.toLowerCase();
+      if (currentPath !== '/diary') {
+        try {
+          window.history.pushState({ view: 'booking' }, '', '/diary');
+        } catch {
+          window.location.hash = 'diary';
+        }
+      }
+    } else {
+      const currentPath = window.location.pathname.toLowerCase();
+      const currentHash = window.location.hash.toLowerCase();
+      if (
+        currentPath === '/diary' ||
+        currentPath === '/booking' ||
+        currentHash === '#diary' ||
+        currentHash === '#booking' ||
+        currentHash === '#appointments' ||
+        currentHash === '#schedule' ||
+        currentHash === '#portal'
+      ) {
+        try {
+          window.history.replaceState(null, '', '/');
+        } catch {
+          window.location.hash = '';
+        }
+      }
+    }
+  }, [viewMode]);
 
   // Close Connect drawer on outside click or touch tap
   useEffect(() => {
@@ -626,16 +684,18 @@ export default function App() {
             /* Minimal Landing View (Centered on Mobile, Left-aligned on Desktop, with exquisite tactile buttons) */
             <div
               key="minimal-landing-layout-wrapper"
-              className="w-full max-w-[2200px] mx-auto flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative overflow-y-auto lg:overflow-visible min-h-0 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 my-auto p-2 custom-scrollbar"
+              className="w-full max-w-[2200px] mx-auto flex-1 h-full flex flex-col justify-between relative overflow-y-auto lg:overflow-visible min-h-0 p-2 custom-scrollbar"
             >
               {/* Floating ambient highlighted words in negative space */}
               <AmbientNegativeSpaceWords />
 
-              {/* Brand & Hero Toolbar Block */}
-              <div
-                id="minimal-hero-brand-block"
-                className="w-full flex flex-col items-center justify-center text-center lg:w-auto lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl lg:items-start lg:text-left shrink-0 select-none z-20 my-auto p-2 2xl:pl-8 3xl:pl-12 overflow-visible"
-              >
+              {/* Main Content Area (Brand Block on left, negative space on right) */}
+              <div className="w-full flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative min-h-0 py-2 sm:py-4 z-20">
+                {/* Brand & Hero Toolbar Block */}
+                <div
+                  id="minimal-hero-brand-block"
+                  className="w-full flex flex-col items-center justify-center text-center lg:w-auto lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl lg:items-start lg:text-left shrink-0 select-none z-20 p-2 2xl:pl-8 3xl:pl-12 overflow-visible"
+                >
                 <button
                   id="minimal-brand-home-trigger"
                   onClick={handleToggleCarousel}
@@ -879,6 +939,18 @@ export default function App() {
               {/* Right side empty placeholder in minimal mode */}
               <div className="hidden lg:block flex-1 h-full pointer-events-none" />
             </div>
+
+            {/* In-flow non-sticky footer for minimal view - normal flex flow, never absolute */}
+            <div className="w-full shrink-0 pt-4 pb-1 sm:pb-2 flex justify-center z-20">
+              <Footer
+                onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                onOpenHelpline={() => setIsHelplineOpen(true)}
+                onOpenLocation={() => setIsLocationOpen(true)}
+                onOpenOverview={() => setIsOverviewOpen(true)}
+                isDark={isDarkSlideActive}
+              />
+            </div>
+          </div>
           ) : viewMode === 'carousel' ? (
             <div
               key="carousel-layout-wrapper"
@@ -1068,24 +1140,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Sticky Mobile Chapter Jump Bar */}
-                <div className="sticky top-0 z-20 -mx-2 px-2 py-1.5 bg-[#FAF9F5]/95 backdrop-blur-md border-b border-stone-200/80 mb-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  {SLIDES.map((slide) => (
-                    <button
-                      key={`mobile-nav-${slide.id}`}
-                      onClick={() => {
-                        const el = document.getElementById(`mobile-slide-${slide.id}`);
-                        if (el) {
-                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                      }}
-                      className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-mono tracking-wider uppercase border border-stone-200/90 bg-white hover:bg-stone-100 text-stone-700 transition-colors cursor-pointer"
-                    >
-                      {slide.numberString.split(' ')[0]} {slide.shortTitle}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Slide Cards Stream - Native Momentum Scrolling Down */}
                 <div className="flex flex-col gap-5 pb-12">
                   {SLIDES.map((slide, idx) => (
@@ -1113,13 +1167,23 @@ export default function App() {
                       </div>
                     </article>
                   ))}
+
+                  {/* Non-sticky Footer at the end of mobile stream */}
+                  <div className="w-full pt-4 pb-8 flex justify-center shrink-0">
+                    <Footer
+                      onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                      onOpenHelpline={() => setIsHelplineOpen(true)}
+                      onOpenLocation={() => setIsLocationOpen(true)}
+                      onOpenOverview={() => setIsOverviewOpen(true)}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Left Side: Brand & Hero Toolbar (Desktop >= lg) */}
               <div
                 id="hero-brand-block"
-                className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-center text-left select-none z-20 py-0 my-auto"
+                className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-between h-full text-left select-none z-20 py-2"
               >
                 <button
                   id="brand-home-trigger"
@@ -1397,6 +1461,17 @@ export default function App() {
                       )}
                     </AnimatePresence>
                   </div>
+                </div>
+
+                {/* Non-sticky Footer on desktop carousel left sidebar */}
+                <div className="mt-auto pt-6 pb-2 w-full flex justify-start shrink-0">
+                  <Footer
+                    onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                    onOpenHelpline={() => setIsHelplineOpen(true)}
+                    onOpenLocation={() => setIsLocationOpen(true)}
+                    onOpenOverview={() => setIsOverviewOpen(true)}
+                    isDark={isDarkSlideActive}
+                  />
                 </div>
               </div>
 
@@ -1703,6 +1778,16 @@ export default function App() {
                       goToSlide(contactSlideIndex);
                     }}
                   />
+
+                  {/* Non-sticky Footer at the end of mobile essay */}
+                  <div className="w-full pt-6 pb-8 flex justify-center shrink-0">
+                    <Footer
+                      onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                      onOpenHelpline={() => setIsHelplineOpen(true)}
+                      onOpenLocation={() => setIsLocationOpen(true)}
+                      onOpenOverview={() => setIsOverviewOpen(true)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1914,6 +1999,16 @@ export default function App() {
                         goToSlide(contactSlideIndex);
                       }}
                     />
+
+                    {/* Non-sticky Footer at the end of desktop essay */}
+                    <div className="w-full pt-8 pb-4 border-t border-stone-200/80 mt-8 flex justify-start shrink-0">
+                      <Footer
+                        onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                        onOpenHelpline={() => setIsHelplineOpen(true)}
+                        onOpenLocation={() => setIsLocationOpen(true)}
+                        onOpenOverview={() => setIsOverviewOpen(true)}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -2213,28 +2308,6 @@ export default function App() {
           ) : null}
         </AnimatePresence>
       </main>
-
-      {/* Fixed Minimal Footer - Shown across standard views */}
-      <AnimatePresence>
-        {viewMode !== 'free-child' && (
-          <motion.div
-            key="application-footer-bar"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full shrink-0 flex items-center justify-center"
-          >
-            <Footer
-              onOpenPrivacy={() => setIsPrivacyOpen(true)}
-              onOpenHelpline={() => setIsHelplineOpen(true)}
-              onOpenLocation={() => setIsLocationOpen(true)}
-              onOpenOverview={() => setIsOverviewOpen(true)}
-              isDark={isDarkSlideActive}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* 4. Global Floating Toast */}
       <Toast toast={toast} onDismiss={() => setToast(null)} />
