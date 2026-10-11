@@ -61,8 +61,8 @@ export default function App() {
   const [slideDirection, setSlideDirection] = useState<number>(1);
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
-  // Mobile accordion drawer state (Chapter 01 open by default: index 0)
-  const [activeMobileDrawer, setActiveMobileDrawer] = useState<number | null>(0);
+  // Mobile accordion drawer state (all drawers closed by default)
+  const [activeMobileDrawer, setActiveMobileDrawer] = useState<number | null>(null);
 
   // View Mode: 'minimal' (clean landing on first load), 'carousel' (7 slides), 'portrait' (essay & photo), 'booking' (live diary), or 'free-child' (visual monograph & theory)
   const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child'>(() => {
@@ -731,10 +731,10 @@ export default function App() {
                   className="flex flex-col items-center text-center lg:items-start lg:text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl transition-all cursor-pointer p-1"
                   aria-label="Open carousel"
                 >
-                  <h1 className="text-[30px] sm:text-[38px] md:text-[46px] lg:text-[48px] xl:text-[54px] 2xl:text-[68px] 3xl:text-[82px] 4xl:text-[96px] font-medium tracking-[0.12em] lg:tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] text-[#18181B] group-hover:text-stone-700 transition-colors lg:whitespace-nowrap">
+                  <h1 className="text-[35px] sm:text-[44px] md:text-[52px] lg:text-[56px] xl:text-[62px] 2xl:text-[76px] 3xl:text-[90px] 4xl:text-[104px] font-medium tracking-[0.12em] lg:tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] text-[#18181B] group-hover:text-stone-700 transition-colors lg:whitespace-nowrap">
                     TALK WITH LIAM
                   </h1>
-                  <p className="text-sm sm:text-base md:text-lg lg:text-[18px] xl:text-[22px] 2xl:text-[28px] 3xl:text-[34px] 4xl:text-[38px] tracking-wider mt-2 sm:mt-3 md:mt-3.5 2xl:mt-5 3xl:mt-6 font-normal text-[#71717A] lg:whitespace-nowrap">
+                  <p className="text-base sm:text-lg md:text-xl lg:text-[21px] xl:text-[25px] 2xl:text-[32px] 3xl:text-[38px] 4xl:text-[42px] tracking-wider mt-2.5 sm:mt-3.5 md:mt-4 2xl:mt-6 3xl:mt-7 font-normal text-[#71717A] lg:whitespace-nowrap">
                     Psychotherapeutic Counselling
                   </p>
                 </button>
@@ -744,19 +744,19 @@ export default function App() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-3 sm:mt-4 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-md lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl 4xl:max-w-4xl text-center lg:text-left border-l-0 lg:border-l-2 2xl:border-l-3 border-[#18181B] pl-0 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
+                  className="mt-3.5 sm:mt-5 lg:mt-6 2xl:mt-8 3xl:mt-10 max-w-lg lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl text-center lg:text-left border-l-0 lg:border-l-2 2xl:border-l-3 border-[#18181B] pl-0 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
                 >
-                  <p className="font-serif italic text-[15px] sm:text-[17px] md:text-[19px] lg:text-[20px] 2xl:text-[26px] 3xl:text-[32px] 4xl:text-[36px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
+                  <p className="font-serif italic text-[17px] sm:text-[20px] md:text-[22px] lg:text-[23px] 2xl:text-[29px] 3xl:text-[35px] 4xl:text-[39px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
                     &ldquo;My past may have defined who I became, but my presence will liberate&nbsp;me.&rdquo;
                   </p>
-                  <cite className="block text-xs 2xl:text-sm 3xl:text-base font-mono tracking-widest text-stone-600 uppercase not-italic mt-1.5 2xl:mt-2.5 3xl:mt-3 text-center lg:text-left">
+                  <cite className="block text-[12.5px] sm:text-sm 2xl:text-base 3xl:text-lg font-mono tracking-widest text-stone-600 uppercase not-italic mt-2 2xl:mt-3 3xl:mt-3.5 text-center lg:text-left">
                     — Liam Doran
                   </cite>
                 </motion.div>
 
                 {/* Refined Tactile Toolbar Buttons */}
                 <div
-                  className="mt-4 sm:mt-6 lg:mt-6 2xl:mt-9 3xl:mt-11 mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-3 sm:gap-4.5 2xl:gap-6 3xl:gap-7 relative p-1 overflow-visible"
+                  className="mt-5 sm:mt-7 lg:mt-7 2xl:mt-10 3xl:mt-12 mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-3.5 sm:gap-5 lg:gap-5 2xl:gap-7 3xl:gap-8 relative p-1 overflow-visible"
                 >
                   {/* 1. Carousel / Monograph Book Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -765,13 +765,13 @@ export default function App() {
                       whileTap={{ scale: 0.94 }}
                       id="minimal-carousel-toggle-btn"
                       onClick={handleToggleCarousel}
-                      className="group/icon relative w-12 h-12 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      className="group/icon relative w-13 h-13 sm:w-16 sm:h-16 lg:w-15 lg:h-15 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
                       aria-label="Open slide carousel"
                     >
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
-                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 2xl:w-8 2xl:h-8 3xl:w-10 3xl:h-10 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 relative z-10 shrink-0" />
+                      <BookOpen className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 relative z-10 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10.5px] 2xl:text-[13px] 3xl:text-[15px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                    <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[11px] 2xl:text-[14px] 3xl:text-[16px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       Slides
                     </span>
                   </div>
@@ -783,13 +783,13 @@ export default function App() {
                       whileTap={{ scale: 0.94 }}
                       id="minimal-portrait-toggle-btn"
                       onClick={() => handleSelectViewMode('portrait')}
-                      className="group/icon relative w-12 h-12 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      className="group/icon relative w-13 h-13 sm:w-16 sm:h-16 lg:w-15 lg:h-15 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
                       aria-label="About Liam"
                     >
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
-                      <User className="w-5 h-5 sm:w-6 sm:h-6 2xl:w-8 2xl:h-8 3xl:w-10 3xl:h-10 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
+                      <User className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10.5px] 2xl:text-[13px] 3xl:text-[15px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                    <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[11px] 2xl:text-[14px] 3xl:text-[16px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       About Liam
                     </span>
                   </div>
@@ -804,7 +804,7 @@ export default function App() {
                         onClick={() => {
                           setIsSocialOpen((prev) => !prev);
                         }}
-                        className={`group/icon relative w-12 h-12 sm:w-14 sm:h-14 2xl:w-18 2xl:h-18 3xl:w-22 3xl:h-22 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                        className={`group/icon relative w-13 h-13 sm:w-16 sm:h-16 lg:w-15 lg:h-15 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
                           isSocialOpen
                             ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
                             : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
@@ -825,7 +825,7 @@ export default function App() {
                               transition={{ duration: 0.15 }}
                               className="relative z-10"
                             >
-                              <X className="w-5 h-5 sm:w-6 sm:h-6 2xl:w-8 2xl:h-8 3xl:w-10 3xl:h-10" />
+                              <X className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
                             </motion.div>
                           ) : (
                             <motion.div
@@ -836,13 +836,13 @@ export default function App() {
                               transition={{ duration: 0.15 }}
                               className="relative z-10"
                             >
-                              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 2xl:w-8 2xl:h-8 3xl:w-10 3xl:h-10 transition-transform duration-200 group-hover/icon:scale-110" />
+                              <MessageCircle className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110" />
                             </motion.div>
                           )}
                         </AnimatePresence>
                       </motion.button>
                       {!isSocialOpen && (
-                        <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10.5px] 2xl:text-[13px] 3xl:text-[15px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[11px] 2xl:text-[14px] 3xl:text-[16px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                           Connect
                         </span>
                       )}
@@ -1170,32 +1170,40 @@ export default function App() {
                 </div>
 
                 {/* Mobile Accordion Drawers Stream (< lg) */}
-                <div className="flex flex-col gap-3 pb-12">
+                <div className="flex flex-col gap-4 sm:gap-5 pb-16 pt-2">
                   {SLIDES.map((slide, idx) => {
                     const isOpen = activeMobileDrawer === idx;
                     return (
-                      <article
+                      <motion.article
                         key={`mobile-card-${slide.id}`}
                         id={`mobile-slide-${slide.id}`}
-                        className={`w-full rounded-2xl border transition-all duration-200 select-text scroll-mt-2 overflow-hidden ${
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.38,
+                          delay: idx * 0.05,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className={`w-full rounded-2xl border transition-all duration-300 select-text scroll-mt-3 overflow-hidden ${
                           isOpen
-                            ? 'bg-white border-stone-300/90 shadow-sm'
-                            : 'bg-[#FCFBF8] hover:bg-white border-stone-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
+                            ? 'bg-white border-stone-300 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ring-1 ring-stone-900/[0.03]'
+                            : 'bg-[#FCFBF8] hover:bg-white border-stone-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.025)] hover:border-stone-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)]'
                         }`}
                       >
                         {/* Drawer Header Trigger Button */}
-                        <button
+                        <motion.button
                           type="button"
+                          whileTap={{ scale: 0.992 }}
                           onClick={() => handleToggleMobileDrawer(idx)}
                           aria-expanded={isOpen}
                           aria-controls={`mobile-drawer-content-${slide.id}`}
-                          className={`w-full flex items-center justify-between text-left p-3.5 sm:p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl cursor-pointer group transition-colors ${
-                            isOpen ? 'bg-stone-50/60' : 'hover:bg-stone-50/80'
+                          className={`w-full flex items-center justify-between text-left p-4 sm:p-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl cursor-pointer group transition-colors ${
+                            isOpen ? 'bg-stone-50/70' : 'hover:bg-stone-50/80'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0 pr-2">
                             <span
-                              className={`font-mono text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-colors duration-200 ${
+                              className={`font-mono text-xs sm:text-[13px] uppercase tracking-wider font-semibold transition-colors duration-200 ${
                                 isOpen ? 'text-[#18181B]' : 'text-stone-600 group-hover:text-stone-900'
                               }`}
                             >
@@ -1204,30 +1212,30 @@ export default function App() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span
-                              className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                              className={`w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center border transition-all duration-300 ${
                                 isOpen
                                   ? 'bg-[#18181B] text-white border-[#18181B] rotate-180'
                                   : 'bg-white text-stone-500 border-stone-200 group-hover:border-stone-400 group-hover:text-stone-800 rotate-0'
                               }`}
                               aria-hidden="true"
                             >
-                              <ChevronDown className="w-3.5 h-3.5" />
+                              <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </span>
                           </div>
-                        </button>
+                        </motion.button>
 
-                        {/* Drawer Content - Calm, instant & fluid disclosure without layout stretching */}
+                        {/* Drawer Content - Subtle slide and fade disclosure without layout squishing */}
                         <AnimatePresence initial={false}>
                           {isOpen && (
                             <motion.div
                               id={`mobile-drawer-content-${slide.id}`}
                               key={`drawer-content-${slide.id}`}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.15, ease: 'easeOut' }}
+                              initial={{ opacity: 0, y: -6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                             >
-                              <div className="px-3.5 sm:px-5 pb-5 pt-1 border-t border-stone-100">
+                              <div className="px-4 sm:px-6 pb-6 pt-1 border-t border-stone-100">
                                 {/* Top In-drawer Action Bar with Top ↑ */}
                                 <div className="flex items-center justify-end py-1.5 mb-3 border-b border-stone-100">
                                   <button
@@ -1274,7 +1282,7 @@ export default function App() {
                             </motion.div>
                           )}
                         </AnimatePresence>
-                      </article>
+                      </motion.article>
                     );
                   })}
 
