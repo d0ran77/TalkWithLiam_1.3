@@ -381,10 +381,7 @@ export const SlideContact: React.FC<SlideContactProps> = ({
               aria-label={`Send direct email to ${PRACTICAL_DETAILS.email}`}
             >
               <Mail className="w-3.5 h-3.5 text-stone-700 shrink-0" />
-              <span>Direct Email:</span>
-              <span className="font-mono text-stone-600 text-[11px] sm:text-xs font-normal">
-                {PRACTICAL_DETAILS.email}
-              </span>
+              <span>Direct Email</span>
             </a>
 
             <button

@@ -18,6 +18,7 @@ import {
   CreditCard,
   Clock,
   ShieldCheck,
+  ChevronDown,
 } from 'lucide-react';
 import { SLIDES, PRACTICAL_DETAILS } from './data/content.ts';
 import { PHOTOS } from './data/photos.ts';
@@ -60,6 +61,8 @@ export default function App() {
   const [slideDirection, setSlideDirection] = useState<number>(1);
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  // Mobile accordion drawer state (Chapter 01 open by default: index 0)
+  const [activeMobileDrawer, setActiveMobileDrawer] = useState<number | null>(0);
 
   // View Mode: 'minimal' (clean landing on first load), 'carousel' (7 slides), 'portrait' (essay & photo), 'booking' (live diary), or 'free-child' (visual monograph & theory)
   const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child'>(() => {
@@ -459,6 +462,7 @@ export default function App() {
       if (index >= 0 && index < SLIDES.length) {
         setSlideDirection(index >= currentSlideIndex ? 1 : -1);
         setCurrentSlideIndex(index);
+        setActiveMobileDrawer(index);
         handleSelectViewMode('carousel');
         scrollToTop();
         // On mobile, scroll smoothly to the target slide card in the vertical stream
@@ -470,11 +474,36 @@ export default function App() {
               mobileTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }
-        }, 60);
+        }, 80);
       }
     },
     [currentSlideIndex, handleSelectViewMode, scrollToTop]
   );
+
+  // Mobile Accordion Drawer Toggle handler (calm, fluid disclosure)
+  const handleToggleMobileDrawer = useCallback((index: number) => {
+    setActiveMobileDrawer((prev) => {
+      const isCurrentlyOpen = prev === index;
+      if (isCurrentlyOpen) {
+        return null;
+      }
+      // Single open accordion: gentle auto-scroll only if needed to keep view steady
+      setTimeout(() => {
+        const slideId = SLIDES[index]?.id;
+        if (slideId) {
+          const drawerEl = document.getElementById(`mobile-slide-${slideId}`);
+          if (drawerEl) {
+            const rect = drawerEl.getBoundingClientRect();
+            // Only scroll if drawer header is clipped above or too far down
+            if (rect.top < 40 || rect.top > window.innerHeight * 0.45) {
+              drawerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }
+      }, 50);
+      return index;
+    });
+  }, []);
 
   const contactSlideIndex =
     SLIDES.findIndex((s) => s.id === 'contact') !== -1
@@ -684,13 +713,13 @@ export default function App() {
             /* Minimal Landing View (Centered on Mobile, Left-aligned on Desktop, with exquisite tactile buttons) */
             <div
               key="minimal-landing-layout-wrapper"
-              className="w-full max-w-[2200px] mx-auto flex-1 h-full flex flex-col justify-between relative overflow-y-auto lg:overflow-visible min-h-0 p-2 custom-scrollbar"
+              className="w-full max-w-[2200px] mx-auto flex-1 h-full flex flex-col justify-between relative overflow-y-auto min-h-0 p-2 sm:p-3 custom-scrollbar"
             >
               {/* Floating ambient highlighted words in negative space */}
               <AmbientNegativeSpaceWords />
 
               {/* Main Content Area (Brand Block on left, negative space on right) */}
-              <div className="w-full flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative min-h-0 py-2 sm:py-4 z-20">
+              <div className="w-full flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative min-h-0 py-2 sm:py-3 lg:pb-8 xl:pb-12 z-20">
                 {/* Brand & Hero Toolbar Block */}
                 <div
                   id="minimal-hero-brand-block"
@@ -715,7 +744,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-4 sm:mt-5 2xl:mt-8 3xl:mt-10 max-w-md lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl 4xl:max-w-4xl text-center lg:text-left border-l-0 lg:border-l-2 2xl:border-l-3 border-[#18181B] pl-0 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
+                  className="mt-3 sm:mt-4 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-md lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl 4xl:max-w-4xl text-center lg:text-left border-l-0 lg:border-l-2 2xl:border-l-3 border-[#18181B] pl-0 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
                 >
                   <p className="font-serif italic text-[15px] sm:text-[17px] md:text-[19px] lg:text-[20px] 2xl:text-[26px] 3xl:text-[32px] 4xl:text-[36px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
                     &ldquo;My past may have defined who I became, but my presence will liberate&nbsp;me.&rdquo;
@@ -727,7 +756,7 @@ export default function App() {
 
                 {/* Refined Tactile Toolbar Buttons */}
                 <div
-                  className="mt-4 sm:mt-8 2xl:mt-11 3xl:mt-14 flex items-center justify-center lg:justify-start gap-3 sm:gap-4.5 2xl:gap-6 3xl:gap-7 relative p-1 overflow-visible"
+                  className="mt-4 sm:mt-6 lg:mt-6 2xl:mt-9 3xl:mt-11 mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-3 sm:gap-4.5 2xl:gap-6 3xl:gap-7 relative p-1 overflow-visible"
                 >
                   {/* 1. Carousel / Monograph Book Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -941,7 +970,7 @@ export default function App() {
             </div>
 
             {/* In-flow non-sticky footer for minimal view - normal flex flow, never absolute */}
-            <div className="w-full shrink-0 pt-4 pb-1 sm:pb-2 flex justify-center z-20">
+            <div className="w-full shrink-0 mt-auto pt-3 lg:pt-4 pb-1 sm:pb-2 flex justify-center z-20">
               <Footer
                 onOpenPrivacy={() => setIsPrivacyOpen(true)}
                 onOpenHelpline={() => setIsHelplineOpen(true)}
@@ -1140,33 +1169,114 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Slide Cards Stream - Native Momentum Scrolling Down */}
-                <div className="flex flex-col gap-5 pb-12">
-                  {SLIDES.map((slide, idx) => (
-                    <article
-                      key={`mobile-card-${slide.id}`}
-                      id={`mobile-slide-${slide.id}`}
-                      className="w-full bg-white rounded-2xl border border-stone-200/90 shadow-sm p-3.5 sm:p-5 select-text scroll-mt-14"
-                    >
-                      <div className="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
-                        <span className="font-mono text-[10px] uppercase tracking-wider text-[#71717A] font-semibold">
-                          {slide.superheader}
-                        </span>
+                {/* Mobile Accordion Drawers Stream (< lg) */}
+                <div className="flex flex-col gap-3 pb-12">
+                  {SLIDES.map((slide, idx) => {
+                    const isOpen = activeMobileDrawer === idx;
+                    return (
+                      <article
+                        key={`mobile-card-${slide.id}`}
+                        id={`mobile-slide-${slide.id}`}
+                        className={`w-full rounded-2xl border transition-all duration-200 select-text scroll-mt-2 overflow-hidden ${
+                          isOpen
+                            ? 'bg-white border-stone-300/90 shadow-sm'
+                            : 'bg-[#FCFBF8] hover:bg-white border-stone-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
+                        }`}
+                      >
+                        {/* Drawer Header Trigger Button */}
                         <button
-                          onClick={() => {
-                            document.getElementById('carousel-mobile-scroll-container')?.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="text-[10px] font-mono uppercase tracking-wider text-stone-400 hover:text-stone-700 cursor-pointer"
-                          aria-label="Scroll to top"
+                          type="button"
+                          onClick={() => handleToggleMobileDrawer(idx)}
+                          aria-expanded={isOpen}
+                          aria-controls={`mobile-drawer-content-${slide.id}`}
+                          className={`w-full flex items-center justify-between text-left p-3.5 sm:p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl cursor-pointer group transition-colors ${
+                            isOpen ? 'bg-stone-50/60' : 'hover:bg-stone-50/80'
+                          }`}
                         >
-                          Top ↑
+                          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                            <span
+                              className={`font-mono text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-colors duration-200 ${
+                                isOpen ? 'text-[#18181B]' : 'text-stone-600 group-hover:text-stone-900'
+                              }`}
+                            >
+                              {slide.superheader}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span
+                              className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                                isOpen
+                                  ? 'bg-[#18181B] text-white border-[#18181B] rotate-180'
+                                  : 'bg-white text-stone-500 border-stone-200 group-hover:border-stone-400 group-hover:text-stone-800 rotate-0'
+                              }`}
+                              aria-hidden="true"
+                            >
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            </span>
+                          </div>
                         </button>
-                      </div>
-                      <div className="w-full">
-                        {renderSlideContent(idx)}
-                      </div>
-                    </article>
-                  ))}
+
+                        {/* Drawer Content - Calm, instant & fluid disclosure without layout stretching */}
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.div
+                              id={`mobile-drawer-content-${slide.id}`}
+                              key={`drawer-content-${slide.id}`}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.15, ease: 'easeOut' }}
+                            >
+                              <div className="px-3.5 sm:px-5 pb-5 pt-1 border-t border-stone-100">
+                                {/* Top In-drawer Action Bar with Top ↑ */}
+                                <div className="flex items-center justify-end py-1.5 mb-3 border-b border-stone-100">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      document
+                                        .getElementById('carousel-mobile-scroll-container')
+                                        ?.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 transition-colors cursor-pointer py-0.5 px-2 rounded hover:bg-stone-100/60"
+                                    aria-label="Scroll back to top of page"
+                                  >
+                                    Top ↑
+                                  </button>
+                                </div>
+
+                                {/* Slide Content (e.g. TWO HUMANS IN A ROOM. etc.) */}
+                                <div className="w-full">
+                                  {renderSlideContent(idx)}
+                                </div>
+
+                                {/* Bottom In-drawer Action Bar */}
+                                <div className="flex items-center justify-between pt-4 mt-6 border-t border-stone-100 text-[10px] font-mono uppercase tracking-wider text-stone-500">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleMobileDrawer(idx)}
+                                    className="hover:text-stone-900 cursor-pointer py-1 px-2 rounded hover:bg-stone-100/60 transition-colors"
+                                  >
+                                    Close Drawer ↑
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      document
+                                        .getElementById('carousel-mobile-scroll-container')
+                                        ?.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="hover:text-stone-900 cursor-pointer py-1 px-2 rounded hover:bg-stone-100/60 transition-colors"
+                                  >
+                                    Top ↑
+                                  </button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </article>
+                    );
+                  })}
 
                   {/* Non-sticky Footer at the end of mobile stream */}
                   <div className="w-full pt-4 pb-8 flex justify-center shrink-0">

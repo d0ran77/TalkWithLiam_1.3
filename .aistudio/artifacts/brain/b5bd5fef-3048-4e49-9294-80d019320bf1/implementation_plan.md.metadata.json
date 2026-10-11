@@ -1,0 +1,6 @@
+{
+  "summary":  "Implementation plan for mobile-only accordion drawer architecture for the carousel / practice slides view. Details state management (defaulting to Chapter 01 open, single-open accordion behavior), drawer header styling with Liam's editorial typography ([01 / 06] • HOW WE WORK), collapsible content animation via Framer Motion, smooth auto-scroll to the active drawer, and preservation of desktop views and the 6 clinical chapters with zero photography.",
+  "updatedAt":  "2026-10-11T15:07:19.509886655Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}
