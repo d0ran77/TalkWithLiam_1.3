@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, ShieldCheck, MapPin, Mail, Copy, Check, Lock } from 'lucide-react';
+import { Send, CheckCircle2, ShieldCheck, MapPin, Mail, Copy, Check, Lock, MessageCircle } from 'lucide-react';
 import { PRACTICAL_DETAILS } from '../../data/content.ts';
 import { ConsultationFormData } from '../../types.ts';
 
@@ -382,6 +382,18 @@ export const SlideContact: React.FC<SlideContactProps> = ({
             >
               <Mail className="w-3.5 h-3.5 text-stone-700 shrink-0" />
               <span>Direct Email</span>
+            </a>
+
+            <a
+              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Message Liam directly on WhatsApp"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#FAF9F5] hover:bg-[#F2EFE9] border border-stone-200/90 text-stone-800 hover:text-[#18181B] transition-colors cursor-pointer text-xs sm:text-[12.5px] font-medium"
+              aria-label="Direct message Liam on WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-stone-700 shrink-0" />
+              <span>WhatsApp</span>
             </a>
 
             <button

@@ -44,9 +44,9 @@ import { SlideFees } from './components/slides/SlideFees.tsx';
 import { SlideFaq } from './components/slides/SlideFaq.tsx';
 import { SlideContact } from './components/slides/SlideContact.tsx';
 
-const XTwitterIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+const WhatsAppIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.743.95 3.708 1.451 5.71 1.452h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
   </svg>
 );
 
@@ -99,6 +99,23 @@ export default function App() {
         if (path === '/free-child' || hash === '#free-child' || hash === '#freechild' || hash === '#camera' || hash === '#instagram') {
           return 'free-child';
         }
+        if (
+          hash === '#how-we-work' ||
+          hash === '#approach' ||
+          hash === '#connection' ||
+          hash === '#specialisms' ||
+          hash === '#areas-of-work' ||
+          hash === '#themes' ||
+          hash === '#fees' ||
+          hash === '#rates' ||
+          hash === '#practicalities' ||
+          hash === '#contact' ||
+          hash === '#consultation' ||
+          hash === '#faq' ||
+          hash === '#faqs'
+        ) {
+          return 'carousel';
+        }
       }
       const saved = sessionStorage.getItem('talk_with_liam_session_view');
       if (saved === 'carousel' || saved === 'portrait' || saved === 'booking' || saved === 'free-child') {
@@ -120,7 +137,7 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
   const [isLocationOpen, setIsLocationOpen] = useState<boolean>(false);
 
-  // Listen for pathname, hash and query parameter changes in URL (e.g. /diary, #diary, ?view=diary)
+  // Listen for pathname, hash and query parameter changes in URL (e.g. /diary, #diary, ?view=diary, #fees)
   useEffect(() => {
     const handleUrlCheck = () => {
       const path = window.location.pathname.toLowerCase();
@@ -148,6 +165,32 @@ export default function App() {
         setViewMode('carousel');
       } else if (path === '/about' || path === '/portrait' || hash === '#about' || hash === '#portrait') {
         setViewMode('portrait');
+      } else if (path === '/free-child' || hash === '#free-child' || hash === '#camera') {
+        setViewMode('free-child');
+      } else if (hash === '#how-we-work' || hash === '#about-work') {
+        setViewMode('carousel');
+        setCurrentSlideIndex(0);
+        setActiveMobileDrawer(0);
+      } else if (hash === '#approach' || hash === '#connection' || hash === '#how-we-work-together') {
+        setViewMode('carousel');
+        setCurrentSlideIndex(1);
+        setActiveMobileDrawer(1);
+      } else if (hash === '#specialisms' || hash === '#areas-of-work' || hash === '#themes') {
+        setViewMode('carousel');
+        setCurrentSlideIndex(2);
+        setActiveMobileDrawer(2);
+      } else if (hash === '#fees' || hash === '#rates' || hash === '#practicalities') {
+        setViewMode('carousel');
+        setCurrentSlideIndex(3);
+        setActiveMobileDrawer(3);
+      } else if (hash === '#contact' || hash === '#consultation' || hash === '#get-in-touch') {
+        setViewMode('carousel');
+        setCurrentSlideIndex(4);
+        setActiveMobileDrawer(4);
+      } else if (hash === '#faq' || hash === '#faqs' || hash === '#guide') {
+        setViewMode('carousel');
+        setCurrentSlideIndex(5);
+        setActiveMobileDrawer(5);
       }
     };
     handleUrlCheck();
@@ -737,6 +780,9 @@ export default function App() {
                   <p className="text-base sm:text-lg md:text-xl lg:text-[21px] xl:text-[25px] 2xl:text-[32px] 3xl:text-[38px] 4xl:text-[42px] tracking-wider mt-2.5 sm:mt-3.5 md:mt-4 2xl:mt-6 3xl:mt-7 font-normal text-[#71717A] lg:whitespace-nowrap">
                     Psychotherapeutic Counselling
                   </p>
+                  <p className="text-xs sm:text-sm md:text-base 2xl:text-lg font-mono tracking-widest uppercase text-stone-500 mt-1 sm:mt-1.5 2xl:mt-2.5 lg:whitespace-nowrap">
+                    Willerby, Hull &amp; Online
+                  </p>
                 </button>
 
                 {/* Core Philosophy Epigraph */}
@@ -899,23 +945,23 @@ export default function App() {
                             </span>
                           </div>
 
-                          {/* X account link */}
+                          {/* WhatsApp link */}
                           <div className="relative group/tooltip flex flex-col items-center">
                             <motion.a
                               whileHover={{ scale: 1.1, y: -1 }}
                               whileTap={{ scale: 0.95 }}
-                              id="minimal-channel-x-account-link"
-                              href="https://x.com"
+                              id="minimal-channel-whatsapp-link"
+                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setIsSocialOpen(false)}
                               className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on X"
+                              aria-label="Message Liam on WhatsApp"
                             >
-                              <XTwitterIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
+                              <WhatsAppIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
                             </motion.a>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              X (Twitter)
+                              WhatsApp
                             </span>
                           </div>
 
@@ -1003,6 +1049,9 @@ export default function App() {
                     </h1>
                     <p className="text-[11px] sm:text-xs text-[#71717A] tracking-wider mt-0.5 font-normal text-center">
                       Psychotherapeutic Counselling
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase text-stone-500 mt-0.5 text-center">
+                      Willerby, Hull &amp; Online
                     </p>
                   </button>
 
@@ -1133,19 +1182,19 @@ export default function App() {
                               <PsychologyTodayIcon className="w-4 h-4" />
                             </motion.a>
 
-                            {/* X */}
+                            {/* WhatsApp */}
                             <motion.a
                               whileHover={{ scale: 1.12, y: -1 }}
                               whileTap={{ scale: 0.95 }}
-                              id="channel-x-account-link-mobile-c"
-                              href="https://x.com"
+                              id="channel-whatsapp-link-mobile-c"
+                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setIsSocialOpen(false)}
                               className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on X"
+                              aria-label="Message Liam on WhatsApp"
                             >
-                              <XTwitterIcon className="w-4 h-4" />
+                              <WhatsAppIcon className="w-4 h-4" />
                             </motion.a>
 
                             {/* YouTube */}
@@ -1518,13 +1567,13 @@ export default function App() {
                             </span>
                           </div>
 
-                          {/* X account link */}
+                          {/* WhatsApp link */}
                           <div className="relative group/tooltip flex flex-col items-center">
                             <motion.a
                               whileHover={{ scale: 1.12, y: -1 }}
                               whileTap={{ scale: 0.95 }}
-                              id="channel-x-account-link"
-                              href="https://x.com"
+                              id="channel-whatsapp-link"
+                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none cursor-pointer ${
@@ -1532,9 +1581,9 @@ export default function App() {
                                   ? 'text-stone-300 hover:text-white hover:bg-stone-800'
                                   : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
                               }`}
-                              aria-label="Visit Liam on X"
+                              aria-label="Message Liam on WhatsApp"
                             >
-                              <XTwitterIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                              <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                             </motion.a>
                             <span
                               className={`pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase px-1.5 py-0.5 rounded border shadow-2xs z-30 ${
@@ -1543,7 +1592,7 @@ export default function App() {
                                   : 'text-stone-600 bg-white/95 border-stone-200/90'
                               }`}
                             >
-                              X (Twitter)
+                              WhatsApp
                             </span>
                           </div>
 
@@ -1838,18 +1887,18 @@ export default function App() {
                               <motion.a
                                 whileHover={{ scale: 1.12, y: -1 }}
                                 whileTap={{ scale: 0.95 }}
-                                id="channel-x-account-link-mobile"
-                                href="https://x.com"
+                                id="channel-whatsapp-link-mobile"
+                                href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={() => setIsSocialOpen(false)}
                                 className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                                aria-label="Visit Liam on X"
+                                aria-label="Message Liam on WhatsApp"
                               >
-                                <XTwitterIcon className="w-4 h-4" />
+                                <WhatsAppIcon className="w-4 h-4" />
                               </motion.a>
                               <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                                X (Twitter)
+                                WhatsApp
                               </span>
                             </div>
 
@@ -2071,17 +2120,17 @@ export default function App() {
                                 <motion.a
                                   whileHover={{ scale: 1.12, y: -1 }}
                                   whileTap={{ scale: 0.95 }}
-                                  id="channel-x-account-link-essay"
-                                  href="https://x.com"
+                                  id="channel-whatsapp-link-essay"
+                                  href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
-                                  aria-label="Visit Liam on X"
+                                  aria-label="Message Liam on WhatsApp"
                                 >
-                                  <XTwitterIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                                  <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                                 </motion.a>
                                 <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                                  X (Twitter)
+                                  WhatsApp
                                 </span>
                               </div>
 
@@ -2330,18 +2379,18 @@ export default function App() {
                             <motion.a
                               whileHover={{ scale: 1.12, y: -1 }}
                               whileTap={{ scale: 0.95 }}
-                              id="channel-x-account-link-booking"
-                              href="https://x.com"
+                              id="channel-whatsapp-link-booking"
+                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setIsSocialOpen(false)}
                               className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on X"
+                              aria-label="Message Liam on WhatsApp"
                             >
-                              <XTwitterIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                              <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
                             </motion.a>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              X (Twitter)
+                              WhatsApp
                             </span>
                           </div>
 

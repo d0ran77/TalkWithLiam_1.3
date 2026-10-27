@@ -342,8 +342,9 @@ export const PRACTICAL_DETAILS = {
   titles: 'UKCP Trainee',
   role: 'UKCP Trainee Psychotherapeutic Counsellor',
   email: 'talkwithliamtherapy@gmail.com',
-  phoneDisplay: '+44 (0)1482 654 321',
-  locationSummary: 'The Willerby Practice & Online UK-Wide',
+  phoneDisplay: '+44 (0)7344 145 282',
+  phoneRaw: '+447344145282',
+  locationSummary: '1b The Square, Willerby & Online UK-Wide',
   accreditationBody: 'UK Council for Psychotherapy (UKCP)',
   bacpNumber: 'UKCP Trainee Member',
   sessionLength: '50 minutes',
@@ -352,7 +353,7 @@ export const PRACTICAL_DETAILS = {
     youtube: 'https://youtube.com/@talkwithliamexplainer?si=KtmFZdvBIuO2hMnA',
     youtubeHandle: '@talkwithliamexplainer',
     youtubeId: 'UCwlzRZ-Sx_sDMsNQQgpv0jQ',
-    x: 'https://x.com',
+    whatsapp: 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.',
     instagram: 'https://instagram.com/talkwithliam',
   },
   rates: {
@@ -365,7 +366,7 @@ export const PRACTICAL_DETAILS = {
   clinicLocations: [
     {
       name: 'The Willerby Practice',
-      address: 'Second Floor, Willerby, East Yorkshire (Access via stairs)',
+      address: '1b The Square, Willerby, East Yorkshire, HU10 7UA (Second Floor, access via stairs)',
       stations: 'Free parking nearby (next to Sainsbury’s) • Bus links from Hull & Beverley',
       days: 'Monday through Friday',
     },
