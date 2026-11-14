@@ -68,7 +68,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child'>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const path = window.location.pathname.toLowerCase();
+        const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
         const hash = window.location.hash.toLowerCase();
         const search = window.location.search.toLowerCase();
         if (
@@ -140,7 +140,7 @@ export default function App() {
   // Listen for pathname, hash and query parameter changes in URL (e.g. /diary, #diary, ?view=diary, #fees)
   useEffect(() => {
     const handleUrlCheck = () => {
-      const path = window.location.pathname.toLowerCase();
+      const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search.toLowerCase();
       if (
@@ -206,7 +206,7 @@ export default function App() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (viewMode === 'booking') {
-      const currentPath = window.location.pathname.toLowerCase();
+      const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
       if (currentPath !== '/diary') {
         try {
           window.history.pushState({ view: 'booking' }, '', '/diary');
@@ -215,7 +215,7 @@ export default function App() {
         }
       }
     } else {
-      const currentPath = window.location.pathname.toLowerCase();
+      const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
       const currentHash = window.location.hash.toLowerCase();
       if (
         currentPath === '/diary' ||
