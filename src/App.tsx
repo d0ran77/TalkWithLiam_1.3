@@ -19,6 +19,9 @@ import {
   Clock,
   ShieldCheck,
   ChevronDown,
+  Compass,
+  Layers,
+  HelpCircle,
 } from 'lucide-react';
 import { SLIDES, PRACTICAL_DETAILS } from './data/content.ts';
 import { PHOTOS } from './data/photos.ts';
@@ -56,15 +59,57 @@ const PsychologyTodayIcon = ({ className = 'w-4 h-4' }: { className?: string }) 
   </svg>
 );
 
+const SLIDE_ROUTE_PATHS = [
+  '/how-we-work',
+  '/approach',
+  '/areas-of-work',
+  '/fees',
+  '/contact',
+  '/faq',
+] as const;
+
+function getSlideIndexFromLocation(path: string, hash: string): number | null {
+  if (path === '/how-we-work' || hash === '#how-we-work' || hash === '#about-work') return 0;
+  if (path === '/approach' || path === '/connection' || hash === '#approach' || hash === '#connection' || hash === '#how-we-work-together') return 1;
+  if (path === '/areas-of-work' || path === '/specialisms' || path === '/themes' || hash === '#specialisms' || hash === '#areas-of-work' || hash === '#themes') return 2;
+  if (path === '/fees' || path === '/rates' || path === '/practicalities' || hash === '#fees' || hash === '#rates' || hash === '#practicalities') return 3;
+  if (path === '/contact' || path === '/consultation' || hash === '#contact' || hash === '#consultation' || hash === '#get-in-touch') return 4;
+  if (path === '/faq' || path === '/faqs' || path === '/guide' || hash === '#faq' || hash === '#faqs' || hash === '#guide') return 5;
+  return null;
+}
+
 export default function App() {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
+        const hash = window.location.hash.toLowerCase();
+        const matchedIndex = getSlideIndexFromLocation(path, hash);
+        if (matchedIndex !== null) return matchedIndex;
+      }
+    } catch {
+      // ignore
+    }
+    return 0;
+  });
   const [slideDirection, setSlideDirection] = useState<number>(1);
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
-  // Mobile accordion drawer state (all drawers closed by default)
-  const [activeMobileDrawer, setActiveMobileDrawer] = useState<number | null>(null);
+  // Mobile accordion drawer state (closed by default unless opened via direct chapter URL)
+  const [activeMobileDrawer, setActiveMobileDrawer] = useState<number | null>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
+        const hash = window.location.hash.toLowerCase();
+        return getSlideIndexFromLocation(path, hash);
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
 
-  // View Mode: 'minimal' (clean landing on first load), 'carousel' (7 slides), 'portrait' (essay & photo), 'booking' (live diary), or 'free-child' (visual monograph & theory)
+  // View Mode: 'minimal' (clean landing on first load), 'carousel' (6 chapters), 'portrait' (essay & photo), 'booking' (live diary), or 'free-child' (visual monograph & theory)
   const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child'>(() => {
     try {
       if (typeof window !== 'undefined') {
@@ -90,7 +135,13 @@ export default function App() {
         ) {
           return 'booking';
         }
-        if (path === '/slides' || path === '/carousel' || hash === '#slides' || hash === '#carousel') {
+        if (
+          path === '/slides' ||
+          path === '/carousel' ||
+          hash === '#slides' ||
+          hash === '#carousel' ||
+          getSlideIndexFromLocation(path, hash) !== null
+        ) {
           return 'carousel';
         }
         if (path === '/about' || path === '/portrait' || hash === '#about' || hash === '#portrait') {
@@ -98,23 +149,6 @@ export default function App() {
         }
         if (path === '/free-child' || hash === '#free-child' || hash === '#freechild' || hash === '#camera' || hash === '#instagram') {
           return 'free-child';
-        }
-        if (
-          hash === '#how-we-work' ||
-          hash === '#approach' ||
-          hash === '#connection' ||
-          hash === '#specialisms' ||
-          hash === '#areas-of-work' ||
-          hash === '#themes' ||
-          hash === '#fees' ||
-          hash === '#rates' ||
-          hash === '#practicalities' ||
-          hash === '#contact' ||
-          hash === '#consultation' ||
-          hash === '#faq' ||
-          hash === '#faqs'
-        ) {
-          return 'carousel';
         }
       }
       const saved = sessionStorage.getItem('talk_with_liam_session_view');
@@ -128,6 +162,8 @@ export default function App() {
   });
   // Speech bubble social & channels drawer state
   const [isSocialOpen, setIsSocialOpen] = useState<boolean>(false);
+  // How We Work chapters drawer state on minimal landing
+  const [isChaptersOpen, setIsChaptersOpen] = useState<boolean>(false);
 
   // Modals state
   const [isOverviewOpen, setIsOverviewOpen] = useState<boolean>(false);
@@ -137,12 +173,14 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
   const [isLocationOpen, setIsLocationOpen] = useState<boolean>(false);
 
-  // Listen for pathname, hash and query parameter changes in URL (e.g. /diary, #diary, ?view=diary, #fees)
+  // Listen for pathname, hash and query parameter changes in URL (e.g. /about, /areas-of-work, /fees, #faq)
   useEffect(() => {
     const handleUrlCheck = () => {
       const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search.toLowerCase();
+      const matchedSlide = getSlideIndexFromLocation(path, hash);
+
       if (
         path === '/diary' ||
         path.startsWith('/diary') ||
@@ -161,39 +199,20 @@ export default function App() {
         search.includes('diary=true')
       ) {
         setViewMode('booking');
+      } else if (matchedSlide !== null) {
+        setViewMode('carousel');
+        setCurrentSlideIndex(matchedSlide);
+        setActiveMobileDrawer(matchedSlide);
       } else if (path === '/slides' || path === '/carousel' || hash === '#slides' || hash === '#carousel') {
         setViewMode('carousel');
       } else if (path === '/about' || path === '/portrait' || hash === '#about' || hash === '#portrait') {
         setViewMode('portrait');
       } else if (path === '/free-child' || hash === '#free-child' || hash === '#camera') {
         setViewMode('free-child');
-      } else if (hash === '#how-we-work' || hash === '#about-work') {
-        setViewMode('carousel');
-        setCurrentSlideIndex(0);
-        setActiveMobileDrawer(0);
-      } else if (hash === '#approach' || hash === '#connection' || hash === '#how-we-work-together') {
-        setViewMode('carousel');
-        setCurrentSlideIndex(1);
-        setActiveMobileDrawer(1);
-      } else if (hash === '#specialisms' || hash === '#areas-of-work' || hash === '#themes') {
-        setViewMode('carousel');
-        setCurrentSlideIndex(2);
-        setActiveMobileDrawer(2);
-      } else if (hash === '#fees' || hash === '#rates' || hash === '#practicalities') {
-        setViewMode('carousel');
-        setCurrentSlideIndex(3);
-        setActiveMobileDrawer(3);
-      } else if (hash === '#contact' || hash === '#consultation' || hash === '#get-in-touch') {
-        setViewMode('carousel');
-        setCurrentSlideIndex(4);
-        setActiveMobileDrawer(4);
-      } else if (hash === '#faq' || hash === '#faqs' || hash === '#guide') {
-        setViewMode('carousel');
-        setCurrentSlideIndex(5);
-        setActiveMobileDrawer(5);
+      } else if (path === '/' && !hash) {
+        setViewMode('minimal');
       }
     };
-    handleUrlCheck();
     window.addEventListener('hashchange', handleUrlCheck);
     window.addEventListener('popstate', handleUrlCheck);
     return () => {
@@ -202,11 +221,13 @@ export default function App() {
     };
   }, []);
 
-  // Synchronize browser address bar with viewMode (clean /diary URL when in booking mode)
+  // Synchronize browser address bar with active viewMode and chapter route
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
+    const currentHash = window.location.hash.toLowerCase();
+
     if (viewMode === 'booking') {
-      const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
       if (currentPath !== '/diary') {
         try {
           window.history.pushState({ view: 'booking' }, '', '/diary');
@@ -214,18 +235,37 @@ export default function App() {
           window.location.hash = 'diary';
         }
       }
-    } else {
-      const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
-      const currentHash = window.location.hash.toLowerCase();
-      if (
-        currentPath === '/diary' ||
-        currentPath === '/booking' ||
+    } else if (viewMode === 'portrait') {
+      if (currentPath !== '/about') {
+        try {
+          window.history.pushState({ view: 'portrait' }, '', '/about');
+        } catch {
+          window.location.hash = 'about';
+        }
+      }
+    } else if (viewMode === 'carousel') {
+      const targetSlidePath =
+        currentPath === '/slides' && currentSlideIndex === 0
+          ? '/slides'
+          : SLIDE_ROUTE_PATHS[currentSlideIndex] || '/how-we-work';
+      if (currentPath !== targetSlidePath) {
+        try {
+          window.history.pushState({ view: 'carousel', slide: currentSlideIndex }, '', targetSlidePath);
+        } catch {
+          // ignore
+        }
+      }
+    } else if (viewMode === 'minimal') {
+      const isNonRootRoute =
+        currentPath !== '/' ||
         currentHash === '#diary' ||
         currentHash === '#booking' ||
         currentHash === '#appointments' ||
         currentHash === '#schedule' ||
-        currentHash === '#portal'
-      ) {
+        currentHash === '#portal' ||
+        currentHash === '#about' ||
+        currentHash === '#slides';
+      if (isNonRootRoute) {
         try {
           window.history.replaceState(null, '', '/');
         } catch {
@@ -233,18 +273,26 @@ export default function App() {
         }
       }
     }
-  }, [viewMode]);
+  }, [viewMode, currentSlideIndex]);
 
-  // Close Connect drawer on outside click or touch tap
+  // Close Connect and How We Work drawers on outside click or touch tap
   useEffect(() => {
-    if (!isSocialOpen) return;
+    if (!isSocialOpen && !isChaptersOpen) return;
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
       if (
+        isSocialOpen &&
         !target.closest('[id*="social-channels-drawer"]') &&
         !target.closest('[id*="speech-bubble"]')
       ) {
         setIsSocialOpen(false);
+      }
+      if (
+        isChaptersOpen &&
+        !target.closest('[id*="chapters-drawer"]') &&
+        !target.closest('[id*="carousel-toggle-btn"]')
+      ) {
+        setIsChaptersOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -253,7 +301,7 @@ export default function App() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isSocialOpen]);
+  }, [isSocialOpen, isChaptersOpen]);
 
   // Scroll-to-top helper that resets window and any scrollable containers
   const scrollToTop = useCallback(() => {
@@ -277,6 +325,7 @@ export default function App() {
   const handleSelectViewMode = useCallback((mode: 'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child') => {
     setViewMode(mode);
     setIsSocialOpen(false);
+    setIsChaptersOpen(false);
     try {
       sessionStorage.setItem('talk_with_liam_session_view', mode);
     } catch {
@@ -688,6 +737,8 @@ export default function App() {
       } else if (e.key === 'Escape') {
         if (isSocialOpen) {
           setIsSocialOpen(false);
+        } else if (isChaptersOpen) {
+          setIsChaptersOpen(false);
         } else if (viewMode === 'portrait') {
           setViewMode('carousel');
         } else if (viewMode === 'free-child') {
@@ -706,7 +757,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nextSlide, prevSlide, goToSlide, viewMode, isSocialOpen, handleToggleBooking]);
+  }, [nextSlide, prevSlide, goToSlide, viewMode, isSocialOpen, isChaptersOpen, handleToggleBooking]);
 
   // Render individual slide component (6 core slides)
   const renderSlideContent = (index: number) => {
@@ -762,253 +813,358 @@ export default function App() {
               <AmbientNegativeSpaceWords />
 
               {/* Main Content Area (Brand Block on left, negative space on right) */}
-              <div className="w-full flex-1 flex flex-col items-center justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative min-h-0 py-2 sm:py-3 lg:pb-8 xl:pb-12 z-20">
+              <div className="w-full flex-1 flex flex-col items-center justify-start sm:justify-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left relative min-h-0 py-1 sm:py-3 lg:pb-8 xl:pb-12 z-20">
                 {/* Brand & Hero Toolbar Block */}
                 <div
                   id="minimal-hero-brand-block"
-                  className="w-full flex flex-col items-center justify-center text-center lg:w-auto lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl lg:items-start lg:text-left shrink-0 select-none z-20 p-2 2xl:pl-8 3xl:pl-12 overflow-visible"
+                  className="w-full my-auto flex flex-col items-center justify-center text-center lg:w-auto lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl lg:items-start lg:text-left shrink-0 select-none z-20 px-2 py-1 sm:p-2 2xl:pl-8 3xl:pl-12 overflow-visible"
                 >
                 <button
                   id="minimal-brand-home-trigger"
                   onClick={handleToggleCarousel}
-                  className="flex flex-col items-center text-center lg:items-start lg:text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl transition-all cursor-pointer p-1"
+                  className="flex flex-col items-center text-center lg:items-start lg:text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl transition-all cursor-pointer p-0.5 sm:p-1"
                   aria-label="Open carousel"
                 >
-                  <h1 className="text-[35px] sm:text-[44px] md:text-[52px] lg:text-[56px] xl:text-[62px] 2xl:text-[76px] 3xl:text-[90px] 4xl:text-[104px] font-medium tracking-[0.12em] lg:tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] text-[#18181B] group-hover:text-stone-700 transition-colors lg:whitespace-nowrap">
+                  <h1 className="text-[28px] sm:text-[42px] md:text-[50px] lg:text-[56px] xl:text-[62px] 2xl:text-[76px] 3xl:text-[90px] 4xl:text-[104px] font-medium tracking-[0.11em] sm:tracking-[0.12em] lg:tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] text-[#18181B] group-hover:text-stone-700 transition-colors lg:whitespace-nowrap">
                     TALK WITH LIAM
                   </h1>
-                  <p className="text-base sm:text-lg md:text-xl lg:text-[21px] xl:text-[25px] 2xl:text-[32px] 3xl:text-[38px] 4xl:text-[42px] tracking-wider mt-2.5 sm:mt-3.5 md:mt-4 2xl:mt-6 3xl:mt-7 font-normal text-[#71717A] lg:whitespace-nowrap">
+                  <p className="text-[14px] sm:text-lg md:text-xl lg:text-[21px] xl:text-[25px] 2xl:text-[32px] 3xl:text-[38px] 4xl:text-[42px] tracking-wider mt-1.5 sm:mt-3 md:mt-3.5 2xl:mt-5 3xl:mt-6 font-normal text-[#71717A] lg:whitespace-nowrap">
                     Psychotherapeutic Counselling
                   </p>
-                  <p className="text-xs sm:text-sm md:text-base 2xl:text-lg font-mono tracking-widest uppercase text-stone-500 mt-1 sm:mt-1.5 2xl:mt-2.5 lg:whitespace-nowrap">
-                    Willerby, Hull &amp; Online
-                  </p>
                 </button>
+
+                {/* Plain-English Practice Anchor (above Windy Dryden quote, no em-dashes) */}
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-5 sm:mt-6 lg:mt-5 2xl:mt-6 max-w-md sm:max-w-lg lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl text-[12.5px] sm:text-[14.5px] md:text-[15.5px] lg:text-[16px] 2xl:text-[20px] 3xl:text-[23px] text-stone-500 leading-relaxed font-light text-center lg:text-left select-text text-balance"
+                >
+                  Grounded, direct, and relational counselling in Willerby, Hull, and online. A straight-talking space to work through anxiety, burnout, trauma, or feeling stuck, starting with a free introductory chat.
+                </motion.p>
 
                 {/* Core Philosophy Epigraph */}
                 <motion.div
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-3.5 sm:mt-5 lg:mt-6 2xl:mt-8 3xl:mt-10 max-w-lg lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl text-center lg:text-left border-l-0 lg:border-l-2 2xl:border-l-3 border-[#18181B] pl-0 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
+                  transition={{ delay: 0.14, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-5 sm:mt-6 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-[300px] sm:max-w-md lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl mx-auto lg:mx-0 text-center lg:text-left border-l-2 2xl:border-l-3 border-[#18181B] pl-3 sm:pl-4 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
                 >
-                  <p className="font-serif italic text-[17px] sm:text-[20px] md:text-[22px] lg:text-[23px] 2xl:text-[29px] 3xl:text-[35px] 4xl:text-[39px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
-                    &ldquo;My past may have defined who I became, but my presence will liberate&nbsp;me.&rdquo;
+                  <p className="font-serif italic text-[13px] sm:text-[16px] md:text-[18px] lg:text-[22px] 2xl:text-[28px] 3xl:text-[34px] 4xl:text-[38px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
+                    &ldquo;How can I best help you today? Is it by helping you solve a problem, by just listening, or by encouraging you to get things off your chest without interruption?&rdquo;
                   </p>
-                  <cite className="block text-[12.5px] sm:text-sm 2xl:text-base 3xl:text-lg font-mono tracking-widest text-stone-600 uppercase not-italic mt-2 2xl:mt-3 3xl:mt-3.5 text-center lg:text-left">
-                    — Liam Doran
+                  <cite className="block text-[10px] sm:text-xs lg:text-sm 2xl:text-base 3xl:text-lg font-mono tracking-widest text-stone-600 uppercase not-italic mt-2 sm:mt-2.5 lg:mt-2 2xl:mt-3 3xl:mt-3.5 text-center lg:text-left">
+                    — Prof. Windy Dryden
                   </cite>
                 </motion.div>
 
-                {/* Refined Tactile Toolbar Buttons */}
+                {/* Refined Tactile Toolbar Buttons (Pure Icons with Desktop Hover Tooltips) */}
                 <div
-                  className="mt-5 sm:mt-7 lg:mt-7 2xl:mt-10 3xl:mt-12 mb-3 lg:mb-4 flex items-center justify-center lg:justify-start gap-3.5 sm:gap-5 lg:gap-5 2xl:gap-7 3xl:gap-8 relative p-1 overflow-visible"
+                  className="mt-6 sm:mt-7 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-center justify-center lg:justify-start gap-4 sm:gap-5 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
                 >
-                  {/* 1. Carousel / Monograph Book Icon */}
+                  {/* 1. Person Icon: Direct to About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.94 }}
-                      id="minimal-carousel-toggle-btn"
-                      onClick={handleToggleCarousel}
-                      className="group/icon relative w-13 h-13 sm:w-16 sm:h-16 lg:w-15 lg:h-15 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
-                      aria-label="Open slide carousel"
-                    >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
-                      <BookOpen className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 relative z-10 shrink-0" />
-                    </motion.button>
-                    <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[11px] 2xl:text-[14px] 3xl:text-[16px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      Slides
-                    </span>
-                  </div>
-
-                  {/* 2. Person Icon: Direct to About Liam */}
-                  <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
+                    <motion.a
+                      href="/about"
                       whileHover={{ scale: 1.08, y: -2 }}
                       whileTap={{ scale: 0.94 }}
                       id="minimal-portrait-toggle-btn"
-                      onClick={() => handleSelectViewMode('portrait')}
-                      className="group/icon relative w-13 h-13 sm:w-16 sm:h-16 lg:w-15 lg:h-15 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      onClick={(e) => {
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                          e.preventDefault();
+                          handleSelectViewMode('portrait');
+                        }
+                      }}
+                      className="group/icon relative w-12 h-12 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
                       aria-label="About Liam"
                     >
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
-                      <User className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
-                    </motion.button>
-                    <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[11px] 2xl:text-[14px] 3xl:text-[16px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      <User className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
+                    </motion.a>
+                    <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       About Liam
                     </span>
                   </div>
 
-                  {/* 3. Speech Bubble Icon */}
-                  <div className="relative flex items-center overflow-visible">
-                    <div className="relative group/tooltip flex flex-col items-center">
-                      <motion.button
-                        whileHover={{ scale: 1.08, y: -2 }}
-                        whileTap={{ scale: 0.94 }}
-                        id="minimal-speech-bubble-btn"
-                        onClick={() => {
-                          setIsSocialOpen((prev) => !prev);
-                        }}
-                        className={`group/icon relative w-13 h-13 sm:w-16 sm:h-16 lg:w-15 lg:h-15 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
-                          isSocialOpen
-                            ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
-                            : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
-                        }`}
-                        aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
-                        aria-expanded={isSocialOpen}
-                      >
-                        {!isSocialOpen && (
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
+                  {/* 2. How We Work Book Icon: Opens 6-Chapter Icon Pill Drawer */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="minimal-carousel-toggle-btn"
+                      onClick={() => {
+                        setIsSocialOpen(false);
+                        setIsChaptersOpen((prev) => !prev);
+                      }}
+                      className={`group/icon relative w-12 h-12 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                        isChaptersOpen
+                          ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
+                          : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
+                      }`}
+                      aria-label={isChaptersOpen ? 'Close practice sections' : 'Open practice sections'}
+                      aria-expanded={isChaptersOpen}
+                    >
+                      {!isChaptersOpen && (
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
+                      )}
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isChaptersOpen ? (
+                          <motion.div
+                            key="chapters-close"
+                            initial={{ rotate: -90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: 90, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="relative z-10"
+                          >
+                            <X className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="chapters-book"
+                            initial={{ rotate: 90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: -90, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="relative z-10"
+                          >
+                            <BookOpen className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                          </motion.div>
                         )}
-                        <AnimatePresence mode="wait" initial={false}>
-                          {isSocialOpen ? (
-                            <motion.div
-                              key="icon-close"
-                              initial={{ rotate: -90, opacity: 0 }}
-                              animate={{ rotate: 0, opacity: 1 }}
-                              exit={{ rotate: 90, opacity: 0 }}
-                              transition={{ duration: 0.15 }}
-                              className="relative z-10"
-                            >
-                              <X className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
-                            </motion.div>
-                          ) : (
-                            <motion.div
-                              key="icon-chat"
-                              initial={{ rotate: 90, opacity: 0 }}
-                              animate={{ rotate: 0, opacity: 1 }}
-                              exit={{ rotate: 90, opacity: 0 }}
-                              transition={{ duration: 0.15 }}
-                              className="relative z-10"
-                            >
-                              <MessageCircle className="w-5.5 h-5.5 sm:w-7 sm:h-7 lg:w-6.5 lg:h-6.5 xl:w-7 xl:h-7 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110" />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.button>
-                      {!isSocialOpen && (
-                        <span className="pointer-events-none absolute -bottom-7 2xl:-bottom-9 3xl:-bottom-11 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[11px] 2xl:text-[14px] 3xl:text-[16px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                          Connect
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Social Channels Slide-out drawer with glassmorphism */}
-                    <AnimatePresence>
-                      {isSocialOpen && (
-                        <motion.div
-                          id="minimal-social-channels-drawer"
-                          initial={{ opacity: 0, y: -8, scale: 0.94 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -8, scale: 0.94 }}
-                          transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-3 2xl:lg:ml-4 flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2 2xl:lg:gap-3 p-1.5 lg:p-1.5 2xl:lg:p-2 bg-white/45 lg:bg-white/95 backdrop-blur-xl border border-white/60 lg:border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
-                        >
-                          {/* Email link / contact form trigger */}
-                          <div className="relative group/tooltip flex flex-col items-center">
-                            <motion.button
-                              whileHover={{ scale: 1.1, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="minimal-channel-mail-btn"
-                              onClick={() => {
-                                handleMailClick();
-                                setIsSocialOpen(false);
-                              }}
-                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Go to contact form"
-                            >
-                              <Mail className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
-                            </motion.button>
-                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              Email
-                            </span>
-                          </div>
-
-                          {/* Psychology Today Profile */}
-                          <div className="relative group/tooltip flex flex-col items-center">
-                            <motion.a
-                              whileHover={{ scale: 1.1, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="minimal-channel-psychology-today-link"
-                              href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => setIsSocialOpen(false)}
-                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on Psychology Today"
-                            >
-                              <PsychologyTodayIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
-                            </motion.a>
-                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              Psychology Today
-                            </span>
-                          </div>
-
-                          {/* WhatsApp link */}
-                          <div className="relative group/tooltip flex flex-col items-center">
-                            <motion.a
-                              whileHover={{ scale: 1.1, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="minimal-channel-whatsapp-link"
-                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => setIsSocialOpen(false)}
-                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Message Liam on WhatsApp"
-                            >
-                              <WhatsAppIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
-                            </motion.a>
-                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              WhatsApp
-                            </span>
-                          </div>
-
-                          {/* YouTube Channel link */}
-                          <div className="relative group/tooltip flex flex-col items-center">
-                            <motion.a
-                              whileHover={{ scale: 1.1, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="minimal-channel-youtube-account-link"
-                              href={PRACTICAL_DETAILS.social.youtube}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => setIsSocialOpen(false)}
-                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on YouTube"
-                            >
-                              <Youtube className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
-                            </motion.a>
-                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              YouTube
-                            </span>
-                          </div>
-
-                          {/* Location & Parking Guide link (Desktop toolbar) */}
-                          <div className="hidden lg:flex relative group/tooltip flex-col items-center">
-                            <motion.button
-                              whileHover={{ scale: 1.1, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="minimal-channel-location-btn"
-                              onClick={() => {
-                                setIsLocationOpen(true);
-                                setIsSocialOpen(false);
-                              }}
-                              className="w-9 h-9 sm:w-10 sm:h-10 2xl:w-14 2xl:h-14 3xl:w-16 3xl:h-16 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Location & Parking Guide"
-                            >
-                              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8" />
-                            </motion.button>
-                            <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                              Parking
-                            </span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                      </AnimatePresence>
+                    </motion.button>
+                    {!isChaptersOpen && (
+                      <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        How We Work
+                      </span>
+                    )}
                   </div>
+
+                  {/* How We Work 6-Chapter Pure-Icon Pill Drawer */}
+                  <AnimatePresence>
+                    {isChaptersOpen && (
+                      <motion.nav
+                        id="minimal-chapters-drawer"
+                        aria-label="How We Work sections"
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-1.5 2xl:p-2 bg-white/60 lg:bg-white/95 backdrop-blur-xl border border-white/70 lg:border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
+                      >
+                        {[
+                          { label: 'How We Work', path: '/how-we-work', slideIdx: 0, Icon: BookOpen },
+                          { label: 'Approach', path: '/approach', slideIdx: 1, Icon: Compass },
+                          { label: 'Areas of Work', path: '/areas-of-work', slideIdx: 2, Icon: Layers },
+                          { label: 'Fees (£30)', path: '/fees', slideIdx: 3, Icon: CreditCard },
+                          { label: 'Contact', path: '/contact', slideIdx: 4, Icon: Mail },
+                          { label: 'FAQs', path: '/faq', slideIdx: 5, Icon: HelpCircle },
+                        ].map(({ label, path, slideIdx, Icon }) => (
+                          <div key={path} className="relative group/tooltip flex flex-col items-center">
+                            <motion.a
+                              href={path}
+                              whileHover={{ scale: 1.1, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => {
+                                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                                  e.preventDefault();
+                                  setIsChaptersOpen(false);
+                                  goToSlide(slideIdx);
+                                }
+                              }}
+                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                              aria-label={label}
+                            >
+                              <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            </motion.a>
+                            <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
+                              {label}
+                            </span>
+                          </div>
+                        ))}
+                      </motion.nav>
+                    )}
+                  </AnimatePresence>
+
+                  {/* 3. Speech Bubble Icon */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="minimal-speech-bubble-btn"
+                      onClick={() => {
+                        setIsChaptersOpen(false);
+                        setIsSocialOpen((prev) => !prev);
+                      }}
+                      className={`group/icon relative w-12 h-12 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                        isSocialOpen
+                          ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
+                          : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
+                      }`}
+                      aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
+                      aria-expanded={isSocialOpen}
+                    >
+                      {!isSocialOpen && (
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
+                      )}
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isSocialOpen ? (
+                          <motion.div
+                            key="icon-close"
+                            initial={{ rotate: -90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: 90, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="relative z-10"
+                          >
+                            <X className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="icon-chat"
+                            initial={{ rotate: 90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: 90, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="relative z-10"
+                          >
+                            <MessageCircle className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                    {!isSocialOpen && (
+                      <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        Connect
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Social Channels Pure-Icon Pill Drawer (aligned centrally underneath, matching How We Work) */}
+                  <AnimatePresence>
+                    {isSocialOpen && (
+                      <motion.div
+                        id="minimal-social-channels-drawer"
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-1.5 2xl:p-2 bg-white/60 lg:bg-white/95 backdrop-blur-xl border border-white/70 lg:border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
+                      >
+                        {/* Email link / contact form trigger */}
+                        <div className="relative group/tooltip flex flex-col items-center">
+                          <motion.button
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="minimal-channel-mail-btn"
+                            onClick={() => {
+                              handleMailClick();
+                              setIsSocialOpen(false);
+                            }}
+                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Go to contact form"
+                          >
+                            <Mail className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                          </motion.button>
+                          <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
+                            Email
+                          </span>
+                        </div>
+
+                        {/* Psychology Today Profile */}
+                        <div className="relative group/tooltip flex flex-col items-center">
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="minimal-channel-psychology-today-link"
+                            href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Visit Liam on Psychology Today"
+                          >
+                            <PsychologyTodayIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                          </motion.a>
+                          <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
+                            Psychology Today
+                          </span>
+                        </div>
+
+                        {/* WhatsApp link */}
+                        <div className="relative group/tooltip flex flex-col items-center">
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="minimal-channel-whatsapp-link"
+                            href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Message Liam on WhatsApp"
+                          >
+                            <WhatsAppIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                          </motion.a>
+                          <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
+                            WhatsApp
+                          </span>
+                        </div>
+
+                        {/* YouTube Channel link */}
+                        <div className="relative group/tooltip flex flex-col items-center">
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="minimal-channel-youtube-account-link"
+                            href={PRACTICAL_DETAILS.social.youtube}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Visit Liam on YouTube"
+                          >
+                            <Youtube className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                          </motion.a>
+                          <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
+                            YouTube
+                          </span>
+                        </div>
+
+                        {/* Location & Parking Guide link (Desktop toolbar) */}
+                        <div className="hidden lg:flex relative group/tooltip flex-col items-center">
+                          <motion.button
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="minimal-channel-location-btn"
+                            onClick={() => {
+                              setIsLocationOpen(true);
+                              setIsSocialOpen(false);
+                            }}
+                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Location & Parking Guide"
+                          >
+                            <MapPin className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                          </motion.button>
+                          <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
+                            Parking
+                          </span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
+
+                {/* Accessible & Crawlable Chapter Index (zero visual footprint on homepage) */}
+                <nav aria-label="Practice sections" className="sr-only">
+                  <a href="/how-we-work" onClick={(e) => { e.preventDefault(); goToSlide(0); }}>How We Work</a>
+                  <a href="/approach" onClick={(e) => { e.preventDefault(); goToSlide(1); }}>Approach</a>
+                  <a href="/areas-of-work" onClick={(e) => { e.preventDefault(); goToSlide(2); }}>Areas of Work</a>
+                  <a href="/fees" onClick={(e) => { e.preventDefault(); goToSlide(3); }}>Fees (£30)</a>
+                  <a href="/contact" onClick={(e) => { e.preventDefault(); goToSlide(4); }}>Contact</a>
+                  <a href="/faq" onClick={(e) => { e.preventDefault(); goToSlide(5); }}>FAQs</a>
+                </nav>
               </div>
 
               {/* Right side empty placeholder in minimal mode */}
@@ -1057,24 +1213,7 @@ export default function App() {
 
                   {/* Centered Heroicons Toolbar under H2 */}
                   <div className="flex items-center justify-center gap-2 relative shrink-0 p-1 overflow-visible">
-                    {/* 1. Slides Heroicon (Active) */}
-                    <div className="relative group/tooltip flex flex-col items-center">
-                      <motion.button
-                        whileHover={{ scale: 1.08, y: -2 }}
-                        whileTap={{ scale: 0.94 }}
-                        id="practitioner-carousel-toggle-btn-mobile"
-                        onClick={handleToggleCarousel}
-                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0"
-                        aria-label="Slide carousel active"
-                      >
-                        <BookOpen className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
-                      </motion.button>
-                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        Slides
-                      </span>
-                    </div>
-
-                    {/* 2. Person Heroicon: About Liam */}
+                    {/* 1. Person Heroicon: About Liam */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -1091,6 +1230,23 @@ export default function App() {
                       </motion.button>
                       <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                         About Liam
+                      </span>
+                    </div>
+
+                    {/* 2. Slides Heroicon (Active) */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-carousel-toggle-btn-mobile"
+                        onClick={handleToggleCarousel}
+                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0"
+                        aria-label="Slide carousel active"
+                      >
+                        <BookOpen className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                      </motion.button>
+                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        Slides
                       </span>
                     </div>
 
@@ -1380,34 +1536,7 @@ export default function App() {
 
                 {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
                 <div className="mt-2 lg:mt-5 2xl:mt-7 flex items-center justify-center lg:justify-start gap-2 sm:gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
-                  {/* 1. Monograph Book Icon (Active in carousel view) */}
-                  <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.94 }}
-                      id="practitioner-carousel-toggle-btn"
-                      onClick={handleToggleCarousel}
-                      className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
-                        isDarkSlideActive
-                          ? 'bg-white text-stone-900 border-white shadow-[0_2px_12px_rgba(255,255,255,0.2)]'
-                          : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
-                      }`}
-                      aria-label="Close slide carousel"
-                    >
-                      <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
-                    </motion.button>
-                    <span
-                      className={`pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-md border shadow-2xs z-30 ${
-                        isDarkSlideActive
-                          ? 'text-stone-300 bg-stone-900/90 backdrop-blur-xs border-stone-700/80'
-                          : 'text-stone-500 bg-white/90 backdrop-blur-xs border-stone-200/80'
-                      }`}
-                    >
-                      Slides
-                    </span>
-                  </div>
-
-                  {/* 2. Person Heroicon: About Liam */}
+                  {/* 1. Person Heroicon: About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
@@ -1434,6 +1563,33 @@ export default function App() {
                       }`}
                     >
                       About Liam
+                    </span>
+                  </div>
+
+                  {/* 2. Monograph Book Icon (Active in carousel view) */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-carousel-toggle-btn"
+                      onClick={handleToggleCarousel}
+                      className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                        isDarkSlideActive
+                          ? 'bg-white text-stone-900 border-white shadow-[0_2px_12px_rgba(255,255,255,0.2)]'
+                          : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                      }`}
+                      aria-label="Close slide carousel"
+                    >
+                      <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                    </motion.button>
+                    <span
+                      className={`pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-md border shadow-2xs z-30 ${
+                        isDarkSlideActive
+                          ? 'text-stone-300 bg-stone-900/90 backdrop-blur-xs border-stone-700/80'
+                          : 'text-stone-500 bg-white/90 backdrop-blur-xs border-stone-200/80'
+                      }`}
+                    >
+                      Slides
                     </span>
                   </div>
 
@@ -1752,24 +1908,7 @@ export default function App() {
 
                   {/* Centered Heroicons under H2 */}
                   <div className="flex items-center justify-center gap-2 relative shrink-0">
-                    {/* 1. Carousel / Monograph Book Icon */}
-                    <div className="relative group/tooltip flex flex-col items-center">
-                      <motion.button
-                        whileHover={{ scale: 1.08, y: -2 }}
-                        whileTap={{ scale: 0.94 }}
-                        id="practitioner-carousel-toggle-btn-mobile"
-                        onClick={handleToggleCarousel}
-                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0"
-                        aria-label="Open slide carousel"
-                      >
-                        <BookOpen className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
-                      </motion.button>
-                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        Slides
-                      </span>
-                    </div>
-
-                    {/* 2. Person Heroicon (Active: toggles portrait view) */}
+                    {/* 1. Person Heroicon (Active: toggles portrait view) */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -1784,6 +1923,23 @@ export default function App() {
                       </motion.button>
                       <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                         About Liam
+                      </span>
+                    </div>
+
+                    {/* 2. Carousel / Monograph Book Icon */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-carousel-toggle-btn-mobile"
+                        onClick={handleToggleCarousel}
+                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0"
+                        aria-label="Open slide carousel"
+                      >
+                        <BookOpen className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                      </motion.button>
+                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        Slides
                       </span>
                     </div>
 
@@ -1988,24 +2144,7 @@ export default function App() {
 
                     {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
                     <div className="mt-4 sm:mt-5 2xl:mt-7 flex items-center gap-2 2xl:gap-3.5 relative">
-                      {/* 1. Carousel / Monograph Book Icon */}
-                      <div className="relative group/tooltip flex flex-col items-center">
-                        <motion.button
-                          whileHover={{ scale: 1.08, y: -2 }}
-                          whileTap={{ scale: 0.94 }}
-                          id="practitioner-carousel-toggle-btn-desktop"
-                          onClick={handleToggleCarousel}
-                          className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
-                          aria-label="Open slide carousel"
-                        >
-                          <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
-                        </motion.button>
-                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                          Slides
-                        </span>
-                      </div>
-
-                      {/* 2. Person Heroicon (Active: toggles portrait view) */}
+                      {/* 1. Person Heroicon (Active: toggles portrait view) */}
                       <div className="relative group/tooltip flex flex-col items-center">
                         <motion.button
                           whileHover={{ scale: 1.08, y: -2 }}
@@ -2020,6 +2159,23 @@ export default function App() {
                         </motion.button>
                         <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                           About Liam
+                        </span>
+                      </div>
+
+                      {/* 2. Carousel / Monograph Book Icon */}
+                      <div className="relative group/tooltip flex flex-col items-center">
+                        <motion.button
+                          whileHover={{ scale: 1.08, y: -2 }}
+                          whileTap={{ scale: 0.94 }}
+                          id="practitioner-carousel-toggle-btn-desktop"
+                          onClick={handleToggleCarousel}
+                          className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
+                          aria-label="Open slide carousel"
+                        >
+                          <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                        </motion.button>
+                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                          Slides
                         </span>
                       </div>
 
@@ -2226,24 +2382,7 @@ export default function App() {
 
                 {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
                 <div className="mt-2 lg:mt-5 2xl:mt-7 flex items-center justify-center lg:justify-start gap-2 sm:gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
-                  {/* 1. Slides / BookOpen Icon */}
-                  <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.94 }}
-                      id="practitioner-carousel-toggle-btn-booking"
-                      onClick={handleToggleCarousel}
-                      className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
-                      aria-label="Open slide carousel"
-                    >
-                      <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
-                    </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      Slides
-                    </span>
-                  </div>
-
-                  {/* 2. Person Heroicon: About Liam */}
+                  {/* 1. Person Heroicon: About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
@@ -2257,6 +2396,23 @@ export default function App() {
                     </motion.button>
                     <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       About Liam
+                    </span>
+                  </div>
+
+                  {/* 2. Slides / BookOpen Icon */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-carousel-toggle-btn-booking"
+                      onClick={handleToggleCarousel}
+                      className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
+                      aria-label="Open slide carousel"
+                    >
+                      <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                    </motion.button>
+                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      Slides
                     </span>
                   </div>
 

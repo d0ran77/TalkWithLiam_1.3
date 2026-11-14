@@ -314,7 +314,16 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    const routeHtmlPages = ['slides', 'about', 'free-child', 'diary'];
+    const routeHtmlPages = [
+      'about',
+      'how-we-work',
+      'approach',
+      'areas-of-work',
+      'fees',
+      'contact',
+      'faq',
+      'slides',
+    ];
     for (const route of routeHtmlPages) {
       app.get([`/${route}`, `/${route}/`], (_req, res) => {
         res.sendFile(path.join(distPath, route, 'index.html'));

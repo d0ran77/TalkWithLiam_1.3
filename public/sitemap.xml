@@ -10,20 +10,14 @@
     <image:image>
       <image:loc>https://talkwithliam.co.uk/potrait.webp</image:loc>
       <image:title>Liam Doran - UKCP Trainee Psychotherapeutic Counsellor</image:title>
-      <image:caption>Liam Doran offering in-person psychotherapy in Willerby, East Yorkshire and UK-wide online therapy.</image:caption>
+      <image:caption>Liam Doran offering grounded, direct, and relational psychotherapy in Willerby, East Yorkshire and UK-wide online.</image:caption>
     </image:image>
-  </url>
-  <url>
-    <loc>https://talkwithliam.co.uk/slides</loc>
-    <lastmod>2026-11-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/about</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
     <image:image>
       <image:loc>https://talkwithliam.co.uk/potrait.webp</image:loc>
       <image:title>Liam Doran - UKCP Trainee Psychotherapeutic Counsellor</image:title>
@@ -31,15 +25,45 @@
     </image:image>
   </url>
   <url>
-    <loc>https://talkwithliam.co.uk/free-child</loc>
+    <loc>https://talkwithliam.co.uk/how-we-work</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/approach</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://talkwithliam.co.uk/diary</loc>
+    <loc>https://talkwithliam.co.uk/areas-of-work</loc>
     <lastmod>2026-11-13</lastmod>
-    <changefreq>daily</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/fees</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/contact</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/faq</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/slides</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

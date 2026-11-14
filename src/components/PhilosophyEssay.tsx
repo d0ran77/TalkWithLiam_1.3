@@ -135,10 +135,10 @@ export const PhilosophyEssay: React.FC<PhilosophyEssayProps> = ({ onGoToContact 
       {/* Featured Quote Highlight */}
       <div className="border-l-2 border-[#18181B] pl-5 sm:pl-7 py-3 my-4 sm:my-6 space-y-1.5 bg-stone-50/60 rounded-r-xl">
         <p className="font-serif italic text-lg sm:text-xl md:text-2xl text-[#18181B] font-medium leading-relaxed">
-          &ldquo;How can I best help you today? Is it by helping you solve a problem, by just listening, or by encouraging you to get things off your chest without interruption?&rdquo;
+          &ldquo;My past may have defined who I became, but my presence will liberate me.&rdquo;
         </p>
         <cite className="block text-xs font-mono tracking-widest text-stone-600 uppercase not-italic">
-          — Prof. Windy Dryden
+          — Liam Doran
         </cite>
       </div>
 
