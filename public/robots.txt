@@ -53,4 +53,4 @@ User-agent: meta-externalagent
 Allow: /
 
 # Sitemap
-Sitemap: https://talkwithliam.com/sitemap.xml
+Sitemap: https://talkwithliam.co.uk/sitemap.xml
