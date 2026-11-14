@@ -1252,127 +1252,125 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* 3. Speech Bubble / Connect (Opens downward on mobile) */}
-                    <div className="relative flex items-center overflow-visible">
-                      <div className="relative group/tooltip flex flex-col items-center">
-                        <motion.button
-                          whileHover={{ scale: 1.08, y: -2 }}
-                          whileTap={{ scale: 0.94 }}
-                          id="speech-bubble-toggle-btn-carousel-mobile"
-                          onClick={() => setIsSocialOpen((prev) => !prev)}
-                          className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0 ${
-                            isSocialOpen
-                              ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
-                              : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)]'
-                          }`}
-                          aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
-                          aria-expanded={isSocialOpen}
-                        >
-                          <AnimatePresence mode="wait" initial={false}>
-                            {isSocialOpen ? (
-                              <motion.div
-                                key="icon-close"
-                                initial={{ rotate: -90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                exit={{ rotate: 90, opacity: 0 }}
-                                transition={{ duration: 0.15 }}
-                              >
-                                <X className="w-4 h-4" />
-                              </motion.div>
-                            ) : (
-                              <motion.div
-                                key="icon-chat"
-                                initial={{ rotate: 90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                exit={{ rotate: 90, opacity: 0 }}
-                                transition={{ duration: 0.15 }}
-                              >
-                                <MessageCircle className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110" />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.button>
-                        {!isSocialOpen && (
-                          <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                            Connect
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Channels Drawer - Opens DOWN on mobile with glassmorphism */}
-                      <AnimatePresence>
-                        {isSocialOpen && (
-                          <motion.div
-                            id="social-channels-drawer-carousel-mobile"
-                            initial={{ opacity: 0, y: -8, scale: 0.94 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -8, scale: 0.94 }}
-                            transition={{ duration: 0.18, ease: 'easeOut' }}
-                            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 p-1.5 bg-white/45 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-40"
-                          >
-                            {/* Mail */}
-                            <motion.button
-                              whileHover={{ scale: 1.12, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="channel-mail-btn-mobile-c"
-                              onClick={() => {
-                                handleMailClick();
-                                setIsSocialOpen(false);
-                              }}
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Go to contact form"
+                    {/* 3. Speech Bubble / Connect */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="speech-bubble-toggle-btn-carousel-mobile"
+                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0 ${
+                          isSocialOpen
+                            ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                            : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)]'
+                        }`}
+                        aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
+                        aria-expanded={isSocialOpen}
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          {isSocialOpen ? (
+                            <motion.div
+                              key="icon-close"
+                              initial={{ rotate: -90, opacity: 0 }}
+                              animate={{ rotate: 0, opacity: 1 }}
+                              exit={{ rotate: 90, opacity: 0 }}
+                              transition={{ duration: 0.15 }}
                             >
-                              <Mail className="w-4 h-4" />
-                            </motion.button>
-
-                            {/* Psychology Today */}
-                            <motion.a
-                              whileHover={{ scale: 1.12, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="channel-psychology-today-link-mobile-c"
-                              href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => setIsSocialOpen(false)}
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on Psychology Today"
+                              <X className="w-4 h-4" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="icon-chat"
+                              initial={{ rotate: 90, opacity: 0 }}
+                              animate={{ rotate: 0, opacity: 1 }}
+                              exit={{ rotate: -90, opacity: 0 }}
+                              transition={{ duration: 0.15 }}
                             >
-                              <PsychologyTodayIcon className="w-4 h-4" />
-                            </motion.a>
-
-                            {/* WhatsApp */}
-                            <motion.a
-                              whileHover={{ scale: 1.12, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="channel-whatsapp-link-mobile-c"
-                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => setIsSocialOpen(false)}
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Message Liam on WhatsApp"
-                            >
-                              <WhatsAppIcon className="w-4 h-4" />
-                            </motion.a>
-
-                            {/* YouTube */}
-                            <motion.a
-                              whileHover={{ scale: 1.12, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
-                              id="channel-youtube-account-link-mobile-c"
-                              href={PRACTICAL_DETAILS.social.youtube}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={() => setIsSocialOpen(false)}
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                              aria-label="Visit Liam on YouTube"
-                            >
-                              <Youtube className="w-4 h-4" />
-                            </motion.a>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                              <MessageCircle className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                      {!isSocialOpen && (
+                        <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                          Connect
+                        </span>
+                      )}
                     </div>
+
+                    {/* Channels Pill Drawer - Centered horizontally underneath matching landing page */}
+                    <AnimatePresence>
+                      {isSocialOpen && (
+                        <motion.div
+                          id="social-channels-drawer-carousel-mobile"
+                          initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                          transition={{ duration: 0.18, ease: 'easeOut' }}
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-row items-center gap-1 sm:gap-1.5 p-1.5 bg-white/85 backdrop-blur-xl border border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-40"
+                        >
+                          {/* Mail */}
+                          <motion.button
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-mail-btn-mobile-c"
+                            onClick={() => {
+                              handleMailClick();
+                              setIsSocialOpen(false);
+                            }}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Go to contact form"
+                          >
+                            <Mail className="w-4 h-4" />
+                          </motion.button>
+
+                          {/* Psychology Today */}
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-psychology-today-link-mobile-c"
+                            href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Visit Liam on Psychology Today"
+                          >
+                            <PsychologyTodayIcon className="w-4 h-4" />
+                          </motion.a>
+
+                          {/* WhatsApp */}
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-whatsapp-link-mobile-c"
+                            href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Message Liam on WhatsApp"
+                          >
+                            <WhatsAppIcon className="w-4 h-4" />
+                          </motion.a>
+
+                          {/* YouTube */}
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-youtube-account-link-mobile-c"
+                            href={PRACTICAL_DETAILS.social.youtube}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Visit Liam on YouTube"
+                          >
+                            <Youtube className="w-4 h-4" />
+                          </motion.a>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -1933,142 +1931,120 @@ export default function App() {
                     </div>
 
                     {/* 3. Speech Bubble Heroicon */}
-                    <div className="relative flex items-center">
-                      <div className="relative group/tooltip flex flex-col items-center">
-                        <motion.button
-                          whileHover={{ scale: 1.08, y: -2 }}
-                          whileTap={{ scale: 0.94 }}
-                          id="speech-bubble-toggle-btn-mobile"
-                          onClick={() => setIsSocialOpen((prev) => !prev)}
-                          className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0 ${
-                            isSocialOpen
-                              ? 'bg-stone-900 text-white border-stone-900 shadow-md'
-                              : 'bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
-                          }`}
-                          aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
-                          aria-expanded={isSocialOpen}
-                        >
-                          <AnimatePresence mode="wait" initial={false}>
-                            {isSocialOpen ? (
-                              <motion.div
-                                key="icon-close-mobile"
-                                initial={{ rotate: -90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                exit={{ rotate: 90, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <X className="w-4 h-4" />
-                              </motion.div>
-                            ) : (
-                              <motion.div
-                                key="icon-chat-mobile"
-                                initial={{ rotate: 90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                exit={{ rotate: -90, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <MessageCircle className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110" />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.button>
-                        {!isSocialOpen && (
-                          <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                            Connect
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Slide-out drawer with Glassmorphism so portrait is visible underneath */}
-                      <AnimatePresence>
-                        {isSocialOpen && (
-                          <motion.div
-                            id="social-channels-drawer-mobile"
-                            initial={{ opacity: 0, y: -8, scale: 0.94 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -8, scale: 0.94 }}
-                            transition={{ duration: 0.18, ease: 'easeOut' }}
-                            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 p-1.5 bg-white/45 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.14)] z-40"
-                          >
-                            <div className="relative group/tooltip flex flex-col items-center">
-                              <motion.button
-                                whileHover={{ scale: 1.12, y: -1 }}
-                                whileTap={{ scale: 0.95 }}
-                                id="channel-mail-btn-mobile"
-                                onClick={() => {
-                                  handleMailClick();
-                                  setIsSocialOpen(false);
-                                }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                                aria-label="Go to contact form"
-                              >
-                                <Mail className="w-4 h-4" />
-                              </motion.button>
-                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                                Email
-                              </span>
-                            </div>
-
-                            <div className="relative group/tooltip flex flex-col items-center">
-                              <motion.a
-                                whileHover={{ scale: 1.12, y: -1 }}
-                                whileTap={{ scale: 0.95 }}
-                                id="channel-psychology-today-link-mobile"
-                                href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => setIsSocialOpen(false)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                                aria-label="Visit Liam on Psychology Today"
-                              >
-                                <PsychologyTodayIcon className="w-4 h-4" />
-                              </motion.a>
-                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                                Psychology Today
-                              </span>
-                            </div>
-
-                            <div className="relative group/tooltip flex flex-col items-center">
-                              <motion.a
-                                whileHover={{ scale: 1.12, y: -1 }}
-                                whileTap={{ scale: 0.95 }}
-                                id="channel-whatsapp-link-mobile"
-                                href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => setIsSocialOpen(false)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                                aria-label="Message Liam on WhatsApp"
-                              >
-                                <WhatsAppIcon className="w-4 h-4" />
-                              </motion.a>
-                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                                WhatsApp
-                              </span>
-                            </div>
-
-                            <div className="relative group/tooltip flex flex-col items-center">
-                              <motion.a
-                                whileHover={{ scale: 1.12, y: -1 }}
-                                whileTap={{ scale: 0.95 }}
-                                id="channel-youtube-account-link-mobile"
-                                href={PRACTICAL_DETAILS.social.youtube}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => setIsSocialOpen(false)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-stone-800 hover:text-stone-950 hover:bg-white/60 transition-colors focus:outline-none cursor-pointer"
-                                aria-label="Visit Liam on YouTube"
-                              >
-                                <Youtube className="w-4 h-4" />
-                              </motion.a>
-                              <span className="hidden lg:block pointer-events-none absolute -bottom-5 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
-                                YouTube
-                              </span>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="speech-bubble-toggle-btn-mobile"
+                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0 ${
+                          isSocialOpen
+                            ? 'bg-stone-900 text-white border-stone-900 shadow-md'
+                            : 'bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                        }`}
+                        aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
+                        aria-expanded={isSocialOpen}
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          {isSocialOpen ? (
+                            <motion.div
+                              key="icon-close-mobile"
+                              initial={{ rotate: -90, opacity: 0 }}
+                              animate={{ rotate: 0, opacity: 1 }}
+                              exit={{ rotate: 90, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <X className="w-4 h-4" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="icon-chat-mobile"
+                              initial={{ rotate: 90, opacity: 0 }}
+                              animate={{ rotate: 0, opacity: 1 }}
+                              exit={{ rotate: -90, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <MessageCircle className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                      {!isSocialOpen && (
+                        <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                          Connect
+                        </span>
+                      )}
                     </div>
+
+                    {/* Centered Horizontal Pill Drawer matching landing page */}
+                    <AnimatePresence>
+                      {isSocialOpen && (
+                        <motion.div
+                          id="social-channels-drawer-mobile"
+                          initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                          transition={{ duration: 0.18, ease: 'easeOut' }}
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-row items-center gap-1 sm:gap-1.5 p-1.5 bg-white/85 backdrop-blur-xl border border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.14)] z-40"
+                        >
+                          <motion.button
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-mail-btn-mobile"
+                            onClick={() => {
+                              handleMailClick();
+                              setIsSocialOpen(false);
+                            }}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Go to contact form"
+                          >
+                            <Mail className="w-4 h-4" />
+                          </motion.button>
+
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-psychology-today-link-mobile"
+                            href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Visit Liam on Psychology Today"
+                          >
+                            <PsychologyTodayIcon className="w-4 h-4" />
+                          </motion.a>
+
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-whatsapp-link-mobile"
+                            href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Message Liam on WhatsApp"
+                          >
+                            <WhatsAppIcon className="w-4 h-4" />
+                          </motion.a>
+
+                          <motion.a
+                            whileHover={{ scale: 1.1, y: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                            id="channel-youtube-account-link-mobile"
+                            href={PRACTICAL_DETAILS.social.youtube}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsSocialOpen(false)}
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            aria-label="Visit Liam on YouTube"
+                          >
+                            <Youtube className="w-4 h-4" />
+                          </motion.a>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
