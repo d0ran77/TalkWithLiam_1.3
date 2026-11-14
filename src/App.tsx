@@ -549,53 +549,55 @@ export default function App() {
     );
   }, [showToast]);
 
+  const scrollMobileToSlide = useCallback((index: number) => {
+    const slideId = SLIDES[index]?.id;
+    if (!slideId) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const container = document.getElementById('carousel-mobile-scroll-container');
+        const drawerEl = document.getElementById(`mobile-slide-${slideId}`);
+        if (container && drawerEl) {
+          const containerRect = container.getBoundingClientRect();
+          const drawerRect = drawerEl.getBoundingClientRect();
+          const targetTop = Math.max(0, drawerRect.top - containerRect.top + container.scrollTop - 10);
+          container.scrollTo({ top: targetTop, behavior: 'auto' });
+        }
+      });
+    });
+  }, []);
+
   const goToSlide = useCallback(
     (index: number) => {
       if (index >= 0 && index < SLIDES.length) {
         setSlideDirection(index >= currentSlideIndex ? 1 : -1);
         setCurrentSlideIndex(index);
         setActiveMobileDrawer(index);
+        const wasCarousel = viewMode === 'carousel';
         handleSelectViewMode('carousel');
-        scrollToTop();
-        // On mobile, scroll smoothly to the target slide card in the vertical stream
-        setTimeout(() => {
-          const slideId = SLIDES[index]?.id;
-          if (slideId) {
-            const mobileTarget = document.getElementById(`mobile-slide-${slideId}`);
-            if (mobileTarget) {
-              mobileTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
-        }, 80);
+        if (!wasCarousel) {
+          scrollToTop();
+          setTimeout(() => scrollMobileToSlide(index), 90);
+        } else {
+          scrollMobileToSlide(index);
+        }
       }
     },
-    [currentSlideIndex, handleSelectViewMode, scrollToTop]
+    [currentSlideIndex, viewMode, handleSelectViewMode, scrollToTop, scrollMobileToSlide]
   );
 
-  // Mobile Accordion Drawer Toggle handler (calm, fluid disclosure)
-  const handleToggleMobileDrawer = useCallback((index: number) => {
-    setActiveMobileDrawer((prev) => {
-      const isCurrentlyOpen = prev === index;
-      if (isCurrentlyOpen) {
-        return null;
+  // Mobile Accordion Drawer Toggle handler (instant collapse/open, always starts at top of opened drawer)
+  const handleToggleMobileDrawer = useCallback(
+    (index: number) => {
+      if (activeMobileDrawer === index) {
+        setActiveMobileDrawer(null);
+      } else {
+        setCurrentSlideIndex(index);
+        setActiveMobileDrawer(index);
+        scrollMobileToSlide(index);
       }
-      // Single open accordion: gentle auto-scroll only if needed to keep view steady
-      setTimeout(() => {
-        const slideId = SLIDES[index]?.id;
-        if (slideId) {
-          const drawerEl = document.getElementById(`mobile-slide-${slideId}`);
-          if (drawerEl) {
-            const rect = drawerEl.getBoundingClientRect();
-            // Only scroll if drawer header is clipped above or too far down
-            if (rect.top < 40 || rect.top > window.innerHeight * 0.45) {
-              drawerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
-        }
-      }, 50);
-      return index;
-    });
-  }, []);
+    },
+    [activeMobileDrawer, scrollMobileToSlide]
+  );
 
   const contactSlideIndex =
     SLIDES.findIndex((s) => s.id === 'contact') !== -1
@@ -825,10 +827,10 @@ export default function App() {
                   className="flex flex-col items-center text-center lg:items-start lg:text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-2xl transition-all cursor-pointer p-0.5 sm:p-1"
                   aria-label="Open carousel"
                 >
-                  <h1 className="text-[28px] sm:text-[42px] md:text-[50px] lg:text-[56px] xl:text-[62px] 2xl:text-[76px] 3xl:text-[90px] 4xl:text-[104px] font-medium tracking-[0.11em] sm:tracking-[0.12em] lg:tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] text-[#18181B] group-hover:text-stone-700 transition-colors lg:whitespace-nowrap">
+                  <h1 className="text-[32px] sm:text-[42px] md:text-[50px] lg:text-[56px] xl:text-[62px] 2xl:text-[76px] 3xl:text-[90px] 4xl:text-[104px] font-medium tracking-[0.09em] sm:tracking-[0.12em] lg:tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] text-[#18181B] group-hover:text-stone-700 transition-colors lg:whitespace-nowrap">
                     TALK WITH LIAM
                   </h1>
-                  <p className="text-[14px] sm:text-lg md:text-xl lg:text-[21px] xl:text-[25px] 2xl:text-[32px] 3xl:text-[38px] 4xl:text-[42px] tracking-wider mt-1.5 sm:mt-3 md:mt-3.5 2xl:mt-5 3xl:mt-6 font-normal text-[#71717A] lg:whitespace-nowrap">
+                  <p className="text-[16px] sm:text-lg md:text-xl lg:text-[21px] xl:text-[25px] 2xl:text-[32px] 3xl:text-[38px] 4xl:text-[42px] tracking-wider mt-2 sm:mt-3 md:mt-3.5 2xl:mt-5 3xl:mt-6 font-normal text-[#71717A] lg:whitespace-nowrap">
                     Psychotherapeutic Counselling
                   </p>
                 </button>
@@ -838,7 +840,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-5 sm:mt-6 lg:mt-5 2xl:mt-6 max-w-md sm:max-w-lg lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl text-[12.5px] sm:text-[14.5px] md:text-[15.5px] lg:text-[16px] 2xl:text-[20px] 3xl:text-[23px] text-stone-500 leading-relaxed font-light text-center lg:text-left select-text text-balance"
+                  className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-6 max-w-md sm:max-w-lg lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl text-[14.5px] sm:text-[15.5px] md:text-[16px] lg:text-[16px] 2xl:text-[20px] 3xl:text-[23px] text-stone-500 leading-relaxed font-light text-center lg:text-left select-text text-balance"
                 >
                   Grounded, direct, and relational counselling in Willerby, Hull, and online. A straight-talking space to work through anxiety, burnout, trauma, or feeling stuck, starting with a free introductory chat.
                 </motion.p>
@@ -848,19 +850,19 @@ export default function App() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.14, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-5 sm:mt-6 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-[300px] sm:max-w-md lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl mx-auto lg:mx-0 text-center lg:text-left border-l-2 2xl:border-l-3 border-[#18181B] pl-3 sm:pl-4 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1 sm:py-1.5 2xl:py-2.5 select-text"
+                  className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-[330px] sm:max-w-md lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl mx-auto lg:mx-0 text-center lg:text-left border-l-2 2xl:border-l-3 border-[#18181B] pl-3.5 sm:pl-4 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1.5 2xl:py-2.5 select-text"
                 >
-                  <p className="font-serif italic text-[13px] sm:text-[16px] md:text-[18px] lg:text-[22px] 2xl:text-[28px] 3xl:text-[34px] 4xl:text-[38px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
+                  <p className="font-serif italic text-[15px] sm:text-[17px] md:text-[18.5px] lg:text-[22px] 2xl:text-[28px] 3xl:text-[34px] 4xl:text-[38px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
                     &ldquo;How can I best help you today? Is it by helping you solve a problem, by just listening, or by encouraging you to get things off your chest without interruption?&rdquo;
                   </p>
-                  <cite className="block text-[10px] sm:text-xs lg:text-sm 2xl:text-base 3xl:text-lg font-mono tracking-widest text-stone-600 uppercase not-italic mt-2 sm:mt-2.5 lg:mt-2 2xl:mt-3 3xl:mt-3.5 text-center lg:text-left">
+                  <cite className="block text-[11px] sm:text-xs lg:text-sm 2xl:text-base 3xl:text-lg font-mono tracking-widest text-stone-600 uppercase not-italic mt-2.5 lg:mt-2 2xl:mt-3 3xl:mt-3.5 text-center lg:text-left">
                     — Prof. Windy Dryden
                   </cite>
                 </motion.div>
 
                 {/* Refined Tactile Toolbar Buttons (Pure Icons with Desktop Hover Tooltips) */}
                 <div
-                  className="mt-6 sm:mt-7 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-center justify-center lg:justify-start gap-4 sm:gap-5 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
+                  className="mt-8 sm:mt-8 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-center justify-center lg:justify-start gap-5 sm:gap-5 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
                 >
                   {/* 1. Person Icon: Direct to About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -875,11 +877,11 @@ export default function App() {
                           handleSelectViewMode('portrait');
                         }
                       }}
-                      className="group/icon relative w-12 h-12 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      className="group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
                       aria-label="About Liam"
                     >
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
-                      <User className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
+                      <User className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
                     </motion.a>
                     <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       About Liam
@@ -897,7 +899,7 @@ export default function App() {
                         setIsSocialOpen(false);
                         setIsChaptersOpen((prev) => !prev);
                       }}
-                      className={`group/icon relative w-12 h-12 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                      className={`group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
                         isChaptersOpen
                           ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
                           : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
@@ -918,7 +920,7 @@ export default function App() {
                             transition={{ duration: 0.15 }}
                             className="relative z-10"
                           >
-                            <X className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
+                            <X className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
                           </motion.div>
                         ) : (
                           <motion.div
@@ -929,7 +931,7 @@ export default function App() {
                             transition={{ duration: 0.15 }}
                             className="relative z-10"
                           >
-                            <BookOpen className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                            <BookOpen className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -997,7 +999,7 @@ export default function App() {
                         setIsChaptersOpen(false);
                         setIsSocialOpen((prev) => !prev);
                       }}
-                      className={`group/icon relative w-12 h-12 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                      className={`group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
                         isSocialOpen
                           ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
                           : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
@@ -1018,7 +1020,7 @@ export default function App() {
                             transition={{ duration: 0.15 }}
                             className="relative z-10"
                           >
-                            <X className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
+                            <X className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
                           </motion.div>
                         ) : (
                           <motion.div
@@ -1029,7 +1031,7 @@ export default function App() {
                             transition={{ duration: 0.15 }}
                             className="relative z-10"
                           >
-                            <MessageCircle className="w-5 h-5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110" />
+                            <MessageCircle className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -1190,7 +1192,7 @@ export default function App() {
               {/* Mobile View: Continuous vertical scroll stream (< lg) without swipe hijacking */}
               <div
                 id="carousel-mobile-scroll-container"
-                className="lg:hidden w-full h-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar px-2 sm:px-4 py-1 select-text"
+                className="lg:hidden w-full h-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar px-2 sm:px-4 py-2 select-text"
               >
                 {/* 1. Mobile Top Brand Header */}
                 <div className="flex flex-col items-center justify-center text-center pt-1 pb-2.5 shrink-0 select-none gap-2">
@@ -1374,31 +1376,27 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Mobile Accordion Drawers Stream (< lg) */}
-                <div className="flex flex-col gap-4 sm:gap-5 pb-16 pt-2">
+                {/* Mobile Accordion Drawers Stream (< lg) - centered vertically when collapsed */}
+                <div
+                  className={`flex flex-col gap-3.5 sm:gap-4 w-full ${
+                    activeMobileDrawer === null ? 'my-auto py-4' : 'pt-2 pb-8'
+                  }`}
+                >
                   {SLIDES.map((slide, idx) => {
                     const isOpen = activeMobileDrawer === idx;
                     return (
-                      <motion.article
+                      <article
                         key={`mobile-card-${slide.id}`}
                         id={`mobile-slide-${slide.id}`}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          duration: 0.38,
-                          delay: idx * 0.05,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                        className={`w-full rounded-2xl border transition-all duration-300 select-text scroll-mt-3 overflow-hidden ${
+                        className={`w-full rounded-2xl border transition-colors duration-200 select-text scroll-mt-3 overflow-hidden ${
                           isOpen
                             ? 'bg-white border-stone-300 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ring-1 ring-stone-900/[0.03]'
                             : 'bg-[#FCFBF8] hover:bg-white border-stone-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.025)] hover:border-stone-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)]'
                         }`}
                       >
                         {/* Drawer Header Trigger Button */}
-                        <motion.button
+                        <button
                           type="button"
-                          whileTap={{ scale: 0.992 }}
                           onClick={() => handleToggleMobileDrawer(idx)}
                           aria-expanded={isOpen}
                           aria-controls={`mobile-drawer-content-${slide.id}`}
@@ -1417,7 +1415,7 @@ export default function App() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span
-                              className={`w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                              className={`w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center border transition-transform duration-200 ${
                                 isOpen
                                   ? 'bg-[#18181B] text-white border-[#18181B] rotate-180'
                                   : 'bg-white text-stone-500 border-stone-200 group-hover:border-stone-400 group-hover:text-stone-800 rotate-0'
@@ -1427,79 +1425,70 @@ export default function App() {
                               <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </span>
                           </div>
-                        </motion.button>
+                        </button>
 
-                        {/* Drawer Content - Subtle slide and fade disclosure without layout squishing */}
-                        <AnimatePresence initial={false}>
-                          {isOpen && (
-                            <motion.div
-                              id={`mobile-drawer-content-${slide.id}`}
-                              key={`drawer-content-${slide.id}`}
-                              initial={{ opacity: 0, y: -6 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
-                              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                            >
-                              <div className="px-4 sm:px-6 pb-6 pt-1 border-t border-stone-100">
-                                {/* Top In-drawer Action Bar with Top ↑ */}
-                                <div className="flex items-center justify-end py-1.5 mb-3 border-b border-stone-100">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      document
-                                        .getElementById('carousel-mobile-scroll-container')
-                                        ?.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }}
-                                    className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 transition-colors cursor-pointer py-0.5 px-2 rounded hover:bg-stone-100/60"
-                                    aria-label="Scroll back to top of page"
-                                  >
-                                    Top ↑
-                                  </button>
-                                </div>
-
-                                {/* Slide Content (e.g. TWO HUMANS IN A ROOM. etc.) */}
-                                <div className="w-full">
-                                  {renderSlideContent(idx)}
-                                </div>
-
-                                {/* Bottom In-drawer Action Bar */}
-                                <div className="flex items-center justify-between pt-4 mt-6 border-t border-stone-100 text-[10px] font-mono uppercase tracking-wider text-stone-500">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleToggleMobileDrawer(idx)}
-                                    className="hover:text-stone-900 cursor-pointer py-1 px-2 rounded hover:bg-stone-100/60 transition-colors"
-                                  >
-                                    Close Drawer ↑
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      document
-                                        .getElementById('carousel-mobile-scroll-container')
-                                        ?.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }}
-                                    className="hover:text-stone-900 cursor-pointer py-1 px-2 rounded hover:bg-stone-100/60 transition-colors"
-                                  >
-                                    Top ↑
-                                  </button>
-                                </div>
+                        {/* Drawer Content - Instant layout open/collapse so switching drawers always starts cleanly at top */}
+                        {isOpen && (
+                          <div id={`mobile-drawer-content-${slide.id}`}>
+                            <div className="px-4 sm:px-6 pb-6 pt-1 border-t border-stone-100">
+                              {/* Top In-drawer Action Bar with Top ↑ */}
+                              <div className="flex items-center justify-end py-1.5 mb-3 border-b border-stone-100">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    document
+                                      .getElementById('carousel-mobile-scroll-container')
+                                      ?.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                  className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900 transition-colors cursor-pointer py-0.5 px-2 rounded hover:bg-stone-100/60"
+                                  aria-label="Scroll back to top of page"
+                                >
+                                  Top ↑
+                                </button>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.article>
+
+                              {/* Slide Content (e.g. TWO HUMANS IN A ROOM. etc.) */}
+                              <div className="w-full">
+                                {renderSlideContent(idx)}
+                              </div>
+
+                              {/* Bottom In-drawer Action Bar */}
+                              <div className="flex items-center justify-between pt-4 mt-6 border-t border-stone-100 text-[10px] font-mono uppercase tracking-wider text-stone-500">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleMobileDrawer(idx)}
+                                  className="hover:text-stone-900 cursor-pointer py-1 px-2 rounded hover:bg-stone-100/60 transition-colors"
+                                >
+                                  Close Drawer ↑
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    document
+                                      .getElementById('carousel-mobile-scroll-container')
+                                      ?.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                  className="hover:text-stone-900 cursor-pointer py-1 px-2 rounded hover:bg-stone-100/60 transition-colors"
+                                >
+                                  Top ↑
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </article>
                     );
                   })}
+                </div>
 
-                  {/* Non-sticky Footer at the end of mobile stream */}
-                  <div className="w-full pt-4 pb-8 flex justify-center shrink-0">
-                    <Footer
-                      onOpenPrivacy={() => setIsPrivacyOpen(true)}
-                      onOpenHelpline={() => setIsHelplineOpen(true)}
-                      onOpenLocation={() => setIsLocationOpen(true)}
-                      onOpenOverview={() => setIsOverviewOpen(true)}
-                    />
-                  </div>
+                {/* Non-sticky Footer anchored cleanly at bottom of mobile stream */}
+                <div className="w-full mt-auto pt-3 pb-4 flex justify-center shrink-0">
+                  <Footer
+                    onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                    onOpenHelpline={() => setIsHelplineOpen(true)}
+                    onOpenLocation={() => setIsLocationOpen(true)}
+                    onOpenOverview={() => setIsOverviewOpen(true)}
+                  />
                 </div>
               </div>
 
