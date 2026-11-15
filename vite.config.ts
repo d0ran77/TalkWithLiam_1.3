@@ -119,6 +119,15 @@ const PUBLIC_ROUTE_PAGES: RouteMeta[] = [
     summary:
       'How we get stuck in repeating arguments and how to step off the loop: an interactive Transactional Analysis guide by Liam Doran.',
   },
+  {
+    route: 'free-child',
+    title: 'The Camera & The Free Child | Talk with Liam',
+    description:
+      'Explore Eric Berne’s Free Child and Adapted Child ego states through street photography and personal reflection by Liam Doran.',
+    heading: 'The Camera and The Free Child',
+    summary:
+      'Transactional Analysis reflections on curiosity, spontaneity, and reclaiming the Free Child in everyday life.',
+  },
 ];
 
 function generateRouteHtmlPages(): Plugin {
@@ -219,7 +228,7 @@ function generateRouteHtmlPages(): Plugin {
               : page.route === 'drama-triangle'
                 ? dramaFallbackHtml
                 : '';
-        const seoFallback = `<div id="root"><main style="max-width:42rem;margin:3rem auto;padding:1.5rem;font-family:sans-serif;color:#18181B"><h1>${page.heading}</h1><p>${page.summary}</p>${extraBody}<nav><a href="/">Home</a> | <a href="/about">About Liam</a> | <a href="/how-we-work">How We Work</a> | <a href="/pac-model">The PAC Model</a> | <a href="/drama-triangle">The Drama Triangle</a> | <a href="/areas-of-work">Areas of Work</a> | <a href="/fees">Fees (£30)</a> | <a href="/contact">Contact</a> | <a href="/faq">FAQs</a></nav></main></div>`;
+        const seoFallback = `<div id="root"><main style="max-width:42rem;margin:3rem auto;padding:1.5rem;font-family:sans-serif;color:#18181B"><h1>${page.heading}</h1><p>${page.summary}</p>${extraBody}<nav><a href="/">Home</a> | <a href="/about">About Liam</a> | <a href="/how-we-work">How We Work</a> | <a href="/pac-model">The PAC Model</a> | <a href="/drama-triangle">The Drama Triangle</a> | <a href="/free-child">The Free Child</a> | <a href="/areas-of-work">Areas of Work</a> | <a href="/fees">Fees (£30)</a> | <a href="/contact">Contact</a> | <a href="/faq">FAQs</a></nav></main></div>`;
         let routeHtml = baseHtml
           .replace('<div id="root"></div>', seoFallback)
           .replace(
