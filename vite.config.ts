@@ -127,7 +127,7 @@ function generateRouteHtmlPages(): Plugin {
           `<article><h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p></article>`,
       ).join('')}</section>`;
 
-      const pacFallbackHtml = `<section><h2>The Core Model (P-A-C)</h2><p>Transactional Analysis psychoeducation exploring internal Parent, Adult, and Child ego states across everyday relational situations.</p>${PAC_SCENARIOS.map(
+      const pacFallbackHtml = `<section><h2>What is the PAC Model?</h2><h3>A straightforward map of how you think, feel and react</h3><p>In Transactional Analysis, the PAC model breaks your personality down into three distinct parts: Parent, Adult and Child. Depending on what is happening in the room, you shift between these states.</p><p>Use the interactive model below to see how each part shows up in daily life and why your reactions can sometimes feel out of character.</p></section><section><h2>The Core Model (P-A-C)</h2><p>Transactional Analysis psychoeducation exploring internal Parent, Adult, and Child ego states across everyday relational situations.</p>${PAC_SCENARIOS.map(
         (scenario) =>
           `<article><h3>${escapeHtml(scenario.label)}</h3>${CORE_NODES.map(
             (node) =>

@@ -121,6 +121,28 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
             </p>
           </section>
 
+          {/* What is the PAC Model? Editorial Explainer */}
+          <section
+            aria-labelledby="pac-what-is-heading"
+            className="mt-7 sm:mt-8 pt-6 sm:pt-7 border-t border-stone-200/75 max-w-2xl space-y-2.5 sm:space-y-3"
+          >
+            <p
+              id="pac-what-is-heading"
+              className="font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.2em] text-[#71717A] font-medium"
+            >
+              WHAT IS THE PAC MODEL?
+            </p>
+            <h2 className="text-[19px] sm:text-[22px] font-medium tracking-tight text-[#18181B] leading-[1.3]">
+              A straightforward map of how you think, feel and react
+            </h2>
+            <p className="text-[14.5px] sm:text-[15.5px] leading-[1.7] text-[#18181B]/80 font-normal max-w-[64ch]">
+              In Transactional Analysis, the PAC model breaks your personality down into three distinct parts: Parent, Adult and Child. Depending on what is happening in the room, you shift between these states.
+            </p>
+            <p className="text-[14.5px] sm:text-[15.5px] leading-[1.7] text-[#71717A] font-normal max-w-[64ch]">
+              Use the interactive model below to see how each part shows up in daily life and why your reactions can sometimes feel out of character.
+            </p>
+          </section>
+
           {/* 1. Underlined Editorial Two-Tab Switcher (Structural vs Functional) */}
           <section aria-label="PAC Model View Switcher" className="mt-8 sm:mt-10">
             <div
