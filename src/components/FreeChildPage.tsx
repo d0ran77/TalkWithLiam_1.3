@@ -11,15 +11,19 @@ import {
   Eye,
   Compass,
   CheckCircle2,
+  Triangle,
+  ChevronDown,
 } from 'lucide-react';
 import { PHOTOS, PhotoItem } from '../data/photos.ts';
 import { PRACTICAL_DETAILS } from '../data/content.ts';
+import { playSoftThump } from '../utils/sound.ts';
 
 interface FreeChildPageProps {
   onBackToLanding: () => void;
   onNavigateToSlides: (slideIndex?: number) => void;
   onGoToAboutLiam: () => void;
   onGoToPacModel: () => void;
+  onGoToDramaTriangle?: () => void;
   onGoToContact: () => void;
 }
 
@@ -45,8 +49,10 @@ export const FreeChildPage: React.FC<FreeChildPageProps> = ({
   onNavigateToSlides,
   onGoToAboutLiam,
   onGoToPacModel,
+  onGoToDramaTriangle,
   onGoToContact,
 }) => {
+  const [isTheoryMenuOpen, setIsTheoryMenuOpen] = useState(false);
   // Default to Photo 06 ("Passage to Light" - the tunnel silhouette with Goonies resonance)
   const defaultPhotoIndex = PHOTOS.findIndex((p) => p.src.includes('6.webp')) >= 0
     ? PHOTOS.findIndex((p) => p.src.includes('6.webp'))
@@ -91,13 +97,56 @@ export const FreeChildPage: React.FC<FreeChildPageProps> = ({
             <span>Practice Chapters</span>
           </button>
 
-          <button
-            onClick={onGoToPacModel}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer"
-          >
-            <PacStackIcon className="w-3.5 h-3.5 text-stone-500" />
-            <span>The PAC Model</span>
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                playSoftThump('default');
+                if (onGoToDramaTriangle) {
+                  setIsTheoryMenuOpen((prev) => !prev);
+                } else {
+                  onGoToPacModel();
+                }
+              }}
+              aria-expanded={isTheoryMenuOpen}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <PacStackIcon className="w-3.5 h-3.5 text-stone-500" />
+              <span>TA Theory</span>
+              {onGoToDramaTriangle && (
+                <ChevronDown className={`w-3 h-3 text-stone-500 transition-transform duration-150 ${isTheoryMenuOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+
+            {isTheoryMenuOpen && onGoToDramaTriangle && (
+              <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-stone-200 bg-white/95 backdrop-blur-md shadow-[0_12px_32px_rgba(24,24,27,0.1)] p-1.5 z-40 flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoftThump('default');
+                    setIsTheoryMenuOpen(false);
+                    onGoToPacModel();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <PacStackIcon className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                  <span>The PAC Model</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoftThump('default');
+                    setIsTheoryMenuOpen(false);
+                    onGoToDramaTriangle();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <Triangle className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                  <span>The Drama Triangle</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           <button
             onClick={onGoToAboutLiam}

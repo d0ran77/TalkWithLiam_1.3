@@ -110,6 +110,15 @@ const PUBLIC_ROUTE_PAGES: RouteMeta[] = [
     summary:
       'Transactional Analysis psychoeducation guide by Liam Doran (UKCP Trainee Psychotherapeutic Counsellor) showing how Parent, Adult, and Child ego states operate internally and in relationships.',
   },
+  {
+    route: 'drama-triangle',
+    title: "The Drama Triangle & Winner's Triangle | Talk with Liam",
+    description:
+      "Explore Stephen Karpman's Drama Triangle (Persecutor, Rescuer, Victim) and Acey Choy's Winner's Triangle (Assertive, Caring, Vulnerable) with real-life examples.",
+    heading: 'The Drama Triangle',
+    summary:
+      'How we get stuck in repeating arguments and how to step off the loop: an interactive Transactional Analysis guide by Liam Doran.',
+  },
 ];
 
 function generateRouteHtmlPages(): Plugin {
@@ -183,6 +192,23 @@ function generateRouteHtmlPages(): Plugin {
         ],
       });
 
+      const dramaFallbackHtml = `<section><h2>The Drama Triangle (The Trap)</h2><p>Stephen Karpman identified three roles we slip into during conflict: Persecutor, Rescuer and Victim.</p></section><section><h2>The Winner's Triangle (The Way Out)</h2><p>Acey Choy showed how each role shifts into grounded presence: Assertive, Caring and Vulnerable.</p></section>`;
+
+      const dramaJsonLd = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        '@id': 'https://talkwithliam.co.uk/drama-triangle#article',
+        headline: "The Drama Triangle & Winner's Triangle (Transactional Analysis)",
+        description:
+          "How we get stuck in repeating arguments and how to step off the loop using Stephen Karpman's Drama Triangle and Acey Choy's Winner's Triangle.",
+        educationalUse: 'Psychoeducation',
+        about: ['Transactional Analysis', 'Drama Triangle', "Winner's Triangle", 'Relational Psychotherapy'],
+        author: { '@id': 'https://talkwithliam.co.uk/#practitioner' },
+        publisher: { '@id': 'https://talkwithliam.co.uk/#business' },
+        mainEntityOfPage: 'https://talkwithliam.co.uk/drama-triangle',
+        inLanguage: 'en-GB',
+      });
+
       for (const page of PUBLIC_ROUTE_PAGES) {
         const canonicalUrl = `https://talkwithliam.co.uk/${page.route}`;
         const extraBody =
@@ -190,8 +216,10 @@ function generateRouteHtmlPages(): Plugin {
             ? faqFallbackHtml
             : page.route === 'pac-model'
               ? pacFallbackHtml
-              : '';
-        const seoFallback = `<div id="root"><main style="max-width:42rem;margin:3rem auto;padding:1.5rem;font-family:sans-serif;color:#18181B"><h1>${page.heading}</h1><p>${page.summary}</p>${extraBody}<nav><a href="/">Home</a> | <a href="/about">About Liam</a> | <a href="/how-we-work">How We Work</a> | <a href="/pac-model">The PAC Model</a> | <a href="/areas-of-work">Areas of Work</a> | <a href="/fees">Fees (£30)</a> | <a href="/contact">Contact</a> | <a href="/faq">FAQs</a></nav></main></div>`;
+              : page.route === 'drama-triangle'
+                ? dramaFallbackHtml
+                : '';
+        const seoFallback = `<div id="root"><main style="max-width:42rem;margin:3rem auto;padding:1.5rem;font-family:sans-serif;color:#18181B"><h1>${page.heading}</h1><p>${page.summary}</p>${extraBody}<nav><a href="/">Home</a> | <a href="/about">About Liam</a> | <a href="/how-we-work">How We Work</a> | <a href="/pac-model">The PAC Model</a> | <a href="/drama-triangle">The Drama Triangle</a> | <a href="/areas-of-work">Areas of Work</a> | <a href="/fees">Fees (£30)</a> | <a href="/contact">Contact</a> | <a href="/faq">FAQs</a></nav></main></div>`;
         let routeHtml = baseHtml
           .replace('<div id="root"></div>', seoFallback)
           .replace(
@@ -239,6 +267,11 @@ function generateRouteHtmlPages(): Plugin {
           routeHtml = routeHtml.replace(
             '</head>',
             `    <script type="application/ld+json">${pacJsonLd}</script>\n  </head>`,
+          );
+        } else if (page.route === 'drama-triangle') {
+          routeHtml = routeHtml.replace(
+            '</head>',
+            `    <script type="application/ld+json">${dramaJsonLd}</script>\n  </head>`,
           );
         }
 

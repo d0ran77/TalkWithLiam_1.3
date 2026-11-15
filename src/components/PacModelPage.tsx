@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, BookOpen, User, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, User, ExternalLink, Triangle } from 'lucide-react';
+import { playSoftThump } from '../utils/sound.ts';
 import {
   PAC_SCENARIOS,
   CORE_NODES,
@@ -17,6 +18,7 @@ interface PacModelPageProps {
   onBackToLanding: () => void;
   onNavigateToSlides: (slideIndex?: number) => void;
   onGoToAboutLiam: () => void;
+  onGoToDramaTriangle?: () => void;
   onGoToContact: () => void;
 }
 
@@ -24,6 +26,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
   onBackToLanding,
   onNavigateToSlides,
   onGoToAboutLiam,
+  onGoToDramaTriangle,
   onGoToContact,
 }) => {
   const [activeTab, setActiveTab] = useState<PacTabId>('core');
@@ -32,6 +35,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
   const [activeFunctionalNode, setActiveFunctionalNode] = useState<FunctionalNodeId>('A');
 
   const handleSelectTab = (tab: PacTabId) => {
+    playSoftThump(tab === 'functional' ? 'bright' : 'default');
     setActiveTab(tab);
     if (tab === 'core') {
       setActiveCoreNode('A');
@@ -85,6 +89,20 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
         </button>
 
         <div className="flex items-center gap-2 sm:gap-3 text-xs shrink-0">
+          {onGoToDramaTriangle && (
+            <button
+              type="button"
+              onClick={() => {
+                playSoftThump('default');
+                onGoToDramaTriangle();
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <Triangle className="w-3.5 h-3.5 text-stone-500" />
+              <span>Drama Triangle</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => onNavigateToSlides(0)}
@@ -197,7 +215,10 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                     key={scenario.id}
                     type="button"
                     aria-pressed={isSelected}
-                    onClick={() => setActiveScenarioId(scenario.id)}
+                    onClick={() => {
+                      playSoftThump('default');
+                      setActiveScenarioId(scenario.id);
+                    }}
                     className={`px-4 py-2 rounded-full text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 border focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${
                       isSelected
                         ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_4px_14px_rgba(24,24,27,0.16)]'
@@ -240,7 +261,10 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                         <motion.button
                           key={node.id}
                           type="button"
-                          onClick={() => setActiveCoreNode(node.id)}
+                          onClick={() => {
+                            playSoftThump('deep');
+                            setActiveCoreNode(node.id);
+                          }}
                           aria-pressed={isSelected}
                           aria-label={`${node.fullName} ego state (${node.letter})`}
                           whileHover={{ scale: isSelected ? 1.03 : 1.05 }}
@@ -289,7 +313,10 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                           <motion.button
                             key={node.id}
                             type="button"
-                            onClick={() => setActiveFunctionalNode(node.id)}
+                            onClick={() => {
+                              playSoftThump('deep');
+                              setActiveFunctionalNode(node.id);
+                            }}
                             aria-pressed={isSelected}
                             aria-label={`${node.fullName} (${node.letter})`}
                             whileHover={{ scale: isSelected ? 1.03 : 1.05 }}
@@ -323,7 +350,10 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                         return (
                           <motion.button
                             type="button"
-                            onClick={() => setActiveFunctionalNode(adultNode.id)}
+                            onClick={() => {
+                              playSoftThump('deep');
+                              setActiveFunctionalNode(adultNode.id);
+                            }}
                             aria-pressed={isSelected}
                             aria-label={`${adultNode.fullName} (${adultNode.letter})`}
                             whileHover={{ scale: isSelected ? 1.03 : 1.05 }}
@@ -358,7 +388,10 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                           <motion.button
                             key={node.id}
                             type="button"
-                            onClick={() => setActiveFunctionalNode(node.id)}
+                            onClick={() => {
+                              playSoftThump('deep');
+                              setActiveFunctionalNode(node.id);
+                            }}
                             aria-pressed={isSelected}
                             aria-label={`${node.fullName} (${node.letter})`}
                             whileHover={{ scale: isSelected ? 1.03 : 1.05 }}
@@ -497,15 +530,32 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
             <p className="text-[15px] sm:text-[16.5px] leading-[1.7] text-[#71717A]">
               Therapy isn&apos;t about fixing you: it&apos;s about two humans in a room looking honestly at your life. Sessions are £30 (in-person in Willerby or online UK-wide), starting with a free initial chat.
             </p>
-            <div>
+            <div className="flex flex-wrap items-center gap-6">
               <button
                 type="button"
-                onClick={onGoToContact}
+                onClick={() => {
+                  playSoftThump('bright');
+                  onGoToContact();
+                }}
                 className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-medium text-[#18181B] hover:text-[#71717A] border-b border-[#18181B] hover:border-[#71717A] pb-0.5 transition-colors cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
               >
                 <span>Book a free initial chat</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" />
               </button>
+
+              {onGoToDramaTriangle && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoftThump('default');
+                    onGoToDramaTriangle();
+                  }}
+                  className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#71717A] hover:text-[#18181B] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+                >
+                  <span>Explore The Drama Triangle</span>
+                  <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              )}
             </div>
             <p className="pt-2 font-mono text-[10.5px] leading-[1.6] text-[#71717A]/90">
               Psychoeducation resource by Liam Doran (UKCP Trainee Psychotherapeutic Counsellor) for personal reflection, not a replacement for individual clinical assessment or urgent crisis care.

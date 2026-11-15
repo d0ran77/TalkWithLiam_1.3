@@ -22,10 +22,12 @@ import {
   Compass,
   Layers,
   HelpCircle,
+  Triangle,
 } from 'lucide-react';
 import { SLIDES, PRACTICAL_DETAILS } from './data/content.ts';
 import { PHOTOS } from './data/photos.ts';
 import { ToastMessage } from './types.ts';
+import { playSoftThump } from './utils/sound.ts';
 import { Footer } from './components/Footer.tsx';
 import { Toast } from './components/Toast.tsx';
 import { OverviewModal } from './components/OverviewModal.tsx';
@@ -40,6 +42,7 @@ import { BookingPortalView } from './components/BookingPortalView.tsx';
 import { LocationParkingModal } from './components/LocationParkingModal.tsx';
 import { FreeChildPage } from './components/FreeChildPage.tsx';
 import { PacModelPage } from './components/PacModelPage.tsx';
+import { DramaTrianglePage } from './components/DramaTrianglePage.tsx';
 import { FloatingConnectSpeedDial } from './components/FloatingConnectSpeedDial.tsx';
 
 import { SlideAbout } from './components/slides/SlideAbout.tsx';
@@ -128,8 +131,8 @@ export default function App() {
     return null;
   });
 
-  // View Mode: 'minimal' (clean landing on first load), 'carousel' (6 chapters), 'portrait' (essay & photo), 'booking' (live diary), 'free-child' (visual monograph & theory), or 'pac-model' (interactive PAC ego state explorer)
-  const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child' | 'pac-model'>(() => {
+  // View Mode: 'minimal' (clean landing on first load), 'carousel' (6 chapters), 'portrait' (essay & photo), 'booking' (live diary), 'free-child' (visual monograph & theory), 'pac-model' (interactive PAC ego state explorer), or 'drama-triangle' (Karpman & Choy interactive explorer)
+  const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child' | 'pac-model' | 'drama-triangle'>(() => {
     try {
       if (typeof window !== 'undefined') {
         const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
@@ -172,9 +175,12 @@ export default function App() {
         if (path === '/pac-model' || path === '/pac' || hash === '#pac-model' || hash === '#pac') {
           return 'pac-model';
         }
+        if (path === '/drama-triangle' || path === '/winners-triangle' || hash === '#drama-triangle' || hash === '#winners-triangle') {
+          return 'drama-triangle';
+        }
       }
       const saved = sessionStorage.getItem('talk_with_liam_session_view');
-      if (saved === 'carousel' || saved === 'portrait' || saved === 'booking' || saved === 'free-child' || saved === 'pac-model') {
+      if (saved === 'carousel' || saved === 'portrait' || saved === 'booking' || saved === 'free-child' || saved === 'pac-model' || saved === 'drama-triangle') {
         return saved;
       }
     } catch {
@@ -186,6 +192,8 @@ export default function App() {
   const [isSocialOpen, setIsSocialOpen] = useState<boolean>(false);
   // How We Work chapters drawer state on minimal landing
   const [isChaptersOpen, setIsChaptersOpen] = useState<boolean>(false);
+  // TA Theory submenu drawer state across toolbars
+  const [isTheoryOpen, setIsTheoryOpen] = useState<boolean>(false);
 
   // Modals state
   const [isOverviewOpen, setIsOverviewOpen] = useState<boolean>(false);
@@ -233,6 +241,8 @@ export default function App() {
         setViewMode('free-child');
       } else if (path === '/pac-model' || path === '/pac' || hash === '#pac-model' || hash === '#pac') {
         setViewMode('pac-model');
+      } else if (path === '/drama-triangle' || path === '/winners-triangle' || hash === '#drama-triangle' || hash === '#winners-triangle') {
+        setViewMode('drama-triangle');
       } else if (path === '/' && !hash) {
         setViewMode('minimal');
       }
@@ -275,6 +285,14 @@ export default function App() {
           window.location.hash = 'pac-model';
         }
       }
+    } else if (viewMode === 'drama-triangle') {
+      if (currentPath !== '/drama-triangle') {
+        try {
+          window.history.pushState({ view: 'drama-triangle' }, '', '/drama-triangle');
+        } catch {
+          window.location.hash = 'drama-triangle';
+        }
+      }
     } else if (viewMode === 'free-child') {
       if (currentPath !== '/free-child') {
         try {
@@ -306,7 +324,9 @@ export default function App() {
         currentHash === '#about' ||
         currentHash === '#slides' ||
         currentHash === '#pac-model' ||
-        currentHash === '#pac';
+        currentHash === '#pac' ||
+        currentHash === '#drama-triangle' ||
+        currentHash === '#winners-triangle';
       if (isNonRootRoute) {
         try {
           window.history.replaceState(null, '', '/');
@@ -317,9 +337,9 @@ export default function App() {
     }
   }, [viewMode, currentSlideIndex]);
 
-  // Close Connect and How We Work drawers on outside click or touch tap
+  // Close Connect, How We Work, and TA Theory drawers on outside click or touch tap
   useEffect(() => {
-    if (!isSocialOpen && !isChaptersOpen) return;
+    if (!isSocialOpen && !isChaptersOpen && !isTheoryOpen) return;
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
       if (
@@ -336,6 +356,13 @@ export default function App() {
       ) {
         setIsChaptersOpen(false);
       }
+      if (
+        isTheoryOpen &&
+        !target.closest('[id*="theory-drawer"]') &&
+        !target.closest('[id*="theory-toggle-btn"]')
+      ) {
+        setIsTheoryOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
@@ -343,7 +370,7 @@ export default function App() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isSocialOpen, isChaptersOpen]);
+  }, [isSocialOpen, isChaptersOpen, isTheoryOpen]);
 
   // Scroll-to-top helper that resets window and any scrollable containers
   const scrollToTop = useCallback(() => {
@@ -364,10 +391,12 @@ export default function App() {
     }
   }, []);
 
-  const handleSelectViewMode = useCallback((mode: 'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child' | 'pac-model') => {
+  const handleSelectViewMode = useCallback((mode: 'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child' | 'pac-model' | 'drama-triangle') => {
+    playSoftThump(mode === 'drama-triangle' || mode === 'pac-model' ? 'bright' : 'default');
     setViewMode(mode);
     setIsSocialOpen(false);
     setIsChaptersOpen(false);
+    setIsTheoryOpen(false);
     try {
       sessionStorage.setItem('talk_with_liam_session_view', mode);
     } catch {
@@ -796,9 +825,11 @@ export default function App() {
           setIsSocialOpen(false);
         } else if (isChaptersOpen) {
           setIsChaptersOpen(false);
+        } else if (isTheoryOpen) {
+          setIsTheoryOpen(false);
         } else if (viewMode === 'portrait') {
           setViewMode('carousel');
-        } else if (viewMode === 'free-child' || viewMode === 'pac-model') {
+        } else if (viewMode === 'free-child' || viewMode === 'pac-model' || viewMode === 'drama-triangle') {
           setViewMode('minimal');
         }
         setIsOverviewOpen(false);
@@ -814,7 +845,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nextSlide, prevSlide, goToSlide, viewMode, isSocialOpen, isChaptersOpen, handleToggleBooking]);
+  }, [nextSlide, prevSlide, goToSlide, viewMode, isSocialOpen, isChaptersOpen, isTheoryOpen, handleToggleBooking]);
 
   // Render individual slide component (6 core slides)
   const renderSlideContent = (index: number) => {
@@ -846,6 +877,58 @@ export default function App() {
 
   const isDarkSlideActive = false;
   const carouselTranslateY = -currentSlideIndex * (cardHeight + cardGap);
+
+  const renderTheoryDrawer = (idSuffix: string, positionClassName: string) => (
+    <AnimatePresence>
+      {isTheoryOpen && (
+        <motion.nav
+          id={`theory-drawer-${idSuffix}`}
+          aria-label="Transactional Analysis theory guides"
+          initial={{ opacity: 0, y: -8, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.95 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className={`${positionClassName} flex flex-row items-center gap-1 p-1.5 bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.12)] z-40`}
+        >
+          <a
+            href="/pac-model"
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.preventDefault();
+                handleSelectViewMode('pac-model');
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+              viewMode === 'pac-model'
+                ? 'bg-[#18181B] text-[#FAF9F5]'
+                : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100/90'
+            }`}
+          >
+            <PacStackIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>The PAC Model</span>
+          </a>
+
+          <a
+            href="/drama-triangle"
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.preventDefault();
+                handleSelectViewMode('drama-triangle');
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+              viewMode === 'drama-triangle'
+                ? 'bg-[#18181B] text-[#FAF9F5]'
+                : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100/90'
+            }`}
+          >
+            <Triangle className="w-3.5 h-3.5 shrink-0" />
+            <span>The Drama Triangle</span>
+          </a>
+        </motion.nav>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div
@@ -951,7 +1034,9 @@ export default function App() {
                       whileTap={{ scale: 0.94 }}
                       id="minimal-carousel-toggle-btn"
                       onClick={() => {
+                        playSoftThump('default');
                         setIsSocialOpen(false);
+                        setIsTheoryOpen(false);
                         setIsChaptersOpen((prev) => !prev);
                       }}
                       className={`group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
@@ -1044,29 +1129,67 @@ export default function App() {
                     )}
                   </AnimatePresence>
 
-                  {/* 3. PAC Model Icon: Direct to Interactive PAC Explorer */}
+                  {/* 3. TA Theory Hub Icon: Opens PAC Model & Drama Triangle Drawer */}
                   <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.a
-                      href="/pac-model"
+                    <motion.button
+                      type="button"
                       whileHover={{ scale: 1.08, y: -2 }}
                       whileTap={{ scale: 0.94 }}
-                      id="minimal-pac-model-btn"
-                      onClick={(e) => {
-                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
-                          e.preventDefault();
-                          handleSelectViewMode('pac-model');
-                        }
+                      id="minimal-theory-toggle-btn"
+                      onClick={() => {
+                        playSoftThump('default');
+                        setIsChaptersOpen(false);
+                        setIsSocialOpen(false);
+                        setIsTheoryOpen((prev) => !prev);
                       }}
-                      className="group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
-                      aria-label="How We Work: The PAC Model"
+                      className={`group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
+                        isTheoryOpen
+                          ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_6px_20px_rgba(24,24,27,0.22)]'
+                          : 'border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)]'
+                      }`}
+                      aria-label={isTheoryOpen ? 'Close TA Theory menu' : 'Open TA Theory guides'}
+                      aria-expanded={isTheoryOpen}
                     >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
-                      <PacStackIcon className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
-                    </motion.a>
-                    <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      The PAC Model
-                    </span>
+                      {!isTheoryOpen && (
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
+                      )}
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isTheoryOpen ? (
+                          <motion.div
+                            key="theory-close"
+                            initial={{ rotate: -90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: 90, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="relative z-10"
+                          >
+                            <X className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11" />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="theory-stack"
+                            initial={{ rotate: 90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: -90, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="relative z-10"
+                          >
+                            <PacStackIcon className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                    {!isTheoryOpen && (
+                      <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        TA Theory
+                      </span>
+                    )}
                   </div>
+
+                  {renderTheoryDrawer(
+                    'minimal',
+                    'absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0'
+                  )}
 
                   {/* 4. Speech Bubble Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -1075,7 +1198,9 @@ export default function App() {
                       whileTap={{ scale: 0.94 }}
                       id="minimal-speech-bubble-btn"
                       onClick={() => {
+                        playSoftThump('default');
                         setIsChaptersOpen(false);
+                        setIsTheoryOpen(false);
                         setIsSocialOpen((prev) => !prev);
                       }}
                       className={`group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden ${
@@ -1240,6 +1365,7 @@ export default function App() {
                 {/* Accessible & Crawlable Chapter Index (zero visual footprint on homepage) */}
                 <nav aria-label="Practice sections" className="sr-only">
                   <a href="/pac-model" onClick={(e) => { e.preventDefault(); handleSelectViewMode('pac-model'); }}>How We Work: The PAC Model</a>
+                  <a href="/drama-triangle" onClick={(e) => { e.preventDefault(); handleSelectViewMode('drama-triangle'); }}>The Drama Triangle</a>
                   <a href="/how-we-work" onClick={(e) => { e.preventDefault(); goToSlide(0); }}>How We Work</a>
                   <a href="/approach" onClick={(e) => { e.preventDefault(); goToSlide(1); }}>Approach</a>
                   <a href="/areas-of-work" onClick={(e) => { e.preventDefault(); goToSlide(2); }}>Areas of Work</a>
@@ -1332,25 +1458,36 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* 3. PAC Model Icon */}
+                    {/* 3. TA Theory Icon */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.94 }}
-                        id="practitioner-pac-toggle-btn-carousel-mobile"
+                        id="practitioner-theory-toggle-btn-carousel-mobile"
                         onClick={() => {
+                          playSoftThump('default');
                           setIsSocialOpen(false);
-                          handleSelectViewMode('pac-model');
+                          setIsTheoryOpen((prev) => !prev);
                         }}
-                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0"
-                        aria-label="How We Work: The PAC Model"
+                        className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0 ${
+                          isTheoryOpen
+                            ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                            : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)]'
+                        }`}
+                        aria-label="Transactional Analysis theory guides"
+                        aria-expanded={isTheoryOpen}
                       >
                         <PacStackIcon className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                       </motion.button>
                       <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        The PAC Model
+                        TA Theory
                       </span>
                     </div>
+
+                    {renderTheoryDrawer(
+                      'carousel-mobile',
+                      'absolute top-full mt-2 left-1/2 -translate-x-1/2'
+                    )}
 
                     {/* 4. Speech Bubble / Connect */}
                     <div className="relative group/tooltip flex flex-col items-center">
@@ -1358,7 +1495,11 @@ export default function App() {
                         whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.94 }}
                         id="speech-bubble-toggle-btn-carousel-mobile"
-                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        onClick={() => {
+                          playSoftThump('default');
+                          setIsTheoryOpen(false);
+                          setIsSocialOpen((prev) => !prev);
+                        }}
                         className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0 ${
                           isSocialOpen
                             ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
@@ -1680,35 +1821,46 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* 3. PAC Model Icon */}
+                  {/* 3. TA Theory Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
                       whileTap={{ scale: 0.94 }}
-                      id="practitioner-pac-toggle-btn-carousel-desktop"
+                      id="practitioner-theory-toggle-btn-carousel-desktop"
                       onClick={() => {
+                        playSoftThump('default');
                         setIsSocialOpen(false);
-                        handleSelectViewMode('pac-model');
+                        setIsTheoryOpen((prev) => !prev);
                       }}
                       className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
-                        isDarkSlideActive
-                          ? 'bg-[#1b1b1e] text-stone-200 hover:text-white hover:bg-stone-800 border-stone-700/80 shadow-sm'
-                          : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
+                        isTheoryOpen
+                          ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                          : isDarkSlideActive
+                            ? 'bg-[#1b1b1e] text-stone-200 hover:text-white hover:bg-stone-800 border-stone-700/80 shadow-sm'
+                            : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
                       }`}
-                      aria-label="How We Work: The PAC Model"
+                      aria-label="Transactional Analysis theory guides"
+                      aria-expanded={isTheoryOpen}
                     >
                       <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
-                    <span
-                      className={`pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-md border shadow-2xs z-30 ${
-                        isDarkSlideActive
-                          ? 'text-stone-300 bg-stone-900/90 backdrop-blur-xs border-stone-700/80'
-                          : 'text-stone-500 bg-white/90 backdrop-blur-xs border-stone-200/80'
-                      }`}
-                    >
-                      The PAC Model
-                    </span>
+                    {!isTheoryOpen && (
+                      <span
+                        className={`pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-md border shadow-2xs z-30 ${
+                          isDarkSlideActive
+                            ? 'text-stone-300 bg-stone-900/90 backdrop-blur-xs border-stone-700/80'
+                            : 'text-stone-500 bg-white/90 backdrop-blur-xs border-stone-200/80'
+                        }`}
+                      >
+                        TA Theory
+                      </span>
+                    )}
                   </div>
+
+                  {renderTheoryDrawer(
+                    'carousel-desktop',
+                    'absolute top-full mt-2 left-0'
+                  )}
 
                   {/* 4. Speech Bubble Heroicon: Opens channels drawer */}
                   <div className="relative flex items-center">
@@ -1718,6 +1870,8 @@ export default function App() {
                         whileTap={{ scale: 0.94 }}
                         id="speech-bubble-toggle-btn"
                         onClick={() => {
+                          playSoftThump('default');
+                          setIsTheoryOpen(false);
                           setIsSocialOpen((prev) => !prev);
                         }}
                         className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
@@ -2060,25 +2214,36 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* 3. PAC Model Icon */}
+                    {/* 3. TA Theory Icon */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.94 }}
-                        id="practitioner-pac-toggle-btn-portrait-mobile"
+                        id="practitioner-theory-toggle-btn-portrait-mobile"
                         onClick={() => {
+                          playSoftThump('default');
                           setIsSocialOpen(false);
-                          handleSelectViewMode('pac-model');
+                          setIsTheoryOpen((prev) => !prev);
                         }}
-                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0"
-                        aria-label="How We Work: The PAC Model"
+                        className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0 ${
+                          isTheoryOpen
+                            ? 'bg-stone-900 text-white border-stone-900 shadow-md'
+                            : 'bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                        }`}
+                        aria-label="Transactional Analysis theory guides"
+                        aria-expanded={isTheoryOpen}
                       >
                         <PacStackIcon className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 shrink-0" />
                       </motion.button>
                       <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        The PAC Model
+                        TA Theory
                       </span>
                     </div>
+
+                    {renderTheoryDrawer(
+                      'portrait-mobile',
+                      'absolute top-full mt-2 left-1/2 -translate-x-1/2'
+                    )}
 
                     {/* 4. Speech Bubble Heroicon */}
                     <div className="relative group/tooltip flex flex-col items-center">
@@ -2086,7 +2251,11 @@ export default function App() {
                         whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.94 }}
                         id="speech-bubble-toggle-btn-mobile"
-                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        onClick={() => {
+                          playSoftThump('default');
+                          setIsTheoryOpen(false);
+                          setIsSocialOpen((prev) => !prev);
+                        }}
                         className={`group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0 ${
                           isSocialOpen
                             ? 'bg-stone-900 text-white border-stone-900 shadow-md'
@@ -2294,25 +2463,38 @@ export default function App() {
                         </span>
                       </div>
 
-                      {/* 3. PAC Model Icon */}
+                      {/* 3. TA Theory Icon */}
                       <div className="relative group/tooltip flex flex-col items-center">
                         <motion.button
                           whileHover={{ scale: 1.08, y: -2 }}
                           whileTap={{ scale: 0.94 }}
-                          id="practitioner-pac-toggle-btn-portrait-desktop"
+                          id="practitioner-theory-toggle-btn-portrait-desktop"
                           onClick={() => {
+                            playSoftThump('default');
                             setIsSocialOpen(false);
-                            handleSelectViewMode('pac-model');
+                            setIsTheoryOpen((prev) => !prev);
                           }}
-                          className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
-                          aria-label="How We Work: The PAC Model"
+                          className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                            isTheoryOpen
+                              ? 'bg-stone-900 text-white border-stone-900 shadow-md'
+                              : 'bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                          }`}
+                          aria-label="Transactional Analysis theory guides"
+                          aria-expanded={isTheoryOpen}
                         >
                           <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 shrink-0" />
                         </motion.button>
-                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                          The PAC Model
-                        </span>
+                        {!isTheoryOpen && (
+                          <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                            TA Theory
+                          </span>
+                        )}
                       </div>
+
+                      {renderTheoryDrawer(
+                        'portrait-desktop',
+                        'absolute top-full mt-2 left-0'
+                      )}
 
                       {/* 4. Speech Bubble Heroicon */}
                       <div className="relative flex items-center">
@@ -2321,7 +2503,11 @@ export default function App() {
                             whileHover={{ scale: 1.08, y: -2 }}
                             whileTap={{ scale: 0.94 }}
                             id="speech-bubble-toggle-btn-essay"
-                            onClick={() => setIsSocialOpen((prev) => !prev)}
+                            onClick={() => {
+                              playSoftThump('default');
+                              setIsTheoryOpen(false);
+                              setIsSocialOpen((prev) => !prev);
+                            }}
                             className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
                               isSocialOpen
                                 ? 'bg-stone-900 text-white border-stone-900 shadow-md'
@@ -2569,25 +2755,38 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* 4. PAC Model Icon */}
+                  {/* 4. TA Theory Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
                       whileTap={{ scale: 0.94 }}
-                      id="practitioner-pac-toggle-btn-booking"
+                      id="practitioner-theory-toggle-btn-booking"
                       onClick={() => {
+                        playSoftThump('default');
                         setIsSocialOpen(false);
-                        handleSelectViewMode('pac-model');
+                        setIsTheoryOpen((prev) => !prev);
                       }}
-                      className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
-                      aria-label="How We Work: The PAC Model"
+                      className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                        isTheoryOpen
+                          ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                          : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
+                      }`}
+                      aria-label="Transactional Analysis theory guides"
+                      aria-expanded={isTheoryOpen}
                     >
                       <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      The PAC Model
-                    </span>
+                    {!isTheoryOpen && (
+                      <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        TA Theory
+                      </span>
+                    )}
                   </div>
+
+                  {renderTheoryDrawer(
+                    'booking',
+                    'absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0'
+                  )}
 
                   {/* 5. Speech Bubble Heroicon + Drawer */}
                   <div className="relative flex items-center">
@@ -2596,7 +2795,11 @@ export default function App() {
                         whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.94 }}
                         id="speech-bubble-toggle-btn-booking"
-                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        onClick={() => {
+                          playSoftThump('default');
+                          setIsTheoryOpen(false);
+                          setIsSocialOpen((prev) => !prev);
+                        }}
                         className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
                           isSocialOpen
                             ? 'bg-stone-900 text-white border-stone-900 shadow-md'
@@ -2778,13 +2981,14 @@ export default function App() {
                 }}
                 onGoToAboutLiam={() => handleSelectViewMode('portrait')}
                 onGoToPacModel={() => handleSelectViewMode('pac-model')}
+                onGoToDramaTriangle={() => handleSelectViewMode('drama-triangle')}
                 onGoToContact={() => {
                   handleSelectViewMode('carousel');
                   goToSlide(contactSlideIndex);
                 }}
               />
             </motion.div>
-          ) : viewMode === 'pac-model' ? (
+          ) : viewMode === 'pac-model' || viewMode === 'drama-triangle' ? (
             <motion.div
               key="pac-model-page-wrapper"
               initial={{ opacity: 0, y: 10 }}
@@ -2856,23 +3060,35 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* 3. PAC Model Icon (Active) */}
+                  {/* 3. TA Theory Icon (Active in TA Theory views) */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
                       whileTap={{ scale: 0.94 }}
-                      id="practitioner-pac-toggle-btn-pac-active"
-                      onClick={handleTogglePacModel}
+                      id="practitioner-theory-toggle-btn-ta-active"
+                      onClick={() => {
+                        playSoftThump('default');
+                        setIsSocialOpen(false);
+                        setIsTheoryOpen((prev) => !prev);
+                      }}
                       aria-pressed={true}
+                      aria-expanded={isTheoryOpen}
                       className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-                      aria-label="Close The PAC Model view"
+                      aria-label="Open TA Theory menu"
                     >
                       <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      The PAC Model
-                    </span>
+                    {!isTheoryOpen && (
+                      <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        TA Theory
+                      </span>
+                    )}
                   </div>
+
+                  {renderTheoryDrawer(
+                    'ta-desktop',
+                    'absolute top-full mt-2 left-0'
+                  )}
 
                   {/* 4. Speech Bubble Heroicon: Opens channels drawer */}
                   <div className="relative flex items-center">
@@ -2881,7 +3097,11 @@ export default function App() {
                         whileHover={{ scale: 1.08, y: -2 }}
                         whileTap={{ scale: 0.94 }}
                         id="speech-bubble-toggle-btn-pac"
-                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        onClick={() => {
+                          playSoftThump('default');
+                          setIsTheoryOpen(false);
+                          setIsSocialOpen((prev) => !prev);
+                        }}
                         className={`group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
                           isSocialOpen
                             ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
@@ -3034,15 +3254,24 @@ export default function App() {
                   }
                   className="w-full h-full lg:w-[var(--pac-card-w)] lg:h-[var(--pac-card-h)] lg:rounded-3xl lg:border lg:border-stone-300/90 lg:bg-[#FAF9F5] lg:shadow-[0_20px_50px_rgba(0,0,0,0.08)] lg:ring-1 lg:ring-stone-900/5 flex flex-col overflow-hidden relative select-text transition-all duration-300"
                 >
-                  <PacModelPage
-                    onBackToLanding={() => handleSelectViewMode('minimal')}
-                    onNavigateToSlides={(slideIdx) => {
-                      handleSelectViewMode('carousel');
-                      if (slideIdx !== undefined) goToSlide(slideIdx);
-                    }}
-                    onGoToAboutLiam={() => handleSelectViewMode('portrait')}
-                    onGoToContact={handleMailClick}
-                  />
+                  {viewMode === 'pac-model' ? (
+                    <PacModelPage
+                      onBackToLanding={() => handleSelectViewMode('minimal')}
+                      onNavigateToSlides={(slideIdx) => {
+                        handleSelectViewMode('carousel');
+                        if (slideIdx !== undefined) goToSlide(slideIdx);
+                      }}
+                      onGoToAboutLiam={() => handleSelectViewMode('portrait')}
+                      onGoToDramaTriangle={() => handleSelectViewMode('drama-triangle')}
+                      onGoToContact={handleMailClick}
+                    />
+                  ) : (
+                    <DramaTrianglePage
+                      onBackToLanding={() => handleSelectViewMode('minimal')}
+                      onGoToPacModel={() => handleSelectViewMode('pac-model')}
+                      onGoToContact={handleMailClick}
+                    />
+                  )}
                 </div>
               </div>
             </motion.div>
