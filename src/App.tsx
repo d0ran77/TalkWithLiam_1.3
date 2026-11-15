@@ -428,6 +428,19 @@ export default function App() {
     scrollToTop();
   }, [scrollToTop]);
 
+  const handleTogglePacModel = useCallback(() => {
+    setViewMode((prev) => {
+      const next = prev === 'pac-model' ? 'minimal' : 'pac-model';
+      try {
+        sessionStorage.setItem('talk_with_liam_session_view', next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+    scrollToTop();
+  }, [scrollToTop]);
+
   // Helper for computing responsive dimensions before or after DOM attach
   const getResponsiveDimensions = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -785,7 +798,7 @@ export default function App() {
           setIsChaptersOpen(false);
         } else if (viewMode === 'portrait') {
           setViewMode('carousel');
-        } else if (viewMode === 'free-child') {
+        } else if (viewMode === 'free-child' || viewMode === 'pac-model') {
           setViewMode('minimal');
         }
         setIsOverviewOpen(false);
@@ -2778,17 +2791,260 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="w-full flex-1 h-full min-h-0 relative overflow-hidden flex flex-col"
+              className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative overflow-hidden min-h-0 gap-3 sm:gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20"
             >
-              <PacModelPage
-                onBackToLanding={() => handleSelectViewMode('minimal')}
-                onNavigateToSlides={(slideIdx) => {
-                  handleSelectViewMode('carousel');
-                  if (slideIdx !== undefined) goToSlide(slideIdx);
-                }}
-                onGoToAboutLiam={() => handleSelectViewMode('portrait')}
-                onGoToContact={handleMailClick}
-              />
+              {/* Left Side: Brand, Hero Toolbar & Footer (Desktop >= lg, identical position to Slides view) */}
+              <div
+                id="hero-brand-block-pac"
+                className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-between h-full text-left select-none z-20 py-2"
+              >
+                <button
+                  id="brand-home-trigger-pac"
+                  onClick={() => {
+                    handleSelectViewMode('minimal');
+                  }}
+                  className="flex flex-col items-start text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-xl transition-all cursor-pointer"
+                  aria-label="Return to minimal landing page"
+                >
+                  <h1 className="text-[30px] xl:text-[34px] 2xl:text-[44px] 3xl:text-[52px] font-medium tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] whitespace-nowrap transition-colors text-[#18181B] group-hover:text-stone-700">
+                    TALK WITH LIAM
+                  </h1>
+                  <p className="text-[14px] 2xl:text-[18px] 3xl:text-[22px] tracking-wider mt-2 2xl:mt-3.5 3xl:mt-4 font-normal whitespace-nowrap text-[#71717A]">
+                    Psychotherapeutic Counselling
+                  </p>
+                </button>
+
+                {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
+                <div className="mt-5 2xl:mt-7 flex items-center justify-start gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
+                  {/* 1. Person Heroicon: About Liam */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-portrait-toggle-btn-pac"
+                      onClick={() => {
+                        setIsSocialOpen(false);
+                        handleTogglePortrait();
+                      }}
+                      className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
+                      aria-label="About Liam"
+                    >
+                      <User className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
+                    </motion.button>
+                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      About Liam
+                    </span>
+                  </div>
+
+                  {/* 2. Monograph Book Icon */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-carousel-toggle-btn-pac"
+                      onClick={() => {
+                        setIsSocialOpen(false);
+                        handleToggleCarousel();
+                      }}
+                      className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
+                      aria-label="Open slide carousel"
+                    >
+                      <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                    </motion.button>
+                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      Slides
+                    </span>
+                  </div>
+
+                  {/* 3. PAC Model Icon (Active) */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-pac-toggle-btn-pac-active"
+                      onClick={handleTogglePacModel}
+                      aria-pressed={true}
+                      className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
+                      aria-label="Close The PAC Model view"
+                    >
+                      <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                    </motion.button>
+                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      The PAC Model
+                    </span>
+                  </div>
+
+                  {/* 4. Speech Bubble Heroicon: Opens channels drawer */}
+                  <div className="relative flex items-center">
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="speech-bubble-toggle-btn-pac"
+                        onClick={() => setIsSocialOpen((prev) => !prev)}
+                        className={`group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                          isSocialOpen
+                            ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                            : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
+                        }`}
+                        aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
+                        aria-expanded={isSocialOpen}
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          {isSocialOpen ? (
+                            <motion.div
+                              key="icon-close-pac"
+                              initial={{ rotate: -90, opacity: 0 }}
+                              animate={{ rotate: 0, opacity: 1 }}
+                              exit={{ rotate: 90, opacity: 0 }}
+                              transition={{ duration: 0.15 }}
+                            >
+                              <X className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="icon-chat-pac"
+                              initial={{ rotate: 90, opacity: 0 }}
+                              animate={{ rotate: 0, opacity: 1 }}
+                              exit={{ rotate: -90, opacity: 0 }}
+                              transition={{ duration: 0.15 }}
+                            >
+                              <MessageCircle className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                      {!isSocialOpen && (
+                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                          Connect
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Slide-out drawer */}
+                    <AnimatePresence>
+                      {isSocialOpen && (
+                        <motion.div
+                          id="social-channels-drawer-pac"
+                          initial={{ opacity: 0, x: -8, scale: 0.92 }}
+                          animate={{ opacity: 1, x: 0, scale: 1 }}
+                          exit={{ opacity: 0, x: -8, scale: 0.92 }}
+                          transition={{ duration: 0.18, ease: 'easeOut' }}
+                          className="ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 border rounded-full z-30 bg-white/95 backdrop-blur-sm border-stone-200/90 shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
+                        >
+                          <div className="relative group/tooltip flex flex-col items-center">
+                            <motion.button
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-mail-btn-pac"
+                              onClick={handleMailClick}
+                              className="w-8 h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-stone-700 hover:text-stone-950 hover:bg-stone-100"
+                              aria-label="Go to contact form"
+                            >
+                              <Mail className="w-4 h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                            </motion.button>
+                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 border border-stone-200/90 px-1.5 py-0.5 rounded shadow-2xs z-30">
+                              Email
+                            </span>
+                          </div>
+
+                          <div className="relative group/tooltip flex flex-col items-center">
+                            <motion.a
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-psychology-today-link-pac"
+                              href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-8 h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-stone-700 hover:text-stone-950 hover:bg-stone-100"
+                              aria-label="Visit Liam on Psychology Today"
+                            >
+                              <PsychologyTodayIcon className="w-4 h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                            </motion.a>
+                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 border border-stone-200/90 px-1.5 py-0.5 rounded shadow-2xs z-30">
+                              Psychology Today
+                            </span>
+                          </div>
+
+                          <div className="relative group/tooltip flex flex-col items-center">
+                            <motion.a
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-whatsapp-link-pac"
+                              href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-8 h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-stone-700 hover:text-stone-950 hover:bg-stone-100"
+                              aria-label="Message Liam on WhatsApp"
+                            >
+                              <WhatsAppIcon className="w-4 h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                            </motion.a>
+                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 border border-stone-200/90 px-1.5 py-0.5 rounded shadow-2xs z-30">
+                              WhatsApp
+                            </span>
+                          </div>
+
+                          <div className="relative group/tooltip flex flex-col items-center">
+                            <motion.a
+                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileTap={{ scale: 0.95 }}
+                              id="channel-youtube-account-link-pac"
+                              href={PRACTICAL_DETAILS.social.youtube}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-8 h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none cursor-pointer text-stone-700 hover:text-stone-950 hover:bg-stone-100"
+                              aria-label="Visit Liam on YouTube"
+                            >
+                              <Youtube className="w-4 h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                            </motion.a>
+                            <span className="pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 border border-stone-200/90 px-1.5 py-0.5 rounded shadow-2xs z-30">
+                              YouTube
+                            </span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                {/* Non-sticky Footer anchored at bottom of desktop left sidebar */}
+                <div className="mt-auto pt-6 pb-2 w-full flex justify-start shrink-0">
+                  <Footer
+                    onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                    onOpenHelpline={() => setIsHelplineOpen(true)}
+                    onOpenLocation={() => setIsLocationOpen(true)}
+                    onOpenOverview={() => setIsOverviewOpen(true)}
+                  />
+                </div>
+              </div>
+
+              {/* Right Side on Desktop (Card Stage matching Slides/Diary) / Full Stage on Mobile (< lg) */}
+              <div
+                id="pac-stage-dynamic-area"
+                ref={setStageRef}
+                className="w-full flex-1 h-full flex items-center justify-center relative overflow-hidden min-h-0 lg:py-1"
+              >
+                <div
+                  id="pac-model-stage-frame"
+                  style={
+                    {
+                      '--pac-card-w': `${cardWidth}px`,
+                      '--pac-card-h': `${cardHeight}px`,
+                    } as React.CSSProperties
+                  }
+                  className="w-full h-full lg:w-[var(--pac-card-w)] lg:h-[var(--pac-card-h)] lg:rounded-3xl lg:border lg:border-stone-300/90 lg:bg-[#FAF9F5] lg:shadow-[0_20px_50px_rgba(0,0,0,0.08)] lg:ring-1 lg:ring-stone-900/5 flex flex-col overflow-hidden relative select-text transition-all duration-300"
+                >
+                  <PacModelPage
+                    onBackToLanding={() => handleSelectViewMode('minimal')}
+                    onNavigateToSlides={(slideIdx) => {
+                      handleSelectViewMode('carousel');
+                      if (slideIdx !== undefined) goToSlide(slideIdx);
+                    }}
+                    onGoToAboutLiam={() => handleSelectViewMode('portrait')}
+                    onGoToContact={handleMailClick}
+                  />
+                </div>
+              </div>
             </motion.div>
           ) : null}
         </AnimatePresence>

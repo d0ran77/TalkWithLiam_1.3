@@ -63,8 +63,8 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
       id="pac-model-dedicated-page"
       className="w-full flex-1 h-full min-h-0 flex flex-col relative overflow-hidden bg-[#FAF9F5] text-[#18181B] select-text"
     >
-      {/* Top Editorial Navigation Bar */}
-      <header className="shrink-0 border-b border-stone-200/80 px-4 sm:px-8 py-3 bg-[#FAF9F5]/90 backdrop-blur-md z-20 flex items-center justify-between gap-4">
+      {/* Top Editorial Navigation Bar (Mobile < lg; Desktop uses shared left sidebar) */}
+      <header className="lg:hidden shrink-0 border-b border-stone-200/80 px-4 sm:px-8 py-3 bg-[#FAF9F5]/90 backdrop-blur-md z-20 flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={onBackToLanding}
@@ -107,7 +107,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
 
       {/* Scrollable Main Canvas */}
       <div className="flex-1 w-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 lg:px-12 pt-8 sm:pt-12 lg:pt-14 pb-24 sm:pb-28">
+        <div className="w-full max-w-5xl mx-auto lg:mx-0 lg:max-w-none px-5 sm:px-8 lg:px-10 xl:px-12 pt-8 sm:pt-10 lg:pt-8 pb-24 sm:pb-28 lg:pb-20">
           {/* Header Section */}
           <section className="max-w-2xl space-y-3.5 sm:space-y-4">
             <p className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#71717A] font-medium">
@@ -260,7 +260,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                     />
 
                     {/* Top Row: CP & NP side-by-side */}
-                    <div className="relative z-10 flex items-center justify-center gap-5 sm:gap-7">
+                    <div className="relative z-10 flex items-center justify-center gap-4 sm:gap-5 xl:gap-7">
                       {topParentNodes.map((node) => {
                         const isSelected = node.id === activeFunctionalNode;
                         return (
@@ -273,7 +273,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                             whileHover={{ scale: isSelected ? 1.03 : 1.05 }}
                             whileTap={{ scale: 0.96 }}
                             transition={{ duration: 0.15 }}
-                            className={`w-[78px] h-[78px] sm:w-[92px] sm:h-[92px] rounded-full border border-[#18181B] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F5] ${
+                            className={`w-[78px] h-[78px] sm:w-[88px] sm:h-[88px] xl:w-[92px] xl:h-[92px] rounded-full border border-[#18181B] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F5] ${
                               isSelected
                                 ? 'bg-[#18181B] text-[#FAF9F5] shadow-[0_12px_30px_rgba(24,24,27,0.22)]'
                                 : 'bg-[#FAF9F5] text-[#18181B] hover:bg-stone-100/80'
@@ -329,7 +329,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                     </div>
 
                     {/* Bottom Row: AC & FC side-by-side */}
-                    <div className="relative z-10 flex items-center justify-center gap-5 sm:gap-7">
+                    <div className="relative z-10 flex items-center justify-center gap-4 sm:gap-5 xl:gap-7">
                       {bottomChildNodes.map((node) => {
                         const isSelected = node.id === activeFunctionalNode;
                         return (
@@ -342,7 +342,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
                             whileHover={{ scale: isSelected ? 1.03 : 1.05 }}
                             whileTap={{ scale: 0.96 }}
                             transition={{ duration: 0.15 }}
-                            className={`w-[78px] h-[78px] sm:w-[92px] sm:h-[92px] rounded-full border border-[#18181B] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F5] ${
+                            className={`w-[78px] h-[78px] sm:w-[88px] sm:h-[88px] xl:w-[92px] xl:h-[92px] rounded-full border border-[#18181B] flex flex-col items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F5] ${
                               isSelected
                                 ? 'bg-[#18181B] text-[#FAF9F5] shadow-[0_12px_30px_rgba(24,24,27,0.22)]'
                                 : 'bg-[#FAF9F5] text-[#18181B] hover:bg-stone-100/80'
