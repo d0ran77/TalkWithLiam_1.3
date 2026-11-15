@@ -192,6 +192,13 @@ export const FAQS: FaqItem[] = [
     tags: ['introductory consultation', 'consultation', 'first step', 'free consultation', 'video meeting'],
   },
   {
+    id: 'couples-or-individual',
+    question: 'Do you offer couples counselling, or can I come on my own for relationship issues?',
+    answer: 'I work 1-to-1 with individuals rather than couples in the room together. However, a huge part of my work involves untangling relationship patterns, repeating arguments, and communication breakdowns. You don\'t need both partners present to change a dynamic: when one person understands their side of the loop and shifts how they respond, the whole relationship changes.',
+    category: 'Getting Started',
+    tags: ['couples counselling', 'individual therapy', '1-to-1', 'relationship issues', 'relationship patterns', 'partner'],
+  },
+  {
     id: 'gp-referral',
     question: 'Do I need a GP referral or a medical diagnosis to see you?',
     answer: 'No, you do not need a GP referral or medical diagnosis. You can self-refer directly by getting in touch to arrange an introductory chat. In the UK, public mental health routes often involve lengthy waiting lists or rigid triage questionnaires. Private therapy allows us to start working together immediately without administrative delays. My clinical work is bound by the UKCP Ethical Framework and supported by regular clinical supervision.',

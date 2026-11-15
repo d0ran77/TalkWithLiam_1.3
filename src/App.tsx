@@ -39,6 +39,8 @@ import { ClientBookingModal } from './components/ClientBookingModal.tsx';
 import { BookingPortalView } from './components/BookingPortalView.tsx';
 import { LocationParkingModal } from './components/LocationParkingModal.tsx';
 import { FreeChildPage } from './components/FreeChildPage.tsx';
+import { PacModelPage } from './components/PacModelPage.tsx';
+import { FloatingConnectSpeedDial } from './components/FloatingConnectSpeedDial.tsx';
 
 import { SlideAbout } from './components/slides/SlideAbout.tsx';
 import { SlideApproach } from './components/slides/SlideApproach.tsx';
@@ -56,6 +58,23 @@ const WhatsAppIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
 const PsychologyTodayIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden="true">
     <path d="M2.5 4h6.2c2.4 0 4.1 1.6 4.1 3.9 0 2.3-1.7 3.9-4.1 3.9H5.3V20H2.5V4zm2.8 5.3h3.3c.9 0 1.5-.6 1.5-1.4 0-.8-.6-1.4-1.5-1.4H5.3v2.8z M13.5 4h8v2.6h-2.6V20H16V6.6h-2.5V4z" />
+  </svg>
+);
+
+const PacStackIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="5.5" r="2.6" />
+    <circle cx="12" cy="12" r="2.6" fill="currentColor" fillOpacity="0.16" />
+    <circle cx="12" cy="18.5" r="2.6" />
   </svg>
 );
 
@@ -109,8 +128,8 @@ export default function App() {
     return null;
   });
 
-  // View Mode: 'minimal' (clean landing on first load), 'carousel' (6 chapters), 'portrait' (essay & photo), 'booking' (live diary), or 'free-child' (visual monograph & theory)
-  const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child'>(() => {
+  // View Mode: 'minimal' (clean landing on first load), 'carousel' (6 chapters), 'portrait' (essay & photo), 'booking' (live diary), 'free-child' (visual monograph & theory), or 'pac-model' (interactive PAC ego state explorer)
+  const [viewMode, setViewMode] = useState<'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child' | 'pac-model'>(() => {
     try {
       if (typeof window !== 'undefined') {
         const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
@@ -150,9 +169,12 @@ export default function App() {
         if (path === '/free-child' || hash === '#free-child' || hash === '#freechild' || hash === '#camera' || hash === '#instagram') {
           return 'free-child';
         }
+        if (path === '/pac-model' || path === '/pac' || hash === '#pac-model' || hash === '#pac') {
+          return 'pac-model';
+        }
       }
       const saved = sessionStorage.getItem('talk_with_liam_session_view');
-      if (saved === 'carousel' || saved === 'portrait' || saved === 'booking' || saved === 'free-child') {
+      if (saved === 'carousel' || saved === 'portrait' || saved === 'booking' || saved === 'free-child' || saved === 'pac-model') {
         return saved;
       }
     } catch {
@@ -209,6 +231,8 @@ export default function App() {
         setViewMode('portrait');
       } else if (path === '/free-child' || hash === '#free-child' || hash === '#camera') {
         setViewMode('free-child');
+      } else if (path === '/pac-model' || path === '/pac' || hash === '#pac-model' || hash === '#pac') {
+        setViewMode('pac-model');
       } else if (path === '/' && !hash) {
         setViewMode('minimal');
       }
@@ -243,6 +267,22 @@ export default function App() {
           window.location.hash = 'about';
         }
       }
+    } else if (viewMode === 'pac-model') {
+      if (currentPath !== '/pac-model') {
+        try {
+          window.history.pushState({ view: 'pac-model' }, '', '/pac-model');
+        } catch {
+          window.location.hash = 'pac-model';
+        }
+      }
+    } else if (viewMode === 'free-child') {
+      if (currentPath !== '/free-child') {
+        try {
+          window.history.pushState({ view: 'free-child' }, '', '/free-child');
+        } catch {
+          window.location.hash = 'free-child';
+        }
+      }
     } else if (viewMode === 'carousel') {
       const targetSlidePath =
         currentPath === '/slides' && currentSlideIndex === 0
@@ -264,7 +304,9 @@ export default function App() {
         currentHash === '#schedule' ||
         currentHash === '#portal' ||
         currentHash === '#about' ||
-        currentHash === '#slides';
+        currentHash === '#slides' ||
+        currentHash === '#pac-model' ||
+        currentHash === '#pac';
       if (isNonRootRoute) {
         try {
           window.history.replaceState(null, '', '/');
@@ -322,7 +364,7 @@ export default function App() {
     }
   }, []);
 
-  const handleSelectViewMode = useCallback((mode: 'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child') => {
+  const handleSelectViewMode = useCallback((mode: 'minimal' | 'carousel' | 'portrait' | 'booking' | 'free-child' | 'pac-model') => {
     setViewMode(mode);
     setIsSocialOpen(false);
     setIsChaptersOpen(false);
@@ -842,7 +884,7 @@ export default function App() {
                   transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-6 max-w-md sm:max-w-lg lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl text-[14.5px] sm:text-[15.5px] md:text-[16px] lg:text-[16px] 2xl:text-[20px] 3xl:text-[23px] text-stone-500 leading-relaxed font-light text-center lg:text-left select-text text-balance"
                 >
-                  Grounded, direct, and relational counselling in Willerby, Hull, and online. A straight-talking space to work through anxiety, burnout, trauma, or feeling stuck, starting with a free introductory chat.
+                  Grounded, direct, and relational counselling for individuals in Willerby, Hull, and online. A straight-talking space to work through anxiety, burnout, trauma, or feeling stuck, starting with a free introductory chat.
                 </motion.p>
 
                 {/* Core Philosophy Epigraph */}
@@ -862,7 +904,7 @@ export default function App() {
 
                 {/* Refined Tactile Toolbar Buttons (Pure Icons with Desktop Hover Tooltips) */}
                 <div
-                  className="mt-8 sm:mt-8 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-center justify-center lg:justify-start gap-5 sm:gap-5 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
+                  className="mt-8 sm:mt-8 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-center justify-center lg:justify-start gap-3.5 sm:gap-5 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
                 >
                   {/* 1. Person Icon: Direct to About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -989,7 +1031,31 @@ export default function App() {
                     )}
                   </AnimatePresence>
 
-                  {/* 3. Speech Bubble Icon */}
+                  {/* 3. PAC Model Icon: Direct to Interactive PAC Explorer */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.a
+                      href="/pac-model"
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="minimal-pac-model-btn"
+                      onClick={(e) => {
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                          e.preventDefault();
+                          handleSelectViewMode('pac-model');
+                        }
+                      }}
+                      className="group/icon relative w-13 h-13 sm:w-15 sm:h-15 lg:w-14 lg:h-14 xl:w-15 xl:h-15 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 rounded-full border border-stone-200/90 ring-1 ring-stone-900/[0.04] bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 hover:border-stone-400/90 shadow-[0_3px_12px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(24,24,27,0.12),0_2px_4px_rgba(24,24,27,0.06)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer overflow-hidden"
+                      aria-label="How We Work: The PAC Model"
+                    >
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
+                      <PacStackIcon className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
+                    </motion.a>
+                    <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      The PAC Model
+                    </span>
+                  </div>
+
+                  {/* 4. Speech Bubble Icon */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
@@ -1160,6 +1226,7 @@ export default function App() {
 
                 {/* Accessible & Crawlable Chapter Index (zero visual footprint on homepage) */}
                 <nav aria-label="Practice sections" className="sr-only">
+                  <a href="/pac-model" onClick={(e) => { e.preventDefault(); handleSelectViewMode('pac-model'); }}>How We Work: The PAC Model</a>
                   <a href="/how-we-work" onClick={(e) => { e.preventDefault(); goToSlide(0); }}>How We Work</a>
                   <a href="/approach" onClick={(e) => { e.preventDefault(); goToSlide(1); }}>Approach</a>
                   <a href="/areas-of-work" onClick={(e) => { e.preventDefault(); goToSlide(2); }}>Areas of Work</a>
@@ -1252,7 +1319,27 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* 3. Speech Bubble / Connect */}
+                    {/* 3. PAC Model Icon */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-pac-toggle-btn-carousel-mobile"
+                        onClick={() => {
+                          setIsSocialOpen(false);
+                          handleSelectViewMode('pac-model');
+                        }}
+                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer shrink-0"
+                        aria-label="How We Work: The PAC Model"
+                      >
+                        <PacStackIcon className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                      </motion.button>
+                      <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        The PAC Model
+                      </span>
+                    </div>
+
+                    {/* 4. Speech Bubble / Connect */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -1479,8 +1566,8 @@ export default function App() {
                   })}
                 </div>
 
-                {/* Non-sticky Footer anchored cleanly at bottom of mobile stream */}
-                <div className="w-full mt-auto pt-3 pb-4 flex justify-center shrink-0">
+                {/* Non-sticky Footer anchored cleanly at bottom of mobile stream with clearance above floating CONNECT */}
+                <div className="w-full mt-auto pt-3 pb-16 flex justify-center shrink-0">
                   <Footer
                     onOpenPrivacy={() => setIsPrivacyOpen(true)}
                     onOpenHelpline={() => setIsHelplineOpen(true)}
@@ -1580,7 +1667,37 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* 3. Speech Bubble Heroicon: Opens channels drawer */}
+                  {/* 3. PAC Model Icon */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-pac-toggle-btn-carousel-desktop"
+                      onClick={() => {
+                        setIsSocialOpen(false);
+                        handleSelectViewMode('pac-model');
+                      }}
+                      className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                        isDarkSlideActive
+                          ? 'bg-[#1b1b1e] text-stone-200 hover:text-white hover:bg-stone-800 border-stone-700/80 shadow-sm'
+                          : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
+                      }`}
+                      aria-label="How We Work: The PAC Model"
+                    >
+                      <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                    </motion.button>
+                    <span
+                      className={`pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-md border shadow-2xs z-30 ${
+                        isDarkSlideActive
+                          ? 'text-stone-300 bg-stone-900/90 backdrop-blur-xs border-stone-700/80'
+                          : 'text-stone-500 bg-white/90 backdrop-blur-xs border-stone-200/80'
+                      }`}
+                    >
+                      The PAC Model
+                    </span>
+                  </div>
+
+                  {/* 4. Speech Bubble Heroicon: Opens channels drawer */}
                   <div className="relative flex items-center">
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
@@ -1930,7 +2047,27 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* 3. Speech Bubble Heroicon */}
+                    {/* 3. PAC Model Icon */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-pac-toggle-btn-portrait-mobile"
+                        onClick={() => {
+                          setIsSocialOpen(false);
+                          handleSelectViewMode('pac-model');
+                        }}
+                        className="group/icon w-9 h-9 sm:w-10 sm:h-10 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer shrink-0"
+                        aria-label="How We Work: The PAC Model"
+                      >
+                        <PacStackIcon className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 shrink-0" />
+                      </motion.button>
+                      <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        The PAC Model
+                      </span>
+                    </div>
+
+                    {/* 4. Speech Bubble Heroicon */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -2067,8 +2204,8 @@ export default function App() {
                     }}
                   />
 
-                  {/* Non-sticky Footer at the end of mobile essay */}
-                  <div className="w-full pt-6 pb-8 flex justify-center shrink-0">
+                  {/* Non-sticky Footer at the end of mobile essay with clearance above floating CONNECT */}
+                  <div className="w-full pt-6 pb-16 flex justify-center shrink-0">
                     <Footer
                       onOpenPrivacy={() => setIsPrivacyOpen(true)}
                       onOpenHelpline={() => setIsHelplineOpen(true)}
@@ -2144,7 +2281,27 @@ export default function App() {
                         </span>
                       </div>
 
-                      {/* 3. Speech Bubble Heroicon */}
+                      {/* 3. PAC Model Icon */}
+                      <div className="relative group/tooltip flex flex-col items-center">
+                        <motion.button
+                          whileHover={{ scale: 1.08, y: -2 }}
+                          whileTap={{ scale: 0.94 }}
+                          id="practitioner-pac-toggle-btn-portrait-desktop"
+                          onClick={() => {
+                            setIsSocialOpen(false);
+                            handleSelectViewMode('pac-model');
+                          }}
+                          className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
+                          aria-label="How We Work: The PAC Model"
+                        >
+                          <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 shrink-0" />
+                        </motion.button>
+                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                          The PAC Model
+                        </span>
+                      </div>
+
+                      {/* 4. Speech Bubble Heroicon */}
                       <div className="relative flex items-center">
                         <div className="relative group/tooltip flex flex-col items-center">
                           <motion.button
@@ -2399,7 +2556,27 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* 4. Speech Bubble Heroicon + Drawer */}
+                  {/* 4. PAC Model Icon */}
+                  <div className="relative group/tooltip flex flex-col items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.94 }}
+                      id="practitioner-pac-toggle-btn-booking"
+                      onClick={() => {
+                        setIsSocialOpen(false);
+                        handleSelectViewMode('pac-model');
+                      }}
+                      className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
+                      aria-label="How We Work: The PAC Model"
+                    >
+                      <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                    </motion.button>
+                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      The PAC Model
+                    </span>
+                  </div>
+
+                  {/* 5. Speech Bubble Heroicon + Drawer */}
                   <div className="relative flex items-center">
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
@@ -2587,15 +2764,40 @@ export default function App() {
                   if (slideIdx !== undefined) goToSlide(slideIdx);
                 }}
                 onGoToAboutLiam={() => handleSelectViewMode('portrait')}
+                onGoToPacModel={() => handleSelectViewMode('pac-model')}
                 onGoToContact={() => {
                   handleSelectViewMode('carousel');
                   goToSlide(contactSlideIndex);
                 }}
               />
             </motion.div>
+          ) : viewMode === 'pac-model' ? (
+            <motion.div
+              key="pac-model-page-wrapper"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="w-full flex-1 h-full min-h-0 relative overflow-hidden flex flex-col"
+            >
+              <PacModelPage
+                onBackToLanding={() => handleSelectViewMode('minimal')}
+                onNavigateToSlides={(slideIdx) => {
+                  handleSelectViewMode('carousel');
+                  if (slideIdx !== undefined) goToSlide(slideIdx);
+                }}
+                onGoToAboutLiam={() => handleSelectViewMode('portrait')}
+                onGoToContact={handleMailClick}
+              />
+            </motion.div>
           ) : null}
         </AnimatePresence>
       </main>
+
+      {/* Monochrome Floating Connect Speed-Dial (Shown on all subpages except minimal homepage) */}
+      {viewMode !== 'minimal' && (
+        <FloatingConnectSpeedDial onOpenContactForm={handleMailClick} />
+      )}
 
       {/* 4. Global Floating Toast */}
       <Toast toast={toast} onDismiss={() => setToast(null)} />

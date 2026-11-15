@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ChevronDown, Mail, HelpCircle, ShieldCheck } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { Search, ChevronDown, Mail } from 'lucide-react';
+import { motion } from 'motion/react';
 import { FAQS } from '../../data/content.ts';
 
 interface SlideFaqProps {
@@ -32,7 +32,8 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({ onNavigate }) => {
 
       const inQuestion = faq.question.toLowerCase().includes(query);
       const inAnswer = faq.answer.toLowerCase().includes(query);
-      return inQuestion || inAnswer;
+      const inTags = faq.tags.some((tag) => tag.toLowerCase().includes(query));
+      return inQuestion || inAnswer || inTags;
     });
   }, [searchQuery, selectedCategory]);
 
@@ -102,6 +103,9 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({ onNavigate }) => {
 
         {/* Clean Accordion List */}
         <div className="space-y-2.5 sm:space-y-3 pt-1">
+          <h2 className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.16em] text-[#71717A] font-semibold px-0.5 m-0">
+            Frequently Asked Questions
+          </h2>
           {filteredFaqs.length === 0 ? (
             <div className="p-8 text-center rounded-2xl bg-stone-50 border border-dashed border-stone-200 text-stone-500 text-sm">
               No matching questions found for &ldquo;{searchQuery}&rdquo;. Feel free to get in touch directly.
@@ -116,12 +120,15 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({ onNavigate }) => {
                 >
                   <button
                     type="button"
+                    id={`faq-question-${faq.id}`}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${faq.id}`}
                     onClick={() => toggleFaq(faq.id)}
                     className="w-full px-4 sm:px-5 py-3.5 sm:py-4 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-stone-50/70 transition-colors"
                   >
-                    <span className="text-[13.5px] sm:text-[15px] font-semibold text-[#18181B] tracking-tight">
+                    <h3 className="text-[13.5px] sm:text-[15px] font-semibold text-[#18181B] tracking-tight m-0">
                       {faq.question}
-                    </span>
+                    </h3>
                     <ChevronDown
                       className={`w-4 h-4 text-stone-500 shrink-0 transition-transform duration-200 ${
                         isOpen ? 'rotate-180 text-[#18181B]' : ''
@@ -129,20 +136,20 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({ onNavigate }) => {
                     />
                   </button>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="px-4 sm:px-5 pb-4 pt-1 text-[13px] sm:text-[14.5px] text-stone-600 leading-relaxed border-t border-stone-100">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div
+                    id={`faq-answer-${faq.id}`}
+                    role="region"
+                    aria-labelledby={`faq-question-${faq.id}`}
+                    className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
+                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden min-h-0">
+                      <div className="px-4 sm:px-5 pb-4 pt-1 text-[13px] sm:text-[14.5px] text-stone-600 leading-relaxed border-t border-stone-100">
+                        <p className="m-0">{faq.answer}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })

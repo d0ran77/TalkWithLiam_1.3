@@ -19,13 +19,32 @@ interface FreeChildPageProps {
   onBackToLanding: () => void;
   onNavigateToSlides: (slideIndex?: number) => void;
   onGoToAboutLiam: () => void;
+  onGoToPacModel: () => void;
   onGoToContact: () => void;
 }
+
+const PacStackIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="5.5" r="2.6" />
+    <circle cx="12" cy="12" r="2.6" fill="currentColor" fillOpacity="0.16" />
+    <circle cx="12" cy="18.5" r="2.6" />
+  </svg>
+);
 
 export const FreeChildPage: React.FC<FreeChildPageProps> = ({
   onBackToLanding,
   onNavigateToSlides,
   onGoToAboutLiam,
+  onGoToPacModel,
   onGoToContact,
 }) => {
   // Default to Photo 06 ("Passage to Light" - the tunnel silhouette with Goonies resonance)
@@ -73,6 +92,14 @@ export const FreeChildPage: React.FC<FreeChildPageProps> = ({
           </button>
 
           <button
+            onClick={onGoToPacModel}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer"
+          >
+            <PacStackIcon className="w-3.5 h-3.5 text-stone-500" />
+            <span>The PAC Model</span>
+          </button>
+
+          <button
             onClick={onGoToAboutLiam}
             className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer"
           >
@@ -84,7 +111,7 @@ export const FreeChildPage: React.FC<FreeChildPageProps> = ({
 
       {/* Main Dual-Column Scrollable Body */}
       <div className="flex-1 w-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10 lg:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 lg:pt-12 pb-24 sm:pb-24">
           
           {/* Header Title & Quote Section */}
           <div className="max-w-3xl mb-8 sm:mb-12 space-y-4">
