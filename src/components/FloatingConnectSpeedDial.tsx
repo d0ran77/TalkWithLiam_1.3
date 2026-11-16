@@ -64,16 +64,16 @@ export const FloatingConnectSpeedDial: React.FC<FloatingConnectSpeedDialProps> =
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-end gap-2"
+            className="flex flex-col items-stretch gap-1 p-1.5 min-w-[152px] rounded-2xl bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)]"
           >
-            {/* 1. WhatsApp (strictly monochrome charcoal & parchment) */}
+            {/* 1. WhatsApp (monochrome charcoal & glass) */}
             <a
               role="menuitem"
               href={WHATSAPP_ENQUIRY_URL}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="group flex items-center gap-2.5 h-10 sm:h-11 px-4 rounded-full bg-[#FAF9F5]/95 backdrop-blur-md border border-[#18181B]/25 text-[#18181B] hover:bg-[#18181B] hover:text-[#FAF9F5] shadow-[0_8px_24px_rgba(24,24,27,0.12)] transition-colors whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+              className="group flex items-center justify-between gap-3 h-10 px-3 rounded-xl text-[#18181B] hover:bg-[#18181B] hover:text-[#FAF9F5] transition-colors whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
             >
               <span className="font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.14em] font-medium">
                 WhatsApp
@@ -86,7 +86,7 @@ export const FloatingConnectSpeedDial: React.FC<FloatingConnectSpeedDialProps> =
               role="menuitem"
               href={SMS_ENQUIRY_URL}
               onClick={() => setIsOpen(false)}
-              className="group flex items-center gap-2.5 h-10 sm:h-11 px-4 rounded-full bg-[#FAF9F5]/95 backdrop-blur-md border border-[#18181B]/25 text-[#18181B] hover:bg-[#18181B] hover:text-[#FAF9F5] shadow-[0_8px_24px_rgba(24,24,27,0.12)] transition-colors whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+              className="group flex items-center justify-between gap-3 h-10 px-3 rounded-xl text-[#18181B] hover:bg-[#18181B] hover:text-[#FAF9F5] transition-colors whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
             >
               <span className="font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.14em] font-medium">
                 Text / SMS
@@ -102,7 +102,7 @@ export const FloatingConnectSpeedDial: React.FC<FloatingConnectSpeedDialProps> =
                 setIsOpen(false);
                 onOpenContactForm();
               }}
-              className="group flex items-center gap-2.5 h-10 sm:h-11 px-4 rounded-full bg-[#FAF9F5]/95 backdrop-blur-md border border-[#18181B]/25 text-[#18181B] hover:bg-[#18181B] hover:text-[#FAF9F5] shadow-[0_8px_24px_rgba(24,24,27,0.12)] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+              className="group flex items-center justify-between gap-3 h-10 px-3 rounded-xl text-[#18181B] hover:bg-[#18181B] hover:text-[#FAF9F5] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
             >
               <span className="font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.14em] font-medium">
                 Email
@@ -113,7 +113,7 @@ export const FloatingConnectSpeedDial: React.FC<FloatingConnectSpeedDialProps> =
         )}
       </AnimatePresence>
 
-      {/* Primary Floating Speed-Dial Trigger */}
+      {/* Primary Floating Speed-Dial Trigger (Smoked Frosted Glassmorphism) */}
       <motion.button
         type="button"
         id="floating-connect-trigger-btn"
@@ -123,7 +123,7 @@ export const FloatingConnectSpeedDial: React.FC<FloatingConnectSpeedDialProps> =
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.96 }}
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 h-11 px-4 sm:px-5 rounded-full bg-[#18181B]/90 backdrop-blur-md border border-[#FAF9F5]/20 text-[#FAF9F5] shadow-[0_10px_28px_rgba(24,24,27,0.22)] hover:bg-[#18181B] transition-colors cursor-pointer whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+        className="flex items-center gap-2 h-11 px-4 sm:px-5 rounded-full bg-[#18181B]/70 bg-gradient-to-b from-[#27272A]/75 to-[#18181B]/68 backdrop-blur-2xl backdrop-saturate-150 border border-white/30 ring-1 ring-[#18181B]/25 text-[#FAF9F5] shadow-[0_12px_32px_rgba(24,24,27,0.22),inset_0_1px_1px_rgba(255,255,255,0.3)] hover:from-[#27272A]/85 hover:to-[#18181B]/80 transition-all cursor-pointer whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
       >
         <span className="font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.18em] font-medium">
           CONNECT

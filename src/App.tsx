@@ -888,7 +888,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.95 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className={`${positionClassName} flex flex-row flex-wrap justify-center items-center gap-1 p-1.5 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl sm:rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.12)] z-40`}
+          className={`${positionClassName} flex flex-row flex-wrap justify-center items-center gap-1 p-1.5 max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-2xl sm:rounded-full shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] z-40`}
         >
           <a
             href="/pac-model"
@@ -1103,7 +1103,7 @@ export default function App() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-2 lg:p-1.5 2xl:p-2 w-[280px] sm:w-[310px] lg:w-auto max-w-[calc(100vw-2rem)] bg-white/92 lg:bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
+                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-2 lg:p-1.5 2xl:p-2 w-[280px] sm:w-[310px] lg:w-auto max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-2xl lg:rounded-full shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] z-40"
                       >
                         {[
                           { label: 'How We Work', mobileLabel: 'How We Work', path: '/how-we-work', slideIdx: 0, Icon: BookOpen },
@@ -1283,7 +1283,7 @@ export default function App() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-2 lg:p-1.5 2xl:p-2 w-[264px] sm:w-[290px] lg:w-auto max-w-[calc(100vw-2rem)] bg-white/92 lg:bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
+                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-2 lg:p-1.5 2xl:p-2 w-[264px] sm:w-[290px] lg:w-auto max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-2xl lg:rounded-full shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] z-40"
                       >
                         {/* Email link / contact form trigger */}
                         <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
@@ -1593,7 +1593,7 @@ export default function App() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.95 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 grid grid-cols-2 gap-1 p-2 w-[264px] max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-40"
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 grid grid-cols-2 gap-1 p-2 w-[264px] max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-2xl shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] z-40"
                         >
                           <motion.button
                             whileTap={{ scale: 0.96 }}
@@ -1973,10 +1973,10 @@ export default function App() {
                           animate={{ opacity: 1, x: 0, scale: 1 }}
                           exit={{ opacity: 0, x: -8, scale: 0.92 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className={`ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 border rounded-full z-30 ${
+                          className={`ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 rounded-full z-30 ${
                             isDarkSlideActive
-                              ? 'bg-[#1b1b1e]/95 backdrop-blur-sm border-stone-700/80 shadow-[0_4px_20px_rgba(0,0,0,0.4)]'
-                              : 'bg-white/95 backdrop-blur-sm border-stone-200/90 shadow-[0_6px_20px_rgba(0,0,0,0.08)]'
+                              ? 'bg-[#1b1b1e]/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/15 shadow-[0_8px_28px_rgba(0,0,0,0.45)]'
+                              : 'bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] shadow-[0_10px_30px_rgba(24,24,27,0.12),inset_0_1px_1px_rgba(255,255,255,0.9)]'
                           }`}
                         >
                           {/* Email link / contact form trigger */}
@@ -2351,7 +2351,7 @@ export default function App() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.95 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 grid grid-cols-2 gap-1 p-2 w-[264px] max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.14)] z-40"
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 grid grid-cols-2 gap-1 p-2 w-[264px] max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-2xl shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] z-40"
                         >
                           <motion.button
                             whileTap={{ scale: 0.96 }}
@@ -2603,7 +2603,7 @@ export default function App() {
                               animate={{ opacity: 1, x: 0, scale: 1 }}
                               exit={{ opacity: 0, x: -8, scale: 0.92 }}
                               transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                              className="ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 bg-white/95 backdrop-blur-sm border border-stone-200/90 rounded-full shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-30"
+                              className="ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-full shadow-[0_10px_30px_rgba(24,24,27,0.12),inset_0_1px_1px_rgba(255,255,255,0.9)] z-30"
                             >
                               <div className="relative group/tooltip flex flex-col items-center">
                                 <motion.button
@@ -2918,7 +2918,7 @@ export default function App() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.94 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 right-0 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-2 2xl:lg:ml-3 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 lg:gap-1.5 2xl:lg:gap-2 p-2 lg:p-1.5 w-[264px] lg:w-auto bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-40"
+                          className="absolute top-full mt-2 right-0 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-2 2xl:lg:ml-3 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 lg:gap-1.5 2xl:lg:gap-2 p-2 lg:p-1.5 w-[264px] lg:w-auto bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-2xl lg:rounded-full shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] z-40"
                         >
                           <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                             <motion.button
@@ -3232,7 +3232,7 @@ export default function App() {
                           animate={{ opacity: 1, x: 0, scale: 1 }}
                           exit={{ opacity: 0, x: -8, scale: 0.92 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 border rounded-full z-30 bg-white/95 backdrop-blur-sm border-stone-200/90 shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
+                          className="ml-2 2xl:ml-3 flex items-center gap-1.5 2xl:gap-2 p-1 2xl:p-1.5 bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/80 ring-1 ring-[#18181B]/[0.08] rounded-full shadow-[0_10px_30px_rgba(24,24,27,0.12),inset_0_1px_1px_rgba(255,255,255,0.9)] z-30"
                         >
                           <div className="relative group/tooltip flex flex-col items-center">
                             <motion.button

@@ -119,7 +119,7 @@ export const FreeChildPage: React.FC<FreeChildPageProps> = ({
             </button>
 
             {isTheoryMenuOpen && onGoToDramaTriangle && (
-              <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-stone-200 bg-white/95 backdrop-blur-md shadow-[0_12px_32px_rgba(24,24,27,0.1)] p-1.5 z-40 flex flex-col gap-1">
+              <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-white/80 ring-1 ring-[#18181B]/[0.08] bg-[#FAF9F5]/55 bg-gradient-to-b from-white/75 via-white/50 to-[#FAF9F5]/45 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_14px_40px_rgba(24,24,27,0.14),inset_0_1px_1px_rgba(255,255,255,0.9)] p-1.5 z-40 flex flex-col gap-1">
                 <button
                   type="button"
                   onClick={() => {
