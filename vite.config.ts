@@ -201,7 +201,7 @@ function generateRouteHtmlPages(): Plugin {
         ],
       });
 
-      const dramaFallbackHtml = `<section><h2>The Drama Triangle (The Trap)</h2><p>Stephen Karpman identified three roles we slip into during conflict: Persecutor, Rescuer and Victim.</p></section><section><h2>The Winner's Triangle (The Way Out)</h2><p>Acey Choy showed how each role shifts into grounded presence: Assertive, Caring and Vulnerable.</p></section>`;
+      const dramaFallbackHtml = `<section><h2>How we get stuck in repeating arguments and how to step off the loop</h2><p>Developed by psychiatrist Stephen Karpman, the Drama Triangle maps three unhelpful roles we slip into during conflict: Victim, Persecutor and Rescuer. When tension rises, we often bounce between these positions without realising it.</p><p>Acey Choy's Winner's Triangle shows the way out. By shifting into Vulnerable, Assertive and Caring responses, you can keep your boundaries intact and handle difficult conversations honestly without getting pulled into the loop.</p><p>Use the interactive model below to see how each role plays out and how to make the switch.</p></section>`;
 
       const dramaJsonLd = JSON.stringify({
         '@context': 'https://schema.org',

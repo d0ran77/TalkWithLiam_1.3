@@ -888,7 +888,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.95 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className={`${positionClassName} flex flex-row items-center gap-1 p-1.5 bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.12)] z-40`}
+          className={`${positionClassName} flex flex-row flex-wrap justify-center items-center gap-1 p-1.5 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl sm:rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.12)] z-40`}
         >
           <a
             href="/pac-model"
@@ -998,9 +998,9 @@ export default function App() {
                   </cite>
                 </motion.div>
 
-                {/* Refined Tactile Toolbar Buttons (Pure Icons with Desktop Hover Tooltips) */}
+                {/* Refined Tactile Toolbar Buttons (Ultra-quiet micro-labels on mobile < lg; hover tooltips on desktop lg+) */}
                 <div
-                  className="mt-8 sm:mt-8 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-center justify-center lg:justify-start gap-3.5 sm:gap-5 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
+                  className="mt-8 sm:mt-8 lg:mt-7 2xl:mt-9 3xl:mt-11 mb-1 lg:mb-3 flex items-start justify-center lg:justify-start gap-4 sm:gap-6 lg:gap-4 2xl:gap-6 3xl:gap-8 relative p-1 overflow-visible"
                 >
                   {/* 1. Person Icon: Direct to About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -1021,12 +1021,15 @@ export default function App() {
                       <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none" />
                       <User className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 lg:w-6 lg:h-6 xl:w-6.5 xl:h-6.5 2xl:w-9 2xl:h-9 3xl:w-11 3xl:h-11 transition-transform duration-200 group-hover/icon:scale-110 relative z-10 shrink-0" />
                     </motion.a>
+                    <span className="lg:hidden mt-1.5 text-[9.5px] sm:text-[10px] font-mono uppercase tracking-[0.12em] text-stone-500 leading-none">
+                      About
+                    </span>
                     <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       About Liam
                     </span>
                   </div>
 
-                  {/* 2. How We Work Book Icon: Opens 6-Chapter Icon Pill Drawer */}
+                  {/* 2. How We Work Book Icon: Opens 6-Chapter Drawer */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       type="button"
@@ -1076,6 +1079,13 @@ export default function App() {
                         )}
                       </AnimatePresence>
                     </motion.button>
+                    <span
+                      className={`lg:hidden mt-1.5 text-[9.5px] sm:text-[10px] font-mono uppercase tracking-[0.12em] leading-none transition-colors ${
+                        isChaptersOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                      }`}
+                    >
+                      Practice
+                    </span>
                     {!isChaptersOpen && (
                       <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                         How We Work
@@ -1083,7 +1093,7 @@ export default function App() {
                     )}
                   </div>
 
-                  {/* How We Work 6-Chapter Pure-Icon Pill Drawer */}
+                  {/* How We Work 6-Chapter Drawer (Labelled compact grid on mobile < lg; pure icon pill on desktop lg+) */}
                   <AnimatePresence>
                     {isChaptersOpen && (
                       <motion.nav
@@ -1093,21 +1103,21 @@ export default function App() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-1.5 2xl:p-2 bg-white/60 lg:bg-white/95 backdrop-blur-xl border border-white/70 lg:border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
+                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-2 lg:p-1.5 2xl:p-2 w-[280px] sm:w-[310px] lg:w-auto max-w-[calc(100vw-2rem)] bg-white/92 lg:bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
                       >
                         {[
-                          { label: 'How We Work', path: '/how-we-work', slideIdx: 0, Icon: BookOpen },
-                          { label: 'Approach', path: '/approach', slideIdx: 1, Icon: Compass },
-                          { label: 'Areas of Work', path: '/areas-of-work', slideIdx: 2, Icon: Layers },
-                          { label: 'Fees (£30)', path: '/fees', slideIdx: 3, Icon: CreditCard },
-                          { label: 'Contact', path: '/contact', slideIdx: 4, Icon: Mail },
-                          { label: 'FAQs', path: '/faq', slideIdx: 5, Icon: HelpCircle },
-                        ].map(({ label, path, slideIdx, Icon }) => (
-                          <div key={path} className="relative group/tooltip flex flex-col items-center">
+                          { label: 'How We Work', mobileLabel: 'How We Work', path: '/how-we-work', slideIdx: 0, Icon: BookOpen },
+                          { label: 'Approach', mobileLabel: 'Approach', path: '/approach', slideIdx: 1, Icon: Compass },
+                          { label: 'Areas of Work', mobileLabel: 'Areas', path: '/areas-of-work', slideIdx: 2, Icon: Layers },
+                          { label: 'Fees (£30)', mobileLabel: 'Fees (£30)', path: '/fees', slideIdx: 3, Icon: CreditCard },
+                          { label: 'Contact', mobileLabel: 'Contact', path: '/contact', slideIdx: 4, Icon: Mail },
+                          { label: 'FAQs', mobileLabel: 'FAQs', path: '/faq', slideIdx: 5, Icon: HelpCircle },
+                        ].map(({ label, mobileLabel, path, slideIdx, Icon }) => (
+                          <div key={path} className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                             <motion.a
                               href={path}
-                              whileHover={{ scale: 1.1, y: -1 }}
-                              whileTap={{ scale: 0.95 }}
+                              whileHover={{ scale: 1.06, y: -1 }}
+                              whileTap={{ scale: 0.96 }}
                               onClick={(e) => {
                                 if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
                                   e.preventDefault();
@@ -1115,10 +1125,13 @@ export default function App() {
                                   goToSlide(slideIdx);
                                 }
                               }}
-                              className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                              className="w-full lg:w-8 lg:h-8 2xl:w-12 2xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                               aria-label={label}
                             >
-                              <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                              <Icon className="w-3.5 h-3.5 lg:w-4.5 lg:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                              <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap truncate">
+                                {mobileLabel}
+                              </span>
                             </motion.a>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
                               {label}
@@ -1179,6 +1192,13 @@ export default function App() {
                         )}
                       </AnimatePresence>
                     </motion.button>
+                    <span
+                      className={`lg:hidden mt-1.5 text-[9.5px] sm:text-[10px] font-mono uppercase tracking-[0.12em] leading-none transition-colors ${
+                        isTheoryOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                      }`}
+                    >
+                      Theory
+                    </span>
                     {!isTheoryOpen && (
                       <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                         TA Theory
@@ -1240,6 +1260,13 @@ export default function App() {
                         )}
                       </AnimatePresence>
                     </motion.button>
+                    <span
+                      className={`lg:hidden mt-1.5 text-[9.5px] sm:text-[10px] font-mono uppercase tracking-[0.12em] leading-none transition-colors ${
+                        isSocialOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                      }`}
+                    >
+                      Connect
+                    </span>
                     {!isSocialOpen && (
                       <span className="hidden lg:block pointer-events-none absolute -bottom-8 2xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[12px] font-mono tracking-wider uppercase text-stone-500 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                         Connect
@@ -1247,7 +1274,7 @@ export default function App() {
                     )}
                   </div>
 
-                  {/* Social Channels Pure-Icon Pill Drawer (aligned centrally underneath, matching How We Work) */}
+                  {/* Social Channels Drawer (Labelled 2x2 grid on mobile < lg; pure icon pill on desktop lg+) */}
                   <AnimatePresence>
                     {isSocialOpen && (
                       <motion.div
@@ -1256,22 +1283,25 @@ export default function App() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 flex flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-1.5 2xl:p-2 bg-white/60 lg:bg-white/95 backdrop-blur-xl border border-white/70 lg:border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
+                        className="absolute top-full mt-2.5 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 sm:gap-1.5 2xl:gap-2 p-2 lg:p-1.5 2xl:p-2 w-[264px] sm:w-[290px] lg:w-auto max-w-[calc(100vw-2rem)] bg-white/92 lg:bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_24px_rgba(0,0,0,0.08)] z-40"
                       >
                         {/* Email link / contact form trigger */}
-                        <div className="relative group/tooltip flex flex-col items-center">
+                        <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                           <motion.button
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.06, y: -1 }}
+                            whileTap={{ scale: 0.96 }}
                             id="minimal-channel-mail-btn"
                             onClick={() => {
                               handleMailClick();
                               setIsSocialOpen(false);
                             }}
-                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="w-full lg:w-8 lg:h-8 2xl:w-12 2xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Go to contact form"
                           >
-                            <Mail className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <Mail className="w-3.5 h-3.5 lg:w-4.5 lg:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                              Email
+                            </span>
                           </motion.button>
                           <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
                             Email
@@ -1279,19 +1309,22 @@ export default function App() {
                         </div>
 
                         {/* Psychology Today Profile */}
-                        <div className="relative group/tooltip flex flex-col items-center">
+                        <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.06, y: -1 }}
+                            whileTap={{ scale: 0.96 }}
                             id="minimal-channel-psychology-today-link"
                             href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="w-full lg:w-8 lg:h-8 2xl:w-12 2xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Visit Liam on Psychology Today"
                           >
-                            <PsychologyTodayIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <PsychologyTodayIcon className="w-3.5 h-3.5 lg:w-4.5 lg:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                              Psych Today
+                            </span>
                           </motion.a>
                           <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
                             Psychology Today
@@ -1299,19 +1332,22 @@ export default function App() {
                         </div>
 
                         {/* WhatsApp link */}
-                        <div className="relative group/tooltip flex flex-col items-center">
+                        <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.06, y: -1 }}
+                            whileTap={{ scale: 0.96 }}
                             id="minimal-channel-whatsapp-link"
                             href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="w-full lg:w-8 lg:h-8 2xl:w-12 2xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Message Liam on WhatsApp"
                           >
-                            <WhatsAppIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <WhatsAppIcon className="w-3.5 h-3.5 lg:w-4.5 lg:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                              WhatsApp
+                            </span>
                           </motion.a>
                           <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
                             WhatsApp
@@ -1319,19 +1355,22 @@ export default function App() {
                         </div>
 
                         {/* YouTube Channel link */}
-                        <div className="relative group/tooltip flex flex-col items-center">
+                        <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.06, y: -1 }}
+                            whileTap={{ scale: 0.96 }}
                             id="minimal-channel-youtube-account-link"
                             href={PRACTICAL_DETAILS.social.youtube}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 2xl:w-12 2xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-white/75 lg:hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="w-full lg:w-8 lg:h-8 2xl:w-12 2xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Visit Liam on YouTube"
                           >
-                            <Youtube className="w-4 h-4 sm:w-4.5 sm:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <Youtube className="w-3.5 h-3.5 lg:w-4.5 lg:h-4.5 2xl:w-5.5 2xl:h-5.5 shrink-0" />
+                            <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                              YouTube
+                            </span>
                           </motion.a>
                           <span className="hidden lg:block pointer-events-none absolute -bottom-7 2xl:-bottom-8 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[10px] 2xl:text-[11.5px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-stone-200/90 shadow-2xs z-50">
                             YouTube
@@ -1419,9 +1458,9 @@ export default function App() {
                     </p>
                   </button>
 
-                  {/* Centered Heroicons Toolbar under H2 */}
-                  <div className="flex items-center justify-center gap-2 relative shrink-0 p-1 overflow-visible">
-                    {/* 1. Person Heroicon: About Liam */}
+                  {/* Centered Circular Icons + Ultra-Quiet Micro-Labels under H2 */}
+                  <div className="flex items-start justify-center gap-4 sm:gap-5 relative shrink-0 p-1 overflow-visible">
+                    {/* 1. Person Icon: About Liam */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -1436,12 +1475,12 @@ export default function App() {
                       >
                         <User className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
                       </motion.button>
-                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        About Liam
+                      <span className="mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-stone-500 leading-none">
+                        About
                       </span>
                     </div>
 
-                    {/* 2. Slides Heroicon (Active) */}
+                    {/* 2. Slides Icon (Active) */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -1453,7 +1492,7 @@ export default function App() {
                       >
                         <BookOpen className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
                       </motion.button>
-                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      <span className="mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-[#18181B] font-medium leading-none">
                         Slides
                       </span>
                     </div>
@@ -1479,8 +1518,12 @@ export default function App() {
                       >
                         <PacStackIcon className="w-4 h-4 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                       </motion.button>
-                      <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        TA Theory
+                      <span
+                        className={`mt-1 text-[9px] font-mono tracking-[0.12em] uppercase leading-none transition-colors ${
+                          isTheoryOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                        }`}
+                      >
+                        Theory
                       </span>
                     </div>
 
@@ -1532,14 +1575,16 @@ export default function App() {
                           )}
                         </AnimatePresence>
                       </motion.button>
-                      {!isSocialOpen && (
-                        <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                          Connect
-                        </span>
-                      )}
+                      <span
+                        className={`mt-1 text-[9px] font-mono tracking-[0.12em] uppercase leading-none transition-colors ${
+                          isSocialOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                        }`}
+                      >
+                        Connect
+                      </span>
                     </div>
 
-                    {/* Channels Pill Drawer - Centered horizontally underneath matching landing page */}
+                    {/* Labelled 2x2 Channels Drawer on Mobile */}
                     <AnimatePresence>
                       {isSocialOpen && (
                         <motion.div
@@ -1548,66 +1593,62 @@ export default function App() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.95 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-row items-center gap-1 sm:gap-1.5 p-1.5 bg-white/85 backdrop-blur-xl border border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-40"
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 grid grid-cols-2 gap-1 p-2 w-[264px] max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-40"
                         >
-                          {/* Mail */}
                           <motion.button
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-mail-btn-mobile-c"
                             onClick={() => {
                               handleMailClick();
                               setIsSocialOpen(false);
                             }}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Go to contact form"
                           >
-                            <Mail className="w-4 h-4" />
+                            <Mail className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">Email</span>
                           </motion.button>
 
-                          {/* Psychology Today */}
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-psychology-today-link-mobile-c"
                             href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Visit Liam on Psychology Today"
                           >
-                            <PsychologyTodayIcon className="w-4 h-4" />
+                            <PsychologyTodayIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">Psych Today</span>
                           </motion.a>
 
-                          {/* WhatsApp */}
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-whatsapp-link-mobile-c"
                             href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Message Liam on WhatsApp"
                           >
-                            <WhatsAppIcon className="w-4 h-4" />
+                            <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">WhatsApp</span>
                           </motion.a>
 
-                          {/* YouTube */}
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-youtube-account-link-mobile-c"
                             href={PRACTICAL_DETAILS.social.youtube}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Visit Liam on YouTube"
                           >
-                            <Youtube className="w-4 h-4" />
+                            <Youtube className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">YouTube</span>
                           </motion.a>
                         </motion.div>
                       )}
@@ -2177,9 +2218,9 @@ export default function App() {
                     </p>
                   </button>
 
-                  {/* Centered Heroicons under H2 */}
-                  <div className="flex items-center justify-center gap-2 relative shrink-0">
-                    {/* 1. Person Heroicon (Active: toggles portrait view) */}
+                  {/* Centered Circular Icons + Ultra-Quiet Micro-Labels under H2 */}
+                  <div className="flex items-start justify-center gap-4 sm:gap-5 relative shrink-0">
+                    {/* 1. Person Icon (Active: toggles portrait view) */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -2192,8 +2233,8 @@ export default function App() {
                       >
                         <User className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
                       </motion.button>
-                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        About Liam
+                      <span className="mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-[#18181B] font-medium leading-none">
+                        About
                       </span>
                     </div>
 
@@ -2209,7 +2250,7 @@ export default function App() {
                       >
                         <BookOpen className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
                       </motion.button>
-                      <span className="pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      <span className="mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-stone-500 leading-none">
                         Slides
                       </span>
                     </div>
@@ -2235,8 +2276,12 @@ export default function App() {
                       >
                         <PacStackIcon className="w-4 h-4 transition-transform duration-300 group-hover/icon:scale-110 shrink-0" />
                       </motion.button>
-                      <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        TA Theory
+                      <span
+                        className={`mt-1 text-[9px] font-mono tracking-[0.12em] uppercase leading-none transition-colors ${
+                          isTheoryOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                        }`}
+                      >
+                        Theory
                       </span>
                     </div>
 
@@ -2245,7 +2290,7 @@ export default function App() {
                       'absolute top-full mt-2 left-1/2 -translate-x-1/2'
                     )}
 
-                    {/* 4. Speech Bubble Heroicon */}
+                    {/* 4. Speech Bubble Icon */}
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
                         whileHover={{ scale: 1.08, y: -2 }}
@@ -2288,14 +2333,16 @@ export default function App() {
                           )}
                         </AnimatePresence>
                       </motion.button>
-                      {!isSocialOpen && (
-                        <span className="hidden lg:block pointer-events-none absolute -bottom-6 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                          Connect
-                        </span>
-                      )}
+                      <span
+                        className={`mt-1 text-[9px] font-mono tracking-[0.12em] uppercase leading-none transition-colors ${
+                          isSocialOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                        }`}
+                      >
+                        Connect
+                      </span>
                     </div>
 
-                    {/* Centered Horizontal Pill Drawer matching landing page */}
+                    {/* Labelled 2x2 Channels Drawer on Mobile */}
                     <AnimatePresence>
                       {isSocialOpen && (
                         <motion.div
@@ -2304,62 +2351,62 @@ export default function App() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.95 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 flex flex-row items-center gap-1 sm:gap-1.5 p-1.5 bg-white/85 backdrop-blur-xl border border-stone-200/90 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.14)] z-40"
+                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 grid grid-cols-2 gap-1 p-2 w-[264px] max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.14)] z-40"
                         >
                           <motion.button
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-mail-btn-mobile"
                             onClick={() => {
                               handleMailClick();
                               setIsSocialOpen(false);
                             }}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Go to contact form"
                           >
-                            <Mail className="w-4 h-4" />
+                            <Mail className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">Email</span>
                           </motion.button>
 
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-psychology-today-link-mobile"
                             href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Visit Liam on Psychology Today"
                           >
-                            <PsychologyTodayIcon className="w-4 h-4" />
+                            <PsychologyTodayIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">Psych Today</span>
                           </motion.a>
 
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-whatsapp-link-mobile"
                             href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Message Liam on WhatsApp"
                           >
-                            <WhatsAppIcon className="w-4 h-4" />
+                            <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">WhatsApp</span>
                           </motion.a>
 
                           <motion.a
-                            whileHover={{ scale: 1.1, y: -1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             id="channel-youtube-account-link-mobile"
                             href={PRACTICAL_DETAILS.social.youtube}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsSocialOpen(false)}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100/80 transition-colors focus:outline-none cursor-pointer"
+                            className="px-2.5 py-2 rounded-xl flex items-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100/90 transition-colors focus:outline-none cursor-pointer"
                             aria-label="Visit Liam on YouTube"
                           >
-                            <Youtube className="w-4 h-4" />
+                            <Youtube className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-[11.5px] font-medium text-stone-800 whitespace-nowrap">YouTube</span>
                           </motion.a>
                         </motion.div>
                       )}
@@ -2702,8 +2749,8 @@ export default function App() {
                 </button>
 
                 {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
-                <div className="mt-2 lg:mt-5 2xl:mt-7 flex items-center justify-center lg:justify-start gap-2 sm:gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
-                  {/* 1. Person Heroicon: About Liam */}
+                <div className="mt-2 lg:mt-5 2xl:mt-7 flex items-start lg:items-center justify-center lg:justify-start gap-3 sm:gap-4 lg:gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
+                  {/* 1. Person Icon: About Liam */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
@@ -2715,7 +2762,10 @@ export default function App() {
                     >
                       <User className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                    <span className="lg:hidden mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-stone-500 leading-none">
+                      About
+                    </span>
+                    <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       About Liam
                     </span>
                   </div>
@@ -2732,12 +2782,15 @@ export default function App() {
                     >
                       <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                    <span className="lg:hidden mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-stone-500 leading-none">
+                      Slides
+                    </span>
+                    <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       Slides
                     </span>
                   </div>
 
-                  {/* 3. Calendar Heroicon: Diary (Active) */}
+                  {/* 3. Calendar Icon: Diary (Active) */}
                   <div className="relative group/tooltip flex flex-col items-center">
                     <motion.button
                       whileHover={{ scale: 1.08, y: -2 }}
@@ -2750,7 +2803,10 @@ export default function App() {
                     >
                       <Calendar className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                    <span className="lg:hidden mt-1 text-[9px] font-mono tracking-[0.12em] uppercase text-[#18181B] font-medium leading-none">
+                      Diary
+                    </span>
+                    <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                       Diary
                     </span>
                   </div>
@@ -2776,8 +2832,15 @@ export default function App() {
                     >
                       <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                     </motion.button>
+                    <span
+                      className={`lg:hidden mt-1 text-[9px] font-mono tracking-[0.12em] uppercase leading-none transition-colors ${
+                        isTheoryOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                      }`}
+                    >
+                      Theory
+                    </span>
                     {!isTheoryOpen && (
-                      <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                      <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                         TA Theory
                       </span>
                     )}
@@ -2788,7 +2851,7 @@ export default function App() {
                     'absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0'
                   )}
 
-                  {/* 5. Speech Bubble Heroicon + Drawer */}
+                  {/* 5. Speech Bubble Icon + Drawer */}
                   <div className="relative flex items-center">
                     <div className="relative group/tooltip flex flex-col items-center">
                       <motion.button
@@ -2832,14 +2895,21 @@ export default function App() {
                           )}
                         </AnimatePresence>
                       </motion.button>
+                      <span
+                        className={`lg:hidden mt-1 text-[9px] font-mono tracking-[0.12em] uppercase leading-none transition-colors ${
+                          isSocialOpen ? 'text-[#18181B] font-medium' : 'text-stone-500'
+                        }`}
+                      >
+                        Connect
+                      </span>
                       {!isSocialOpen && (
-                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        <span className="hidden lg:block pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                           Connect
                         </span>
                       )}
                     </div>
 
-                    {/* Slide-out drawer */}
+                    {/* Slide-out drawer (labelled grid on mobile < lg; pure icon pill on lg+) */}
                     <AnimatePresence>
                       {isSocialOpen && (
                         <motion.div
@@ -2848,21 +2918,24 @@ export default function App() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -8, scale: 0.94 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-2 2xl:lg:ml-3 flex flex-col lg:flex-row items-center gap-1.5 lg:gap-1.5 2xl:lg:gap-2 p-1.5 2xl:lg:p-1.5 bg-white/45 lg:bg-white/95 backdrop-blur-xl border border-white/60 lg:border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-40"
+                          className="absolute top-full mt-2 right-0 lg:static lg:top-auto lg:left-auto lg:translate-x-0 lg:ml-2 2xl:lg:ml-3 grid grid-cols-2 lg:flex lg:flex-row items-center gap-1 lg:gap-1.5 2xl:lg:gap-2 p-2 lg:p-1.5 w-[264px] lg:w-auto bg-white/95 backdrop-blur-xl border border-stone-200/90 rounded-2xl lg:rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] lg:shadow-[0_6px_20px_rgba(0,0,0,0.08)] z-40"
                         >
-                          <div className="relative group/tooltip flex flex-col items-center">
+                          <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                             <motion.button
-                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileHover={{ scale: 1.08, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="channel-mail-btn-booking"
                               onClick={() => {
                                 handleMailClick();
                                 setIsSocialOpen(false);
                               }}
-                              className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              className="w-full lg:w-8 lg:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Go to contact form"
                             >
-                              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                              <Mail className="w-3.5 h-3.5 lg:w-4 lg:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 shrink-0" />
+                              <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                                Email
+                              </span>
                             </motion.button>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Email
@@ -2870,57 +2943,66 @@ export default function App() {
                           </div>
 
                           {/* Psychology Today Profile */}
-                          <div className="relative group/tooltip flex flex-col items-center">
+                          <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                             <motion.a
-                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileHover={{ scale: 1.08, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="channel-psychology-today-link-booking"
                               href={PRACTICAL_DETAILS.social.psychologyToday || 'https://www.psychologytoday.com/profile/1850757'}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setIsSocialOpen(false)}
-                              className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              className="w-full lg:w-8 lg:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on Psychology Today"
                             >
-                              <PsychologyTodayIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                              <PsychologyTodayIcon className="w-3.5 h-3.5 lg:w-4 lg:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 shrink-0" />
+                              <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                                Psych Today
+                              </span>
                             </motion.a>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               Psychology Today
                             </span>
                           </div>
 
-                          <div className="relative group/tooltip flex flex-col items-center">
+                          <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                             <motion.a
-                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileHover={{ scale: 1.08, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="channel-whatsapp-link-booking"
                               href={PRACTICAL_DETAILS.social.whatsapp || 'https://wa.me/447344145282?text=Hello%20Liam,%20I%27d%20like%20to%20enquire%20about%20counselling.'}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setIsSocialOpen(false)}
-                              className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              className="w-full lg:w-8 lg:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Message Liam on WhatsApp"
                             >
-                              <WhatsAppIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                              <WhatsAppIcon className="w-3.5 h-3.5 lg:w-4 lg:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 shrink-0" />
+                              <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                                WhatsApp
+                              </span>
                             </motion.a>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               WhatsApp
                             </span>
                           </div>
 
-                          <div className="relative group/tooltip flex flex-col items-center">
+                          <div className="relative group/tooltip flex flex-col lg:items-center w-full lg:w-auto">
                             <motion.a
-                              whileHover={{ scale: 1.12, y: -1 }}
+                              whileHover={{ scale: 1.08, y: -1 }}
                               whileTap={{ scale: 0.95 }}
                               id="channel-youtube-account-link-booking"
                               href={PRACTICAL_DETAILS.social.youtube}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setIsSocialOpen(false)}
-                              className="w-7 h-7 sm:w-8 sm:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 rounded-full flex items-center justify-center text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
+                              className="w-full lg:w-8 lg:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 px-2.5 py-2 lg:p-0 rounded-xl lg:rounded-full flex items-center justify-start lg:justify-center gap-2 text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors focus:outline-none cursor-pointer"
                               aria-label="Visit Liam on YouTube"
                             >
-                              <Youtube className="w-3.5 h-3.5 sm:w-4 sm:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6" />
+                              <Youtube className="w-3.5 h-3.5 lg:w-4 lg:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 shrink-0" />
+                              <span className="lg:hidden text-[11.5px] font-medium text-stone-800 whitespace-nowrap">
+                                YouTube
+                              </span>
                             </motion.a>
                             <span className="hidden lg:block pointer-events-none absolute -bottom-5 2xl:-bottom-7 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9px] 2xl:text-[11px] font-mono tracking-wider uppercase text-stone-600 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded border border-stone-200/90 shadow-2xs z-30">
                               YouTube

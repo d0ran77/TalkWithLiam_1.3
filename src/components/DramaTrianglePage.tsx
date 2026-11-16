@@ -505,6 +505,18 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
             <h2 className="text-[16px] sm:text-[19px] leading-[1.55] text-[#71717A] font-normal max-w-[60ch]">
               How we get stuck in repeating arguments and how to step off the loop
             </h2>
+
+            <div className="pt-2 space-y-3 text-[15px] sm:text-[16px] leading-[1.7] text-[#3F3F46] max-w-[62ch]">
+              <p>
+                Developed by psychiatrist Stephen Karpman, the Drama Triangle maps three unhelpful roles we slip into during conflict: Victim, Persecutor and Rescuer. When tension rises, we often bounce between these positions without realising it.
+              </p>
+              <p>
+                Acey Choy&apos;s Winner&apos;s Triangle shows the way out. By shifting into Vulnerable, Assertive and Caring responses, you can keep your boundaries intact and handle difficult conversations honestly without getting pulled into the loop.
+              </p>
+              <p className="text-[#18181B] font-medium">
+                Use the interactive model below to see how each role plays out and how to make the switch.
+              </p>
+            </div>
           </header>
 
           {/* Top Switcher: Mode Pill Toggle + Optional Quick Switch to PAC Model */}
