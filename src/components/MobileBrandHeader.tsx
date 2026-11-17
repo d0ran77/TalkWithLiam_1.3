@@ -96,7 +96,7 @@ export const MobileBrandHeader: React.FC<MobileBrandHeaderProps> = ({
   return (
     <div
       ref={headerRef}
-      className={`lg:hidden relative z-30 flex flex-col items-center justify-center text-center pt-2 pb-3 shrink-0 select-none gap-2.5 ${className}`}
+      className={`lg:hidden relative z-50 flex flex-col items-center justify-center text-center pt-2 pb-3 shrink-0 select-none gap-2.5 ${className}`}
     >
       <button
         type="button"

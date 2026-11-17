@@ -37,6 +37,8 @@ import { LocationParkingModal } from './components/LocationParkingModal.tsx';
 import { FreeChildPage } from './components/FreeChildPage.tsx';
 import { PacModelPage } from './components/PacModelPage.tsx';
 import { DramaTrianglePage } from './components/DramaTrianglePage.tsx';
+import { PacModel3DPreviewPage } from './components/PacModel3DPreviewPage.tsx';
+import { DramaTriangle3DPreviewPage } from './components/DramaTriangle3DPreviewPage.tsx';
 import { FloatingConnectSpeedDial } from './components/FloatingConnectSpeedDial.tsx';
 import { PracticeGuideView, PracticeGuideSectionJump } from './components/PracticeGuideView.tsx';
 import { MobileBrandHeader } from './components/MobileBrandHeader.tsx';
@@ -128,8 +130,8 @@ export default function App() {
   const [sectionJumpRequest, setSectionJumpRequest] = useState<PracticeGuideSectionJump | null>(null);
   const sectionChangeSourceRef = useRef<'scroll' | 'nav'>('nav');
 
-  // View Mode: 'minimal', 'practice' (continuous 6-chapter guide), 'portrait' (essay & photo), 'free-child', 'pac-model', or 'drama-triangle'
-  const [viewMode, setViewMode] = useState<'minimal' | 'practice' | 'portrait' | 'free-child' | 'pac-model' | 'drama-triangle'>(() => {
+  // View Mode: 'minimal', 'practice', 'portrait', 'free-child', 'pac-model', 'drama-triangle', or staged 3D previews
+  const [viewMode, setViewMode] = useState<'minimal' | 'practice' | 'portrait' | 'free-child' | 'pac-model' | 'drama-triangle' | 'pac-model-3d' | 'drama-triangle-3d'>(() => {
     try {
       if (typeof window !== 'undefined') {
         const path = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
@@ -152,6 +154,12 @@ export default function App() {
         if (path === '/free-child' || hash === '#free-child' || hash === '#freechild' || hash === '#camera' || hash === '#instagram') {
           return 'free-child';
         }
+        if (path === '/pac-model-3d' || hash === '#pac-model-3d') {
+          return 'pac-model-3d';
+        }
+        if (path === '/drama-triangle-3d' || hash === '#drama-triangle-3d') {
+          return 'drama-triangle-3d';
+        }
         if (path === '/pac-model' || path === '/pac' || hash === '#pac-model' || hash === '#pac') {
           return 'pac-model';
         }
@@ -163,7 +171,7 @@ export default function App() {
       if (saved === 'practice' || saved === 'carousel' || saved === 'guide-preview') {
         return 'practice';
       }
-      if (saved === 'portrait' || saved === 'free-child' || saved === 'pac-model' || saved === 'drama-triangle') {
+      if (saved === 'portrait' || saved === 'free-child' || saved === 'pac-model' || saved === 'drama-triangle' || saved === 'pac-model-3d' || saved === 'drama-triangle-3d') {
         return saved;
       }
     } catch {
@@ -214,6 +222,10 @@ export default function App() {
         setViewMode('portrait');
       } else if (path === '/free-child' || hash === '#free-child' || hash === '#camera') {
         setViewMode('free-child');
+      } else if (path === '/pac-model-3d' || hash === '#pac-model-3d') {
+        setViewMode('pac-model-3d');
+      } else if (path === '/drama-triangle-3d' || hash === '#drama-triangle-3d') {
+        setViewMode('drama-triangle-3d');
       } else if (path === '/pac-model' || path === '/pac' || hash === '#pac-model' || hash === '#pac') {
         setViewMode('pac-model');
       } else if (path === '/drama-triangle' || path === '/winners-triangle' || hash === '#drama-triangle' || hash === '#winners-triangle') {
@@ -242,6 +254,22 @@ export default function App() {
           window.history.pushState({ view: 'portrait' }, '', '/about');
         } catch {
           window.location.hash = 'about';
+        }
+      }
+    } else if (viewMode === 'pac-model-3d') {
+      if (currentPath !== '/pac-model-3d') {
+        try {
+          window.history.pushState({ view: 'pac-model-3d' }, '', '/pac-model-3d');
+        } catch {
+          window.location.hash = 'pac-model-3d';
+        }
+      }
+    } else if (viewMode === 'drama-triangle-3d') {
+      if (currentPath !== '/drama-triangle-3d') {
+        try {
+          window.history.pushState({ view: 'drama-triangle-3d' }, '', '/drama-triangle-3d');
+        } catch {
+          window.location.hash = 'drama-triangle-3d';
         }
       }
     } else if (viewMode === 'pac-model') {
@@ -293,7 +321,9 @@ export default function App() {
         currentHash === '#slides' ||
         currentHash === '#pac-model' ||
         currentHash === '#pac' ||
+        currentHash === '#pac-model-3d' ||
         currentHash === '#drama-triangle' ||
+        currentHash === '#drama-triangle-3d' ||
         currentHash === '#winners-triangle' ||
         currentHash === '#guide-preview';
       if (isNonRootRoute) {
@@ -311,8 +341,8 @@ export default function App() {
     if (typeof document === 'undefined') return;
     let routeKey = '';
     if (viewMode === 'portrait') routeKey = 'about';
-    else if (viewMode === 'pac-model') routeKey = 'pac-model';
-    else if (viewMode === 'drama-triangle') routeKey = 'drama-triangle';
+    else if (viewMode === 'pac-model' || viewMode === 'pac-model-3d') routeKey = 'pac-model';
+    else if (viewMode === 'drama-triangle' || viewMode === 'drama-triangle-3d') routeKey = 'drama-triangle';
     else if (viewMode === 'free-child') routeKey = 'free-child';
     else if (viewMode === 'practice') {
       routeKey = SLIDE_INDEX_TO_ROUTE[currentSlideIndex] || 'how-we-work';
@@ -399,8 +429,15 @@ export default function App() {
     }
   }, []);
 
-  const handleSelectViewMode = useCallback((mode: 'minimal' | 'practice' | 'portrait' | 'free-child' | 'pac-model' | 'drama-triangle') => {
-    playSoftThump(mode === 'drama-triangle' || mode === 'pac-model' ? 'bright' : 'default');
+  const handleSelectViewMode = useCallback((mode: 'minimal' | 'practice' | 'portrait' | 'free-child' | 'pac-model' | 'drama-triangle' | 'pac-model-3d' | 'drama-triangle-3d') => {
+    playSoftThump(
+      mode === 'drama-triangle' ||
+      mode === 'pac-model' ||
+      mode === 'pac-model-3d' ||
+      mode === 'drama-triangle-3d'
+        ? 'bright'
+        : 'default'
+    );
     setViewMode(mode);
     setIsSocialOpen(false);
     setIsChaptersOpen(false);
@@ -685,7 +722,13 @@ export default function App() {
           setIsTheoryOpen(false);
         } else if (viewMode === 'portrait') {
           setViewMode('practice');
-        } else if (viewMode === 'free-child' || viewMode === 'pac-model' || viewMode === 'drama-triangle') {
+        } else if (
+          viewMode === 'free-child' ||
+          viewMode === 'pac-model' ||
+          viewMode === 'drama-triangle' ||
+          viewMode === 'pac-model-3d' ||
+          viewMode === 'drama-triangle-3d'
+        ) {
           setViewMode('minimal');
         }
         setIsOverviewOpen(false);
@@ -1642,7 +1685,10 @@ export default function App() {
                 }}
               />
             </motion.div>
-          ) : viewMode === 'pac-model' || viewMode === 'drama-triangle' ? (
+          ) : viewMode === 'pac-model' ||
+            viewMode === 'drama-triangle' ||
+            viewMode === 'pac-model-3d' ||
+            viewMode === 'drama-triangle-3d' ? (
             <motion.div
               key="pac-model-page-wrapper"
               initial={PAGE_BREATH_INITIAL}
@@ -1932,12 +1978,32 @@ export default function App() {
                           onGoToDramaTriangle={() => handleSelectViewMode('drama-triangle')}
                           onGoToContact={handleMailClick}
                         />
-                      ) : (
+                      ) : viewMode === 'drama-triangle' ? (
                         <DramaTrianglePage
                           onBackToLanding={() => handleSelectViewMode('minimal')}
                           onGoToAboutLiam={() => handleSelectViewMode('portrait')}
                           onGoToPractice={() => goToSlide(0)}
                           onGoToPacModel={() => handleSelectViewMode('pac-model')}
+                          onGoToContact={handleMailClick}
+                        />
+                      ) : viewMode === 'pac-model-3d' ? (
+                        <PacModel3DPreviewPage
+                          onBackToLanding={() => handleSelectViewMode('minimal')}
+                          onGoToAboutLiam={() => handleSelectViewMode('portrait')}
+                          onGoToPractice={() => goToSlide(0)}
+                          onGoToLivePacModel={() => handleSelectViewMode('pac-model')}
+                          onGoToLiveDramaTriangle={() => handleSelectViewMode('drama-triangle')}
+                          onSwitchToTriangle3D={() => handleSelectViewMode('drama-triangle-3d')}
+                          onGoToContact={handleMailClick}
+                        />
+                      ) : (
+                        <DramaTriangle3DPreviewPage
+                          onBackToLanding={() => handleSelectViewMode('minimal')}
+                          onGoToAboutLiam={() => handleSelectViewMode('portrait')}
+                          onGoToPractice={() => goToSlide(0)}
+                          onGoToLivePacModel={() => handleSelectViewMode('pac-model')}
+                          onGoToLiveDramaTriangle={() => handleSelectViewMode('drama-triangle')}
+                          onSwitchToPac3D={() => handleSelectViewMode('pac-model-3d')}
                           onGoToContact={handleMailClick}
                         />
                       )}

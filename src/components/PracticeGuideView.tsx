@@ -409,7 +409,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
         className="w-full flex-1 overflow-y-auto custom-scrollbar relative"
       >
         {/* Uniform Mobile Header (< lg): Identical to About Me, scrolls cleanly above sticky 01-06 chapter strip */}
-        <div className="lg:hidden px-3 pt-1 border-b border-stone-200/60 bg-[#FAF9F5]">
+        <div className="lg:hidden px-3 pt-1 border-b border-stone-200/60 bg-[#FAF9F5] relative z-50">
           <MobileBrandHeader
             activeView="practice"
             onBrandClick={onBackToLanding}
@@ -424,7 +424,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
         {/* Compact Sticky Top Chrome (<= 15% of mobile viewport height) */}
         <header
           ref={stickyHeaderRef}
-          className="sticky top-0 z-40 bg-[#FAF9F5]/90 backdrop-blur-xl backdrop-saturate-150 border-b border-stone-200/80"
+          className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-xl backdrop-saturate-150 border-b border-stone-200/80"
         >
           {/* Desktop Row 1: Return Link + Quiet Typography Navigation (No Diary) */}
           <div className="hidden lg:flex max-w-6xl mx-auto px-8 h-12 items-center justify-between gap-2">
@@ -593,7 +593,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className={`practice-chapter-jump-trigger absolute top-full mt-2 ${
                   align === 'center' ? 'left-1/2 -translate-x-1/2' : 'left-0'
-                } w-[256px] sm:w-[292px] max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/95 backdrop-blur-2xl border border-stone-200/90 ring-1 ring-[#18181B]/[0.07] rounded-2xl shadow-[0_14px_36px_-6px_rgba(24,24,27,0.16)] p-1.5 z-40 text-left`}
+                } w-[256px] sm:w-[292px] max-w-[calc(100vw-2rem)] bg-[#FAF9F5]/95 backdrop-blur-2xl border border-stone-200/90 ring-1 ring-[#18181B]/[0.07] rounded-2xl shadow-[0_14px_36px_-6px_rgba(24,24,27,0.16)] p-1.5 z-50 text-left`}
                 role="menu"
                 aria-label="Jump to practice chapter"
               >
@@ -646,6 +646,8 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                 id={sec.id}
                 aria-labelledby={`${sec.id}-heading`}
                 className={`w-full relative bg-[#FAF9F5] scroll-mt-16 ${
+                  isDividerOpen || isKickerOpen ? 'z-40' : ''
+                } ${
                   idx === 0
                     ? 'pt-10 sm:pt-16 pb-24 sm:pb-32 lg:pb-40'
                     : 'py-20 sm:py-32 lg:py-40'
@@ -703,7 +705,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                 <div className="max-w-3xl mx-auto px-4 sm:px-8 relative">
                   {/* Sequential Chapter Heading Block */}
                   <div className="relative mb-9 sm:mb-12">
-                    <div className="relative z-10 space-y-2.5">
+                    <div className={`relative space-y-2.5 ${isKickerOpen ? 'z-40' : 'z-10'}`}>
                       <BreathReveal enabled={isAnimated} delay={0} yOffset={10}>
                         <div className="relative inline-block practice-chapter-jump-trigger">
                           <button
