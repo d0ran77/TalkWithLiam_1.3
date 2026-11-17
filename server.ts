@@ -337,11 +337,15 @@ async function startServer() {
       'free-child',
     ];
     for (const route of routeHtmlPages) {
-      app.get([`/${route}`, `/${route}/`], (_req, res) => {
+      app.get(`/${route}`, (req, res) => {
+        if (req.path.endsWith('/')) {
+          res.redirect(301, `/${route}`);
+          return;
+        }
         res.sendFile(path.join(distPath, route, 'index.html'));
       });
     }
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, { redirect: false }));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

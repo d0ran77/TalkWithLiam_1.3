@@ -113,7 +113,7 @@ export const LocationParkingModal: React.FC<LocationParkingModalProps> = ({
     COMMUTE_OPTIONS.find((c) => c.id === selectedTownId) || COMMUTE_OPTIONS[0];
 
   const handleCopyPostcode = () => {
-    navigator.clipboard.writeText('HU10 6EB');
+    navigator.clipboard.writeText('HU10 7UA');
     setCopiedPostcode(true);
     setTimeout(() => setCopiedPostcode(false), 2200);
   };
@@ -145,7 +145,7 @@ export const LocationParkingModal: React.FC<LocationParkingModalProps> = ({
                     The Willerby Practice • Location &amp; Parking
                   </h3>
                   <p className="text-xs text-stone-500 font-mono">
-                    Willerby Square, East Yorkshire • Postcode: HU10 6EB
+                    1b The Square, Willerby, East Yorkshire • Postcode: HU10 7UA
                   </p>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export const LocationParkingModal: React.FC<LocationParkingModalProps> = ({
                     ) : (
                       <>
                         <Copy className="w-3 h-3 text-stone-500" />
-                        <span>SatNav: HU10 6EB</span>
+                        <span>SatNav: HU10 7UA</span>
                       </>
                     )}
                   </button>

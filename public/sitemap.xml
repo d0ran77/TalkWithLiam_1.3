@@ -4,18 +4,18 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://talkwithliam.co.uk/</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://talkwithliam.co.uk/favicon1.jpeg</image:loc>
       <image:title>Talk with Liam - Psychotherapeutic Counselling</image:title>
-      <image:caption>Talk with Liam relational psychotherapeutic counselling in Willerby, East Yorkshire and UK-wide online.</image:caption>
+      <image:caption>Talk with Liam relational psychotherapeutic counselling in Willerby, East Yorkshire (HU10 7UA) and UK-wide online.</image:caption>
     </image:image>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/about</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <image:image>
@@ -26,61 +26,71 @@
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/how-we-work</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://talkwithliam.co.uk/pac-model</loc>
-    <lastmod>2026-11-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://talkwithliam.co.uk/drama-triangle</loc>
-    <lastmod>2026-11-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://talkwithliam.co.uk/free-child</loc>
-    <lastmod>2026-11-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/approach</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/areas-of-work</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/fees</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/contact</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://talkwithliam.co.uk/faq</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://talkwithliam.co.uk/pac-model</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/drama-triangle</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://talkwithliam.co.uk/free-child</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://talkwithliam.co.uk/8.webp</image:loc>
+      <image:title>The Beacon Path - 35mm Street Photography</image:title>
+      <image:caption>Solitary wooden bench along Salt Marsh Way, East Yorkshire.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://talkwithliam.co.uk/6.webp</image:loc>
+      <image:title>Passage to Light - 35mm Street Photography</image:title>
+      <image:caption>Figures stepping through pedestrian tunnel shadow toward daylight.</image:caption>
+    </image:image>
+  </url>
+  <url>
     <loc>https://talkwithliam.co.uk/slides</loc>
-    <lastmod>2026-11-15</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

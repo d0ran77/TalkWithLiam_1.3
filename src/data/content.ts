@@ -357,6 +357,8 @@ export const PRACTICAL_DETAILS = {
   sessionLength: '50 minutes',
   social: {
     psychologyToday: 'https://www.psychologytoday.com/profile/1850757',
+    googleBusinessProfile:
+      'https://www.google.com/maps/place/Talk+With+Liam/@53.7570981,-0.451291,17z/data=!3m1!4b1!4m6!3m5!1s0x4878c1bd4df063e7:0x6dd2a9885229174d!8m2!3d53.7570982!4d-0.4464255!16s%2Fg%2F11z1zsmj7z',
     youtube: 'https://youtube.com/@talkwithliamexplainer?si=KtmFZdvBIuO2hMnA',
     youtubeHandle: '@talkwithliamexplainer',
     youtubeId: 'UCwlzRZ-Sx_sDMsNQQgpv0jQ',
