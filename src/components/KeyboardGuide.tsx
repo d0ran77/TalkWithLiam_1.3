@@ -9,10 +9,10 @@ interface KeyboardGuideProps {
 
 export const KeyboardGuide: React.FC<KeyboardGuideProps> = ({ isOpen, onClose }) => {
   const shortcuts = [
-    { key: '↑ / ↓ (or ← / →)', desc: 'Previous or next slide' },
-    { key: '1 - 6', desc: 'Jump directly to slide 1-6' },
-    { key: 'Home / End', desc: 'First or last slide' },
+    { key: '1 - 6', desc: 'Jump directly to chapter 01–06' },
+    { key: 'Home / End', desc: 'First or last chapter' },
     { key: 'I / Esc', desc: 'Toggle directory index / close' },
+    { key: '?', desc: 'Toggle keyboard shortcuts' },
   ];
 
   return (

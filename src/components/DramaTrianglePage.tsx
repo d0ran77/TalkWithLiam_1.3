@@ -3,13 +3,13 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
-  BookOpen,
   Repeat,
   Shield,
   Heart,
   Eye,
   Compass,
 } from 'lucide-react';
+import { MobileBrandHeader } from './MobileBrandHeader.tsx';
 
 import {
   TriangleMode,
@@ -28,12 +28,16 @@ const SCENARIOS = DRAMA_SCENARIOS;
 
 export interface DramaTrianglePageProps {
   onBackToLanding?: () => void;
+  onGoToAboutLiam?: () => void;
+  onGoToPractice?: () => void;
   onGoToPacModel?: () => void;
   onGoToContact?: () => void;
 }
 
 export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
   onBackToLanding,
+  onGoToAboutLiam,
+  onGoToPractice,
   onGoToPacModel,
   onGoToContact,
 }) => {
@@ -195,54 +199,22 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
       id="drama-triangle-dedicated-page"
       className="w-full flex-1 h-full min-h-0 flex flex-col relative overflow-hidden bg-[#FAF9F5] text-[#18181B] select-text font-sans"
     >
-      {/* Top Editorial Navigation Bar (Mobile < lg; Desktop uses shared left sidebar) */}
-      {(onBackToLanding || onGoToPacModel) && (
-        <header className="lg:hidden shrink-0 border-b border-[#E4E4E7] px-4 sm:px-8 py-3 bg-[#FAF9F5]/95 backdrop-blur-md z-20 flex items-center justify-between gap-3">
-          {onBackToLanding ? (
-            <button
-              type="button"
-              onClick={() => {
-                playSoftThump('pill');
-                onBackToLanding();
-              }}
-              className="flex items-center gap-2.5 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18181B]/40 rounded-xl transition-all cursor-pointer shrink-0"
-              aria-label="Return to Talk With Liam landing page"
-            >
-              <div className="w-8 h-8 rounded-full border border-[#E4E4E7] bg-[#FFFFFF] flex items-center justify-center text-[#71717A] group-hover:text-[#18181B] group-hover:border-[#18181B]/40 transition-colors shadow-2xs shrink-0">
-                <ArrowLeft className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-[14px] sm:text-[16px] font-medium tracking-[0.12em] uppercase text-[#18181B] leading-none whitespace-nowrap">
-                  TALK WITH LIAM
-                </span>
-                <span className="block text-[10px] sm:text-[11px] text-[#71717A] tracking-wider mt-0.5 font-normal whitespace-nowrap">
-                  TA Theory · The Drama Triangle
-                </span>
-              </div>
-            </button>
-          ) : (
-            <div />
-          )}
-
-          {onGoToPacModel && (
-            <button
-              type="button"
-              onClick={() => {
-                playSoftThump('pill');
-                onGoToPacModel();
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E4E4E7] bg-[#FFFFFF] hover:bg-stone-100 text-xs font-medium text-[#18181B] transition-colors cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-[#71717A]" aria-hidden="true" />
-              <span>PAC Model</span>
-            </button>
-          )}
-        </header>
-      )}
-
       {/* Scrollable Main Canvas */}
       <div className="flex-1 w-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-5xl mx-auto lg:mx-0 lg:max-w-none px-5 sm:px-8 lg:px-10 xl:px-12 pt-7 sm:pt-10 lg:pt-8 pb-24 sm:pb-28 lg:pb-20">
+        {/* Uniform Mobile Header (< lg): Identical to About Me */}
+        <div className="lg:hidden px-3 pt-1 pb-2 border-b border-[#E4E4E7]/80 bg-[#FAF9F5]">
+          <MobileBrandHeader
+            activeView="drama-triangle"
+            onBrandClick={() => onBackToLanding?.()}
+            onGoToAbout={() => onGoToAboutLiam?.()}
+            onGoToPractice={() => onGoToPractice?.()}
+            onGoToPacModel={() => onGoToPacModel?.()}
+            onGoToDramaTriangle={() => {}}
+            onGoToContact={() => onGoToContact?.()}
+          />
+        </div>
+
+        <div className="w-full max-w-5xl mx-auto lg:mx-0 lg:max-w-none px-5 sm:px-8 lg:px-10 xl:px-12 pt-6 sm:pt-8 lg:pt-8 pb-24 sm:pb-28 lg:pb-20">
           {/* Header Section */}
           <header className="max-w-3xl space-y-3">
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[#71717A]">

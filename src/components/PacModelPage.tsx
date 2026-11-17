@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, User, ExternalLink, Triangle } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { playSoftThump } from '../utils/sound.ts';
+import { MobileBrandHeader } from './MobileBrandHeader.tsx';
 import {
   PAC_SCENARIOS,
   CORE_NODES,
@@ -67,65 +68,22 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
       id="pac-model-dedicated-page"
       className="w-full flex-1 h-full min-h-0 flex flex-col relative overflow-hidden bg-[#FAF9F5] text-[#18181B] select-text"
     >
-      {/* Top Editorial Navigation Bar (Mobile < lg; Desktop uses shared left sidebar) */}
-      <header className="lg:hidden shrink-0 border-b border-stone-200/80 px-4 sm:px-8 py-3 bg-[#FAF9F5]/90 backdrop-blur-md z-20 flex items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={onBackToLanding}
-          className="flex items-center gap-2.5 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-xl transition-all cursor-pointer shrink-0"
-          aria-label="Return to Talk With Liam landing page"
-        >
-          <div className="w-8 h-8 rounded-full border border-stone-200/90 bg-white flex items-center justify-center text-stone-600 group-hover:text-stone-950 group-hover:border-stone-400 transition-colors shadow-2xs shrink-0">
-            <ArrowLeft className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="block text-[14px] sm:text-[16px] font-medium tracking-[0.12em] uppercase text-[#18181B] leading-none group-hover:text-stone-700 transition-colors whitespace-nowrap">
-              TALK WITH LIAM
-            </span>
-            <span className="block text-[10px] sm:text-[11px] text-[#71717A] tracking-wider mt-0.5 font-normal whitespace-nowrap">
-              How We Work: The PAC Model
-            </span>
-          </div>
-        </button>
-
-        <div className="flex items-center gap-2 sm:gap-3 text-xs shrink-0">
-          {onGoToDramaTriangle && (
-            <button
-              type="button"
-              onClick={() => {
-                playSoftThump('default');
-                onGoToDramaTriangle();
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <Triangle className="w-3.5 h-3.5 text-stone-500" />
-              <span>Drama Triangle</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => onNavigateToSlides(0)}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer whitespace-nowrap shrink-0"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-stone-500" />
-            <span>Practice Chapters</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onGoToAboutLiam}
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200/90 bg-white/80 hover:bg-stone-100 text-stone-700 hover:text-stone-950 transition-colors cursor-pointer whitespace-nowrap shrink-0"
-          >
-            <User className="w-3.5 h-3.5 text-stone-500" />
-            <span>About Liam</span>
-          </button>
-        </div>
-      </header>
-
       {/* Scrollable Main Canvas */}
       <div className="flex-1 w-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-5xl mx-auto lg:mx-0 lg:max-w-none px-5 sm:px-8 lg:px-10 xl:px-12 pt-8 sm:pt-10 lg:pt-8 pb-24 sm:pb-28 lg:pb-20">
+        {/* Uniform Mobile Header (< lg): Identical to About Me */}
+        <div className="lg:hidden px-3 pt-1 pb-2 border-b border-stone-200/70 bg-[#FAF9F5]">
+          <MobileBrandHeader
+            activeView="pac-model"
+            onBrandClick={onBackToLanding}
+            onGoToAbout={onGoToAboutLiam}
+            onGoToPractice={() => onNavigateToSlides(0)}
+            onGoToPacModel={() => {}}
+            onGoToDramaTriangle={() => onGoToDramaTriangle?.()}
+            onGoToContact={onGoToContact}
+          />
+        </div>
+
+        <div className="w-full max-w-5xl mx-auto lg:mx-0 lg:max-w-none px-5 sm:px-8 lg:px-10 xl:px-12 pt-6 sm:pt-8 lg:pt-8 pb-24 sm:pb-28 lg:pb-20">
           {/* Header Section */}
           <section className="max-w-2xl space-y-3.5 sm:space-y-4">
             <p className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#71717A] font-medium">

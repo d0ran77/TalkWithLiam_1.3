@@ -39,7 +39,7 @@ export const OverviewModal: React.FC<OverviewModalProps> = ({
                   Directory Overview
                 </span>
                 <h3 className="font-sans text-xl font-medium text-[#18181B]">
-                  Monograph Slides
+                  Practice Guide
                 </h3>
               </div>
 
@@ -98,7 +98,7 @@ export const OverviewModal: React.FC<OverviewModalProps> = ({
 
             {/* Modal Footer */}
             <div className="mt-5 pt-3.5 border-t border-stone-200/80 flex items-center justify-between text-xs text-[#71717A]">
-              <span>Press 1-6 or arrow keys to navigate directly</span>
+              <span>Press 1-6 or click any chapter to jump directly</span>
               <span className="font-mono text-[10px] md:text-[11px]">Talk With Liam • Willerby &amp; Online</span>
             </div>
           </motion.div>
