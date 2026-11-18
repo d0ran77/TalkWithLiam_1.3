@@ -164,10 +164,10 @@ export const AmbientNegativeSpaceWords: React.FC<AmbientNegativeSpaceWordsProps>
       const sizeIndex = Math.floor(Math.random() * SIZE_VARIANTS.length);
       const sizeClass = SIZE_VARIANTS[sizeIndex];
 
-      // Soft ambient transparency (richer behind frosted glassmorphism containers so blur refraction reads clearly)
+      // Soft ambient transparency so floating words stay clearly behind frosted glass containers
       const maxOpacity =
         variant === 'backdrop'
-          ? 0.28 + Math.random() * 0.14
+          ? 0.16 + Math.random() * 0.08
           : 0.14 + Math.random() * 0.14;
       const rotationDeg = (Math.random() - 0.5) * 3.5; // subtle natural tilt
       const duration = 14.0 + Math.random() * 4.0; // 14s to 18s serene slow float
@@ -190,10 +190,10 @@ export const AmbientNegativeSpaceWords: React.FC<AmbientNegativeSpaceWordsProps>
       });
     };
 
-    // Quick initial spawn on backdrop mode so glass refraction is visible immediately
-    const initialTimer = setTimeout(spawnWord, variant === 'backdrop' ? 180 : 1200);
+    // Wait for page container transition to settle before spawning backdrop words behind glass
+    const initialTimer = setTimeout(spawnWord, variant === 'backdrop' ? 850 : 1200);
     const secondTimer =
-      variant === 'backdrop' ? setTimeout(spawnWord, 900) : null;
+      variant === 'backdrop' ? setTimeout(spawnWord, 2200) : null;
 
     // Spawn every 10.5s so words emerge slowly from distance and never rush
     const interval = setInterval(spawnWord, 10500);

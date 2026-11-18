@@ -193,6 +193,11 @@ export default function App() {
   const [isKeyboardGuideOpen, setIsKeyboardGuideOpen] = useState<boolean>(false);
   const [isLocationOpen, setIsLocationOpen] = useState<boolean>(false);
 
+  // Remove pre-hydration fallback hiding class only after React has committed to the DOM
+  useEffect(() => {
+    document.documentElement.classList.remove('js-hydrating');
+  }, []);
+
   // Listen for pathname, hash and query parameter changes in URL (e.g. /about, /areas-of-work, /fees, #faq)
   useEffect(() => {
     const handleUrlCheck = () => {
@@ -706,49 +711,12 @@ export default function App() {
     <MotionConfig reducedMotion="user">
     <div
       id="app-root-viewport"
-      className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between px-2.5 sm:px-6 md:px-8 lg:px-12 2xl:px-16 3xl:px-24 py-1.5 sm:py-3.5 md:py-4 select-none relative transition-colors duration-700 ease-in-out bg-[#FAF9F5] text-[#18181B]"
+      className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between px-2.5 sm:px-6 md:px-8 lg:px-12 2xl:px-16 3xl:px-24 py-1.5 sm:py-3.5 md:py-4 select-none relative isolate transition-colors duration-700 ease-in-out bg-[#FAF9F5] text-[#18181B]"
     >
-      {/* Floating ambient negative-space words & soft radial light blooms rendered strictly behind all stage & sidebar content */}
-      {(viewMode === 'practice' ||
-        viewMode === 'pac-model' ||
-        viewMode === 'drama-triangle' ||
-        viewMode === 'pac-model-3d' ||
-        viewMode === 'drama-triangle-3d') && (
-        <>
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0"
-          >
-            <div
-              className="absolute -top-[18%] right-[6%] w-[52vw] h-[52vw] max-w-[740px] max-h-[740px] rounded-full blur-3xl opacity-80"
-              style={{
-                background:
-                  'radial-gradient(circle, rgba(45, 90, 67, 0.16) 0%, rgba(45, 90, 67, 0.05) 48%, rgba(45, 90, 67, 0) 75%)',
-              }}
-            />
-            <div
-              className="absolute -bottom-[20%] left-[20%] w-[56vw] h-[56vw] max-w-[780px] max-h-[780px] rounded-full blur-3xl opacity-80"
-              style={{
-                background:
-                  'radial-gradient(circle, rgba(196, 186, 168, 0.44) 0%, rgba(196, 186, 168, 0.14) 50%, rgba(196, 186, 168, 0) 75%)',
-              }}
-            />
-            <div
-              className="absolute top-[28%] left-[44%] w-[40vw] h-[40vw] max-w-[540px] max-h-[540px] rounded-full blur-3xl opacity-70"
-              style={{
-                background:
-                  'radial-gradient(circle, rgba(45, 90, 67, 0.11) 0%, rgba(24, 24, 27, 0.03) 50%, rgba(24, 24, 27, 0) 75%)',
-              }}
-            />
-          </div>
-          <AmbientNegativeSpaceWords variant="backdrop" />
-        </>
-      )}
-
       {/* Main Content Stage */}
       <main
         id="main-stage-container"
-        className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative z-10 overflow-visible my-auto py-0.5 sm:py-1 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 min-h-0"
+        className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative z-10 isolate overflow-visible my-auto py-0.5 sm:py-1 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 min-h-0"
       >
         <AnimatePresence mode="wait" initial={false}>
           {viewMode === 'minimal' ? (
@@ -785,29 +753,19 @@ export default function App() {
                 </button>
 
                 {/* Plain-English Practice Anchor (above Windy Dryden quote, no em-dashes) */}
-                <motion.p
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-6 max-w-md sm:max-w-lg lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl text-[14.5px] sm:text-[15.5px] md:text-[16px] lg:text-[16px] 2xl:text-[20px] 3xl:text-[23px] text-stone-500 leading-relaxed font-light text-center lg:text-left select-text text-balance"
-                >
+                <p className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-6 max-w-md sm:max-w-lg lg:max-w-xl 2xl:max-w-2xl 3xl:max-w-3xl text-[14.5px] sm:text-[15.5px] md:text-[16px] lg:text-[16px] 2xl:text-[20px] 3xl:text-[23px] text-stone-500 leading-relaxed font-light text-center lg:text-left select-text text-balance">
                   Grounded, direct, and relational counselling for individuals in Willerby, Hull, and online. A straight-talking space to work through anxiety, burnout, trauma, or feeling stuck, starting with a free introductory chat.
-                </motion.p>
+                </p>
 
                 {/* Core Philosophy Epigraph */}
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.14, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-[330px] sm:max-w-md lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl mx-auto lg:mx-0 text-center lg:text-left border-l-2 2xl:border-l-3 border-[#18181B] pl-3.5 sm:pl-4 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1.5 2xl:py-2.5 select-text"
-                >
+                <div className="mt-6 sm:mt-7 lg:mt-5 2xl:mt-7 3xl:mt-9 max-w-[330px] sm:max-w-md lg:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl 4xl:max-w-5xl mx-auto lg:mx-0 text-center lg:text-left border-l-2 2xl:border-l-3 border-[#18181B] pl-3.5 sm:pl-4 lg:pl-5 2xl:pl-7 3xl:pl-8 py-1.5 2xl:py-2.5 select-text">
                   <p className="font-serif italic text-[15px] sm:text-[17px] md:text-[18.5px] lg:text-[22px] 2xl:text-[28px] 3xl:text-[34px] 4xl:text-[38px] text-[#18181B] font-medium leading-relaxed text-center lg:text-left text-balance">
                     &ldquo;How can I best help you today? Is it by helping you solve a problem, by just listening, or by encouraging you to get things off your chest without interruption?&rdquo;
                   </p>
                   <cite className="block text-[11px] sm:text-xs lg:text-sm 2xl:text-base 3xl:text-lg font-mono tracking-widest text-stone-600 uppercase not-italic mt-2.5 lg:mt-2 2xl:mt-3 3xl:mt-3.5 text-center lg:text-left">
                     — Prof. Windy Dryden
                   </cite>
-                </motion.div>
+                </div>
 
                 {/* Refined Tactile Toolbar Buttons (Ultra-quiet micro-labels on mobile < lg; hover tooltips on desktop lg+) */}
                 <div
@@ -1597,12 +1555,41 @@ export default function App() {
               initial={PAGE_BREATH_INITIAL}
               animate={PAGE_BREATH_ANIMATE}
               exit={PAGE_BREATH_EXIT}
-              className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative overflow-visible min-h-0 gap-3 sm:gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20"
+              className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative isolate overflow-visible min-h-0 gap-3 sm:gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20"
             >
+              {/* Floating ambient negative-space words & soft radial light blooms mounted WITH this view and pinned strictly behind sidebar & stage (z-0) */}
+              <div
+                aria-hidden="true"
+                className="absolute -inset-x-6 -inset-y-4 lg:-inset-x-24 lg:-inset-y-8 pointer-events-none overflow-hidden select-none z-0 isolate"
+              >
+                <div
+                  className="absolute -top-[18%] right-[6%] w-[52vw] h-[52vw] max-w-[740px] max-h-[740px] rounded-full blur-3xl opacity-80"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(45, 90, 67, 0.16) 0%, rgba(45, 90, 67, 0.05) 48%, rgba(45, 90, 67, 0) 75%)',
+                  }}
+                />
+                <div
+                  className="absolute -bottom-[20%] left-[20%] w-[56vw] h-[56vw] max-w-[780px] max-h-[780px] rounded-full blur-3xl opacity-80"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(196, 186, 168, 0.44) 0%, rgba(196, 186, 168, 0.14) 50%, rgba(196, 186, 168, 0) 75%)',
+                  }}
+                />
+                <div
+                  className="absolute top-[28%] left-[44%] w-[40vw] h-[40vw] max-w-[540px] max-h-[540px] rounded-full blur-3xl opacity-70"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(45, 90, 67, 0.11) 0%, rgba(24, 24, 27, 0.03) 50%, rgba(24, 24, 27, 0) 75%)',
+                  }}
+                />
+                <AmbientNegativeSpaceWords variant="backdrop" />
+              </div>
+
               {/* Left Side: Brand, Hero Toolbar & Footer (Desktop >= lg — Shared across Practice & TA Theory) */}
               <div
                 id="hero-brand-block-pac"
-                className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-between h-full text-left select-none z-20 py-2"
+                className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-between h-full text-left select-none relative z-20 py-2"
               >
                 <div className="w-full shrink-0 relative z-30">
                   <button
@@ -1853,11 +1840,11 @@ export default function App() {
               {/* Right Side on Desktop (Card Stage matching Slides/Diary) / Full Stage on Mobile (< lg) */}
               <div
                 id="pac-stage-dynamic-area"
-                className="w-full flex-1 h-full min-w-0 min-h-0 flex items-center justify-center relative overflow-visible lg:py-4 lg:px-3.5 z-10"
+                className="w-full flex-1 h-full min-w-0 min-h-0 flex items-center justify-center relative overflow-visible lg:py-4 lg:px-3.5 z-20 isolate"
               >
                 <div
                   id="pac-model-stage-frame"
-                  className="w-full h-full lg:max-w-[1600px] lg:max-h-[1100px] rounded-2xl lg:rounded-3xl border border-white/85 bg-white/40 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-[#18181B]/[0.06] shadow-[0_18px_48px_-14px_rgba(24,24,27,0.10),0_6px_18px_-6px_rgba(24,24,27,0.05),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_0_28px_rgba(255,255,255,0.35)] flex flex-col overflow-hidden relative select-text"
+                  className="w-full h-full lg:max-w-[1600px] lg:max-h-[1100px] rounded-2xl lg:rounded-3xl border border-white/90 bg-white/62 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-[#18181B]/[0.06] shadow-[0_18px_48px_-14px_rgba(24,24,27,0.10),0_6px_18px_-6px_rgba(24,24,27,0.05),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_0_28px_rgba(255,255,255,0.4)] flex flex-col overflow-hidden relative select-text"
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div

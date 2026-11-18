@@ -347,20 +347,21 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
   }, [openChapterMenuKey]);
 
   const renderSectionBody = (index: number) => {
+    const animateSection = isAnimated && index > 0;
     switch (index) {
       case 0:
-        return <SlideAbout onNavigate={scrollToSection} flowMode animateFlow={isAnimated} />;
+        return <SlideAbout onNavigate={scrollToSection} flowMode animateFlow={animateSection} />;
       case 1:
-        return <SlideApproach onNavigate={scrollToSection} flowMode animateFlow={isAnimated} />;
+        return <SlideApproach onNavigate={scrollToSection} flowMode animateFlow={animateSection} />;
       case 2:
-        return <SlideSpecialisms onNavigate={scrollToSection} flowMode animateFlow={isAnimated} />;
+        return <SlideSpecialisms onNavigate={scrollToSection} flowMode animateFlow={animateSection} />;
       case 3:
         return (
           <SlideFees
             onNavigate={scrollToSection}
             onOpenLocation={onOpenLocation}
             flowMode
-            animateFlow={isAnimated}
+            animateFlow={animateSection}
           />
         );
       case 4:
@@ -372,11 +373,11 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
             onOpenPrivacy={onOpenPrivacy}
             onOpenLocation={onOpenLocation}
             flowMode
-            animateFlow={isAnimated}
+            animateFlow={animateSection}
           />
         );
       case 5:
-        return <SlideFaq onNavigate={scrollToSection} flowMode animateFlow={isAnimated} />;
+        return <SlideFaq onNavigate={scrollToSection} flowMode animateFlow={animateSection} />;
       default:
         return null;
     }
@@ -626,7 +627,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                   {/* Sequential Chapter Heading Block */}
                   <div className="relative mb-9 sm:mb-12">
                     <div className={`relative space-y-2.5 ${isKickerOpen ? 'z-40' : 'z-10'}`}>
-                      <BreathReveal enabled={isAnimated} delay={0} yOffset={10}>
+                      <BreathReveal enabled={isAnimated && idx > 0} delay={0} yOffset={10}>
                         <div className="relative inline-block practice-chapter-jump-trigger">
                           <button
                             type="button"
@@ -654,7 +655,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                         </div>
                       </BreathReveal>
 
-                      <BreathReveal enabled={isAnimated} delay={0.06} yOffset={14}>
+                      <BreathReveal enabled={isAnimated && idx > 0} delay={0.06} yOffset={14}>
                         <h2
                           id={`${sec.id}-heading`}
                           className="text-[22px] sm:text-[28px] md:text-[34px] leading-[1.12] font-medium tracking-[0.03em] text-[#18181B] uppercase text-balance"
@@ -663,7 +664,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                         </h2>
                       </BreathReveal>
 
-                      <BreathReveal enabled={isAnimated} delay={0.12} yOffset={10}>
+                      <BreathReveal enabled={isAnimated && idx > 0} delay={0.12} yOffset={10}>
                         <p className="text-[13px] sm:text-[14.5px] text-stone-500 font-normal leading-relaxed max-w-xl">
                           {sec.subtitle}
                         </p>
@@ -671,7 +672,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                     </div>
 
                     <BreathHairline
-                      enabled={isAnimated}
+                      enabled={isAnimated && idx > 0}
                       delay={0.14}
                       duration={0.68}
                       origin="left"
