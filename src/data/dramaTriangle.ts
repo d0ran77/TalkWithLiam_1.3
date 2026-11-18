@@ -42,6 +42,14 @@ export const DRAMA_INTRO = {
   ],
 };
 
+export const DRAMA_YOUTUBE_SHORT = {
+  id: 'EiDjO5SzBHw',
+  watchUrl: 'https://youtube.com/shorts/EiDjO5SzBHw',
+  embedUrl: 'https://www.youtube-nocookie.com/embed/EiDjO5SzBHw?rel=0',
+  thumbnailUrl: 'https://i.ytimg.com/vi/EiDjO5SzBHw/hqdefault.jpg',
+  title: "Liam Doran explains Karpman's Drama Triangle and Acey Choy's Winner's Triangle",
+};
+
 export const DRAMA_ROLES: Record<DramaRoleId, RoleDetail> = {
   persecutor: {
     id: 'persecutor',

@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { motion, useScroll, useSpring, useReducedMotion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { playSoftThump } from '../utils/sound.ts';
 import { SlideAbout } from './slides/SlideAbout.tsx';
 import { SlideApproach } from './slides/SlideApproach.tsx';
@@ -115,7 +115,6 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
   onOpenLocation,
   onOpenOverview,
 }) => {
-  const [isTheoryMenuOpen, setIsTheoryMenuOpen] = useState<boolean>(false);
   const [openChapterMenuKey, setOpenChapterMenuKey] = useState<string | null>(null);
 
   const prefersReducedMotion = useReducedMotion();
@@ -177,18 +176,12 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
     [prefersReducedMotion]
   );
 
-  // Snap cleanly on first mount when entering via a deep link (/fees, /contact, homepage drawer)
-  useEffect(() => {
+  // Snap cleanly before paint on first mount when entering via a deep link (/fees, /contact, homepage drawer)
+  useLayoutEffect(() => {
     if (hasMountedScrollRef.current) return;
     hasMountedScrollRef.current = true;
     if (activeSectionIndex > 0) {
-      const raf1 = requestAnimationFrame(() => {
-        const raf2 = requestAnimationFrame(() => {
-          scrollTargetSection(activeSectionIndex, 'auto');
-        });
-        return () => cancelAnimationFrame(raf2);
-      });
-      return () => cancelAnimationFrame(raf1);
+      scrollTargetSection(activeSectionIndex, 'auto');
     }
   }, [activeSectionIndex, scrollTargetSection]);
 
@@ -329,25 +322,17 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
     [onSectionChange, scrollTargetSection]
   );
 
-  // Close TA Theory dropdown & inline chapter popovers on outside click or Escape
+  // Close inline chapter popovers on outside click or Escape
   useEffect(() => {
-    if (!isTheoryMenuOpen && openChapterMenuKey === null) return;
+    if (openChapterMenuKey === null) return;
     const handleOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
-      if (
-        isTheoryMenuOpen &&
-        !target.closest('#practice-theory-popover') &&
-        !target.closest('#practice-theory-toggle')
-      ) {
-        setIsTheoryMenuOpen(false);
-      }
-      if (openChapterMenuKey !== null && !target.closest('.practice-chapter-jump-trigger')) {
+      if (!target.closest('.practice-chapter-jump-trigger')) {
         setOpenChapterMenuKey(null);
       }
     };
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsTheoryMenuOpen(false);
         setOpenChapterMenuKey(null);
       }
     };
@@ -359,7 +344,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
       document.removeEventListener('touchstart', handleOutside);
       window.removeEventListener('keydown', handleKey);
     };
-  }, [isTheoryMenuOpen, openChapterMenuKey]);
+  }, [openChapterMenuKey]);
 
   const renderSectionBody = (index: number) => {
     switch (index) {
@@ -400,16 +385,36 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
   return (
     <div
       id="practice-guide-shell"
-      className="w-full h-full flex flex-col bg-[#FAF9F5] lg:rounded-3xl lg:border lg:border-stone-200/90 lg:shadow-[0_20px_50px_rgba(24,24,27,0.06)] overflow-hidden relative select-text"
+      className="w-full h-full flex flex-col bg-transparent overflow-hidden relative select-text"
     >
+      {/* Desktop Vertical Reading Progress Thread (lg+) */}
+      <div
+        aria-hidden="true"
+        className="hidden lg:block absolute right-2.5 top-[58px] bottom-5 w-[3px] rounded-full bg-stone-200/75 overflow-hidden z-40 pointer-events-none"
+      >
+        {isAnimated ? (
+          <motion.div
+            className="w-full h-full rounded-full bg-[#2D5A43] origin-top will-change-transform"
+            style={{ scaleY: smoothProgress }}
+          />
+        ) : (
+          <div
+            className="w-full rounded-full bg-[#2D5A43] transition-[height] duration-150"
+            style={{
+              height: `${Math.round(((activeSectionIndex + 1) / PRACTICE_SECTIONS.length) * 100)}%`,
+            }}
+          />
+        )}
+      </div>
+
       {/* Unified Scroll Container so mobile brand header, sticky 01-06 tabs, reading progress & scroll-spy align cleanly */}
       <div
         ref={scrollContainerRef}
         id="practice-monograph-scroll-container"
-        className="w-full flex-1 overflow-y-auto custom-scrollbar relative"
+        className="w-full flex-1 overflow-y-auto no-scrollbar relative"
       >
-        {/* Uniform Mobile Header (< lg): Identical to About Me, scrolls cleanly above sticky 01-06 chapter strip */}
-        <div className="lg:hidden px-3 pt-1 border-b border-stone-200/60 bg-[#FAF9F5] relative z-50">
+        {/* Uniform Mobile Header (< lg): Identical to About Me & TA Theory, scrolls cleanly above sticky 01-06 chapter strip */}
+        <div className="lg:hidden px-3 pt-1 border-b border-stone-200/60 bg-transparent relative z-50">
           <MobileBrandHeader
             activeView="practice"
             onBrandClick={onBackToLanding}
@@ -421,104 +426,19 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
           />
         </div>
 
-        {/* Compact Sticky Top Chrome (<= 15% of mobile viewport height) */}
+        {/* Sticky Chapter Anchor Tabs (and mobile horizontal progress bar) */}
         <header
           ref={stickyHeaderRef}
-          className="sticky top-0 z-30 bg-[#FAF9F5]/90 backdrop-blur-xl backdrop-saturate-150 border-b border-stone-200/80"
+          className="sticky top-0 z-30 bg-[#FAF9F5]/82 border-b border-stone-900/[0.07]"
         >
-          {/* Desktop Row 1: Return Link + Quiet Typography Navigation (No Diary) */}
-          <div className="hidden lg:flex max-w-6xl mx-auto px-8 h-12 items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                playSoftThump('default');
-                onBackToLanding();
-              }}
-              className="inline-flex items-center gap-1.5 text-xs font-medium tracking-[0.12em] uppercase text-[#18181B] hover:text-stone-600 transition-colors cursor-pointer py-1.5 pr-1 shrink-0"
-              aria-label="Return to homepage"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-stone-600 shrink-0" />
-              <span className="font-semibold">TALK WITH LIAM</span>
-            </button>
-
-            <nav aria-label="Site navigation" className="flex items-center gap-5 shrink-0 relative">
-              <button
-                type="button"
-                onClick={() => {
-                  playSoftThump('default');
-                  onGoToAbout();
-                }}
-                className="text-xs font-medium tracking-[0.06em] uppercase text-stone-600 hover:text-[#18181B] transition-colors cursor-pointer py-1 whitespace-nowrap"
-              >
-                About
-              </button>
-
-              <div className="relative">
-                <button
-                  id="practice-theory-toggle"
-                  type="button"
-                  onClick={() => {
-                    playSoftThump('default');
-                    setIsTheoryMenuOpen((prev) => !prev);
-                  }}
-                  aria-expanded={isTheoryMenuOpen}
-                  className={`inline-flex items-center gap-1 text-xs font-medium tracking-[0.06em] uppercase transition-colors cursor-pointer py-1 whitespace-nowrap ${
-                    isTheoryMenuOpen ? 'text-[#18181B]' : 'text-stone-600 hover:text-[#18181B]'
-                  }`}
-                >
-                  <span>TA Theory</span>
-                  <ChevronDown
-                    className={`w-3 h-3 text-stone-500 transition-transform duration-150 ${
-                      isTheoryMenuOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {isTheoryMenuOpen && (
-                    <motion.div
-                      id="practice-theory-popover"
-                      initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -6, scale: 0.96 }}
-                      transition={{ duration: 0.16, ease: 'easeOut' }}
-                      className="absolute right-0 top-full mt-2 w-48 bg-[#FAF9F5]/95 backdrop-blur-2xl border border-stone-200/90 ring-1 ring-[#18181B]/[0.06] rounded-xl shadow-[0_12px_32px_-6px_rgba(24,24,27,0.14)] p-1.5 z-50 text-left space-y-0.5"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsTheoryMenuOpen(false);
-                          onGoToPacModel();
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:text-[#18181B] hover:bg-stone-200/50 transition-colors cursor-pointer"
-                      >
-                        The PAC Model
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsTheoryMenuOpen(false);
-                          onGoToDramaTriangle();
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:text-[#18181B] hover:bg-stone-200/50 transition-colors cursor-pointer"
-                      >
-                        The Drama Triangle
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </nav>
-          </div>
-
-          {/* Row 2: Quiet Horizontal Anchor Tabs (single-line interactive 01-06 strip on mobile & desktop) */}
+          {/* Quiet Horizontal Anchor Tabs (single-line interactive 01-06 strip on mobile & desktop) */}
           <nav
             aria-label="Practice sections quick jump"
-            className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 lg:border-t lg:border-stone-200/50"
+            className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8"
           >
             <div
               ref={tabNavRef}
-              className="flex items-center lg:justify-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-1"
+              className="flex items-center lg:justify-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-1 lg:py-1.5"
             >
               {PRACTICE_SECTIONS.map((sec, idx) => {
                 const isActive = activeSectionIndex === idx;
@@ -559,8 +479,8 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
             </div>
           </nav>
 
-          {/* Whisper-Thin Forest Green Reading Progress Thread */}
-          <div className="w-full h-[1.5px] bg-stone-200/60 overflow-hidden">
+          {/* Whisper-Thin Forest Green Reading Progress Thread (Mobile < lg horizontal) */}
+          <div className="lg:hidden w-full h-[1.5px] bg-stone-200/60 overflow-hidden">
             {isAnimated ? (
               <motion.div
                 className="h-full bg-[#2D5A43] origin-left will-change-transform"
@@ -645,7 +565,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                 key={sec.id}
                 id={sec.id}
                 aria-labelledby={`${sec.id}-heading`}
-                className={`w-full relative bg-[#FAF9F5] scroll-mt-16 ${
+                className={`w-full relative bg-transparent scroll-mt-16 ${
                   isDividerOpen || isKickerOpen ? 'z-40' : ''
                 } ${
                   idx === 0
@@ -678,7 +598,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border font-mono text-[10.5px] tracking-[0.18em] uppercase transition-all cursor-pointer ${
                           isDividerOpen
                             ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-xs'
-                            : 'bg-[#FAF9F5] text-stone-500 border-stone-200/90 hover:border-stone-400 hover:text-[#18181B] shadow-2xs'
+                            : 'bg-white/65 text-stone-500 border-white/80 ring-1 ring-stone-900/[0.06] hover:bg-white/85 hover:text-[#18181B] shadow-2xs'
                         }`}
                       >
                         <span>{sec.num}</span>
@@ -768,7 +688,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
         </div>
 
         {/* Clean Closing Sign-Off & Footer */}
-        <footer className="bg-[#FAF9F5] border-t border-zinc-200/80 pt-14 sm:pt-20 pb-24 sm:pb-28 lg:pb-20 px-4 sm:px-8">
+        <footer className="bg-transparent border-t border-zinc-200/80 pt-14 sm:pt-20 pb-24 sm:pb-28 lg:pb-20 px-4 sm:px-8">
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center space-y-5">
             <div className="space-y-1">
               <p className="font-serif italic text-base sm:text-lg text-[#18181B]">
@@ -802,7 +722,7 @@ export const PracticeGuideView: React.FC<PracticeGuideViewProps> = ({
               </button>
             </div>
 
-            <div className="pt-2 w-full flex justify-center">
+            <div className="pt-2 w-full flex justify-center lg:hidden">
               <Footer
                 onOpenPrivacy={onOpenPrivacy}
                 onOpenHelpline={onOpenHelpline}

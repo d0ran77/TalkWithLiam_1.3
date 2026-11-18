@@ -88,7 +88,7 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search questions (e.g. fees, first session, confidentiality)..."
-              className="w-full pl-9.5 pr-4 py-2 sm:py-2.5 rounded-xl bg-white border border-stone-200/90 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-400 shadow-2xs"
+              className="w-full pl-9.5 pr-4 py-2 sm:py-2.5 rounded-xl bg-white/55 border border-white/80 ring-1 ring-[#18181B]/[0.06] text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
             />
           </div>
 
@@ -105,7 +105,7 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({
                     isSelected
                       ? 'bg-[#18181B] text-white shadow-2xs'
                       : flowMode
-                      ? 'bg-white/95 border border-zinc-200/90 text-stone-600 hover:bg-white hover:text-stone-900'
+                      ? 'bg-white/55 border border-white/80 ring-1 ring-[#18181B]/[0.06] text-stone-600 hover:bg-white/80 hover:text-stone-900'
                       : 'bg-stone-100/90 text-stone-600 hover:bg-stone-200/80 hover:text-stone-900'
                   }`}
                 >
@@ -139,7 +139,7 @@ export const SlideFaq: React.FC<SlideFaqProps> = ({
                   duration={0.54}
                 >
                   <div
-                    className={`rounded-xl sm:rounded-2xl bg-white border border-stone-200/80 shadow-2xs overflow-hidden ${
+                    className={`rounded-xl sm:rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.04)] overflow-hidden ${
                       animate
                         ? 'hover:border-stone-300/90 hover:shadow-xs transition-all duration-300'
                         : 'transition-colors'

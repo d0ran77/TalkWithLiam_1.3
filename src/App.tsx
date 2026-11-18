@@ -513,117 +513,6 @@ export default function App() {
     scrollToTop();
   }, [scrollToTop]);
 
-  // Helper for computing responsive dimensions before or after DOM attach
-  const getResponsiveDimensions = useCallback(() => {
-    if (typeof window === 'undefined') {
-      return { stageW: 1000, stageH: 700, cardW: 900, cardH: 650 };
-    }
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
-    const isMobile = winW < 1024;
-
-    // Available stage dimensions
-    // On mobile, header takes ~80px, footer ~40px, padding ~16px -> stage height is approx winH - 136px
-    const stageW = isMobile ? Math.max(280, winW - 16) : Math.max(500, winW - 380);
-    const stageH = isMobile ? Math.max(300, winH - 136) : Math.max(450, winH - 85);
-
-    const cardW = isMobile
-      ? Math.max(280, Math.min(stageW - 4, 680))
-      : Math.max(600, Math.min(stageW - 16, 1600));
-
-    const cardH = isMobile
-      ? Math.max(280, Math.min(stageH - 4, 760))
-      : Math.max(480, Math.min(stageH - 12, 1100));
-
-    return { stageW, stageH, cardW, cardH };
-  }, []);
-
-  // Responsive stage measurement (shared by Diary & TA Theory card frames)
-  const stageRef = useRef<HTMLDivElement | null>(null);
-
-  const [cardWidth, setCardWidth] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const winW = window.innerWidth;
-      const isMobile = winW < 1024;
-      const stageW = isMobile ? Math.max(280, winW - 16) : Math.max(500, winW - 380);
-      return isMobile
-        ? Math.max(280, Math.min(stageW - 4, 680))
-        : Math.max(600, Math.min(stageW - 16, 1600));
-    }
-    return 900;
-  });
-
-  const [cardHeight, setCardHeight] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const winW = window.innerWidth;
-      const winH = window.innerHeight;
-      const isMobile = winW < 1024;
-      const stageH = isMobile ? Math.max(300, winH - 136) : Math.max(450, winH - 85);
-      return isMobile
-        ? Math.max(280, Math.min(stageH - 4, 760))
-        : Math.max(480, Math.min(stageH - 12, 1100));
-    }
-    return 650;
-  });
-
-  const updateDimensions = useCallback(() => {
-    if (stageRef.current) {
-      const width = stageRef.current.clientWidth;
-      const height = stageRef.current.clientHeight;
-      if (width > 0 && height > 0) {
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
-        const calculatedWidth = isMobile
-          ? Math.max(280, Math.min(width - 4, 680))
-          : Math.max(600, Math.min(width - 16, 1600));
-
-        const calculatedHeight = isMobile
-          ? Math.max(280, Math.min(height - 4, 760))
-          : Math.max(480, Math.min(height - 12, 1100));
-
-        setCardWidth(calculatedWidth);
-        setCardHeight(calculatedHeight);
-        return;
-      }
-    }
-    // Fallback if stageRef is not yet attached
-    const { cardW, cardH } = getResponsiveDimensions();
-    setCardWidth(cardW);
-    setCardHeight(cardH);
-  }, [getResponsiveDimensions]);
-
-  // Callback ref to instantly measure when stage DOM node attaches
-  const setStageRef = useCallback((node: HTMLDivElement | null) => {
-    stageRef.current = node;
-    if (node) {
-      updateDimensions();
-      requestAnimationFrame(() => {
-        updateDimensions();
-      });
-    }
-  }, [updateDimensions]);
-
-  useEffect(() => {
-    updateDimensions();
-    const handleResize = () => updateDimensions();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [updateDimensions]);
-
-  // ResizeObserver for dynamic stage measurement whenever viewMode changes or stageRef attaches
-  useEffect(() => {
-    if (!stageRef.current) {
-      updateDimensions();
-      return;
-    }
-    const el = stageRef.current;
-    const observer = new ResizeObserver(() => {
-      updateDimensions();
-    });
-    observer.observe(el);
-    updateDimensions();
-    return () => observer.disconnect();
-  }, [viewMode, updateDimensions]);
-
   // Preload all gallery and portrait image assets to eliminate first-load lag
   useEffect(() => {
     PHOTOS.forEach((photo) => {
@@ -819,12 +708,49 @@ export default function App() {
       id="app-root-viewport"
       className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between px-2.5 sm:px-6 md:px-8 lg:px-12 2xl:px-16 3xl:px-24 py-1.5 sm:py-3.5 md:py-4 select-none relative transition-colors duration-700 ease-in-out bg-[#FAF9F5] text-[#18181B]"
     >
+      {/* Floating ambient negative-space words & soft radial light blooms rendered strictly behind all stage & sidebar content */}
+      {(viewMode === 'practice' ||
+        viewMode === 'pac-model' ||
+        viewMode === 'drama-triangle' ||
+        viewMode === 'pac-model-3d' ||
+        viewMode === 'drama-triangle-3d') && (
+        <>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0"
+          >
+            <div
+              className="absolute -top-[18%] right-[6%] w-[52vw] h-[52vw] max-w-[740px] max-h-[740px] rounded-full blur-3xl opacity-80"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(45, 90, 67, 0.16) 0%, rgba(45, 90, 67, 0.05) 48%, rgba(45, 90, 67, 0) 75%)',
+              }}
+            />
+            <div
+              className="absolute -bottom-[20%] left-[20%] w-[56vw] h-[56vw] max-w-[780px] max-h-[780px] rounded-full blur-3xl opacity-80"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(196, 186, 168, 0.44) 0%, rgba(196, 186, 168, 0.14) 50%, rgba(196, 186, 168, 0) 75%)',
+              }}
+            />
+            <div
+              className="absolute top-[28%] left-[44%] w-[40vw] h-[40vw] max-w-[540px] max-h-[540px] rounded-full blur-3xl opacity-70"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(45, 90, 67, 0.11) 0%, rgba(24, 24, 27, 0.03) 50%, rgba(24, 24, 27, 0) 75%)',
+              }}
+            />
+          </div>
+          <AmbientNegativeSpaceWords variant="backdrop" />
+        </>
+      )}
+
       {/* Main Content Stage */}
       <main
         id="main-stage-container"
-        className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative overflow-visible my-auto py-0.5 sm:py-1 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 min-h-0"
+        className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative z-10 overflow-visible my-auto py-0.5 sm:py-1 gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20 min-h-0"
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {viewMode === 'minimal' ? (
             /* Minimal Landing View (Centered on Mobile, Left-aligned on Desktop, with exquisite tactile buttons) */
             <motion.div
@@ -1313,30 +1239,6 @@ export default function App() {
               />
             </div>
             </motion.div>
-          ) : viewMode === 'practice' ? (
-            <motion.div
-              key="practice-guide-wrapper"
-              initial={PAGE_BREATH_INITIAL}
-              animate={PAGE_BREATH_ANIMATE}
-              exit={PAGE_BREATH_EXIT}
-              className="w-full max-w-[1440px] mx-auto flex-1 flex flex-col min-h-0 overflow-hidden"
-            >
-              <PracticeGuideView
-                activeSectionIndex={currentSlideIndex}
-                sectionJumpRequest={sectionJumpRequest}
-                onSectionChange={handlePracticeSectionChange}
-                onBackToLanding={() => handleSelectViewMode('minimal')}
-                onGoToAbout={() => handleSelectViewMode('portrait')}
-                onGoToPacModel={() => handleSelectViewMode('pac-model')}
-                onGoToDramaTriangle={() => handleSelectViewMode('drama-triangle')}
-                onCopyEmail={handleCopyEmail}
-                copiedEmail={copiedEmail}
-                onOpenPrivacy={() => setIsPrivacyOpen(true)}
-                onOpenHelpline={() => setIsHelplineOpen(true)}
-                onOpenLocation={() => setIsLocationOpen(true)}
-                onOpenOverview={() => setIsOverviewOpen(true)}
-              />
-            </motion.div>
           ) : viewMode === 'portrait' ? (
             /* Portrait & Full Essay Mode */
             <motion.div
@@ -1408,10 +1310,10 @@ export default function App() {
                     <button
                       id="brand-home-trigger-essay"
                       onClick={() => {
-                        goToSlide(0);
+                        handleSelectViewMode('minimal');
                       }}
                       className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-xl transition-all cursor-pointer"
-                      aria-label="Open practice guide"
+                      aria-label="Return to homepage"
                     >
                       <h1 className="text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px] xl:text-[36px] 2xl:text-[46px] 3xl:text-[54px] font-medium tracking-[0.14em] 2xl:tracking-[0.15em] uppercase text-[#18181B] leading-[1.08] whitespace-nowrap group-hover:text-stone-700 transition-colors">
                         TALK WITH LIAM
@@ -1422,7 +1324,7 @@ export default function App() {
                     </button>
 
                     {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
-                    <div className="mt-4 sm:mt-5 2xl:mt-7 flex items-center gap-2 2xl:gap-3.5 relative">
+                    <div className="mt-4 sm:mt-5 2xl:mt-7 flex items-center gap-2.5 2xl:gap-3.5 relative">
                       {/* 1. Person Heroicon (Active: toggles portrait view) */}
                       <div className="relative group/tooltip flex flex-col items-center">
                         <motion.button
@@ -1430,11 +1332,11 @@ export default function App() {
                           whileTap={{ scale: 0.94 }}
                           id="practitioner-portrait-toggle-btn-active"
                           onClick={handleTogglePortrait}
-                          className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-stone-900 text-white border-stone-900 shadow-md flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
+                          className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
                           aria-label="Close portrait view"
                           aria-pressed={true}
                         >
-                          <User className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
+                          <User className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
                         </motion.button>
                         <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                           About Liam
@@ -1448,10 +1350,10 @@ export default function App() {
                           whileTap={{ scale: 0.94 }}
                           id="practitioner-carousel-toggle-btn-desktop"
                           onClick={handleTogglePractice}
-                          className="group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
+                          className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)] flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0"
                           aria-label="Open practice guide"
                         >
-                          <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                          <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
                         </motion.button>
                         <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
                           Practice
@@ -1469,15 +1371,15 @@ export default function App() {
                             setIsSocialOpen(false);
                             setIsTheoryOpen((prev) => !prev);
                           }}
-                          className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                          className={`group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
                             isTheoryOpen
-                              ? 'bg-stone-900 text-white border-stone-900 shadow-md'
-                              : 'bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                              ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                              : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
                           }`}
                           aria-label="Transactional Analysis theory guides"
                           aria-expanded={isTheoryOpen}
                         >
-                          <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110 shrink-0" />
+                          <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
                         </motion.button>
                         {!isTheoryOpen && (
                           <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
@@ -1502,10 +1404,10 @@ export default function App() {
                             setIsTheoryOpen(false);
                             setIsSocialOpen((prev) => !prev);
                           }}
-                          className={`group/icon w-9 h-9 sm:w-10 sm:h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                          className={`group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
                             isSocialOpen
-                              ? 'bg-stone-900 text-white border-stone-900 shadow-md'
-                              : 'bg-gradient-to-b from-white via-white to-stone-50/90 text-stone-700 hover:text-stone-950 border-stone-200/90 hover:border-stone-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+                              ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                              : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
                           }`}
                           aria-label={isSocialOpen ? 'Close channels' : 'Open social & mail channels'}
                           aria-expanded={isSocialOpen}
@@ -1529,7 +1431,7 @@ export default function App() {
                                 exit={{ rotate: -90, opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                               >
-                                <MessageCircle className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-300 group-hover/icon:scale-110" />
+                                <MessageCircle className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110" />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1685,7 +1587,8 @@ export default function App() {
                 }}
               />
             </motion.div>
-          ) : viewMode === 'pac-model' ||
+          ) : viewMode === 'practice' ||
+            viewMode === 'pac-model' ||
             viewMode === 'drama-triangle' ||
             viewMode === 'pac-model-3d' ||
             viewMode === 'drama-triangle-3d' ? (
@@ -1696,96 +1599,106 @@ export default function App() {
               exit={PAGE_BREATH_EXIT}
               className="w-full max-w-[2400px] mx-auto flex-1 flex flex-col lg:flex-row items-stretch justify-between relative overflow-visible min-h-0 gap-3 sm:gap-4 lg:gap-8 xl:gap-12 2xl:gap-16 3xl:gap-20"
             >
-              {/* Left Side: Brand, Hero Toolbar & Footer (Desktop >= lg) */}
+              {/* Left Side: Brand, Hero Toolbar & Footer (Desktop >= lg — Shared across Practice & TA Theory) */}
               <div
                 id="hero-brand-block-pac"
                 className="hidden lg:flex lg:w-[280px] xl:w-[320px] 2xl:w-[420px] 3xl:w-[480px] shrink-0 flex-col items-start justify-between h-full text-left select-none z-20 py-2"
               >
-                <button
-                  id="brand-home-trigger-pac"
-                  onClick={() => {
-                    handleSelectViewMode('minimal');
-                  }}
-                  className="flex flex-col items-start text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-xl transition-all cursor-pointer"
-                  aria-label="Return to minimal landing page"
-                >
-                  <h1 className="text-[30px] xl:text-[34px] 2xl:text-[44px] 3xl:text-[52px] font-medium tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] whitespace-nowrap transition-colors text-[#18181B] group-hover:text-stone-700">
-                    TALK WITH LIAM
-                  </h1>
-                  <p className="text-[14px] 2xl:text-[18px] 3xl:text-[22px] tracking-wider mt-2 2xl:mt-3.5 3xl:mt-4 font-normal whitespace-nowrap text-[#71717A]">
-                    Psychotherapeutic Counselling
-                  </p>
-                </button>
+                <div className="w-full shrink-0 relative z-30">
+                  <button
+                    id="brand-home-trigger-pac"
+                    onClick={() => {
+                      handleSelectViewMode('minimal');
+                    }}
+                    className="flex flex-col items-start text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 rounded-xl transition-all cursor-pointer"
+                    aria-label="Return to homepage"
+                  >
+                    <h1 className="text-[30px] xl:text-[34px] 2xl:text-[44px] 3xl:text-[52px] font-medium tracking-[0.14em] 2xl:tracking-[0.15em] uppercase leading-[1.08] whitespace-nowrap transition-colors text-[#18181B] group-hover:text-stone-700">
+                      TALK WITH LIAM
+                    </h1>
+                    <p className="text-[14px] 2xl:text-[18px] 3xl:text-[22px] tracking-wider mt-2 2xl:mt-3.5 3xl:mt-4 font-normal whitespace-nowrap text-[#71717A]">
+                      Psychotherapeutic Counselling
+                    </p>
+                  </button>
 
-                {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
-                <div className="mt-5 2xl:mt-7 flex items-center justify-start gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
-                  {/* 1. Person Heroicon: About Liam */}
-                  <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.94 }}
-                      id="practitioner-portrait-toggle-btn-pac"
-                      onClick={() => {
-                        setIsSocialOpen(false);
-                        setIsTheoryOpen(false);
-                        handleTogglePortrait();
-                      }}
-                      className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
-                      aria-label="About Liam"
-                    >
-                      <User className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
-                    </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      About Liam
-                    </span>
-                  </div>
-
-                  {/* 2. Practice Guide Book Icon */}
-                  <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.94 }}
-                      id="practitioner-carousel-toggle-btn-pac"
-                      onClick={handleTogglePractice}
-                      className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
-                      aria-label="Open practice guide"
-                    >
-                      <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
-                    </motion.button>
-                    <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                      Practice
-                    </span>
-                  </div>
-
-                  {/* 3. TA Theory Icon (Active in TA Theory views) */}
-                  <div className="relative group/tooltip flex flex-col items-center">
-                    <motion.button
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.94 }}
-                      id="practitioner-theory-toggle-btn-ta-active"
-                      onClick={() => {
-                        playSoftThump('default');
-                        setIsSocialOpen(false);
-                        setIsTheoryOpen((prev) => !prev);
-                      }}
-                      aria-pressed={true}
-                      aria-expanded={isTheoryOpen}
-                      className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-                      aria-label="Open TA Theory menu"
-                    >
-                      <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
-                    </motion.button>
-                    {!isTheoryOpen && (
+                  {/* Heroicons Toolbar under Psychotherapeutic Counselling */}
+                  <div className="mt-5 2xl:mt-7 flex items-center justify-start gap-2.5 2xl:gap-3.5 relative shrink-0 p-1 overflow-visible">
+                    {/* 1. Person Heroicon: About Liam */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-portrait-toggle-btn-pac"
+                        onClick={() => {
+                          setIsSocialOpen(false);
+                          setIsTheoryOpen(false);
+                          handleTogglePortrait();
+                        }}
+                        className="group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]"
+                        aria-label="About Liam"
+                      >
+                        <User className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:rotate-3 shrink-0" />
+                      </motion.button>
                       <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
-                        TA Theory
+                        About Liam
                       </span>
-                    )}
-                  </div>
+                    </div>
 
-                  {renderTheoryDrawer(
-                    'ta-desktop',
-                    'absolute top-full mt-2 left-0'
-                  )}
+                    {/* 2. Practice Guide Book Icon */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-carousel-toggle-btn-pac"
+                        onClick={handleTogglePractice}
+                        aria-pressed={viewMode === 'practice'}
+                        className={`group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                          viewMode === 'practice'
+                            ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                            : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
+                        }`}
+                        aria-label="Open practice guide"
+                      >
+                        <BookOpen className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 group-hover/icon:-rotate-3 shrink-0" />
+                      </motion.button>
+                      <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                        Practice
+                      </span>
+                    </div>
+
+                    {/* 3. TA Theory Icon (Active in TA Theory views) */}
+                    <div className="relative group/tooltip flex flex-col items-center">
+                      <motion.button
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.94 }}
+                        id="practitioner-theory-toggle-btn-ta-active"
+                        onClick={() => {
+                          playSoftThump('default');
+                          setIsSocialOpen(false);
+                          setIsTheoryOpen((prev) => !prev);
+                        }}
+                        aria-pressed={viewMode !== 'practice'}
+                        aria-expanded={isTheoryOpen}
+                        className={`group/icon w-10 h-10 2xl:w-13 2xl:h-13 3xl:w-15 3xl:h-15 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 cursor-pointer shrink-0 ${
+                          viewMode !== 'practice' || isTheoryOpen
+                            ? 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                            : 'bg-gradient-to-b from-white via-[#FCFBF8] to-[#F5F2EB] text-stone-700 hover:text-stone-950 border-stone-200/90 ring-1 ring-stone-900/[0.04] hover:border-stone-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_rgba(24,24,27,0.1)]'
+                        }`}
+                        aria-label="Open TA Theory menu"
+                      >
+                        <PacStackIcon className="w-4 h-4 2xl:w-5.5 2xl:h-5.5 3xl:w-6.5 3xl:h-6.5 transition-transform duration-200 group-hover/icon:scale-110 shrink-0" />
+                      </motion.button>
+                      {!isTheoryOpen && (
+                        <span className="pointer-events-none absolute -bottom-6 2xl:-bottom-8 3xl:-bottom-10 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap text-[9.5px] 2xl:text-[11.5px] 3xl:text-[13px] font-mono tracking-wider uppercase text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-stone-200/80 shadow-2xs z-30">
+                          TA Theory
+                        </span>
+                      )}
+                    </div>
+
+                    {renderTheoryDrawer(
+                      'ta-desktop',
+                      'absolute top-full mt-2 left-0'
+                    )}
 
                   {/* 4. Speech Bubble Heroicon: Opens channels drawer underneath */}
                   <div className="relative group/tooltip flex flex-col items-center">
@@ -1923,6 +1836,7 @@ export default function App() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  </div>
                 </div>
 
                 {/* Non-sticky Footer anchored at bottom of desktop left sidebar */}
@@ -1939,20 +1853,13 @@ export default function App() {
               {/* Right Side on Desktop (Card Stage matching Slides/Diary) / Full Stage on Mobile (< lg) */}
               <div
                 id="pac-stage-dynamic-area"
-                ref={setStageRef}
-                className="w-full flex-1 h-full flex items-center justify-center relative overflow-hidden min-h-0 lg:py-1"
+                className="w-full flex-1 h-full min-w-0 min-h-0 flex items-center justify-center relative overflow-visible lg:py-4 lg:px-3.5 z-10"
               >
                 <div
                   id="pac-model-stage-frame"
-                  style={
-                    {
-                      '--pac-card-w': `${cardWidth}px`,
-                      '--pac-card-h': `${cardHeight}px`,
-                    } as React.CSSProperties
-                  }
-                  className="w-full h-full lg:w-[var(--pac-card-w)] lg:h-[var(--pac-card-h)] lg:rounded-3xl lg:border lg:border-stone-300/90 lg:bg-[#FAF9F5] lg:shadow-[0_20px_50px_rgba(0,0,0,0.08)] lg:ring-1 lg:ring-stone-900/5 flex flex-col overflow-hidden relative select-text transition-all duration-300"
+                  className="w-full h-full lg:max-w-[1600px] lg:max-h-[1100px] rounded-2xl lg:rounded-3xl border border-white/85 bg-white/40 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-[#18181B]/[0.06] shadow-[0_18px_48px_-14px_rgba(24,24,27,0.10),0_6px_18px_-6px_rgba(24,24,27,0.05),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_0_28px_rgba(255,255,255,0.35)] flex flex-col overflow-hidden relative select-text"
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={viewMode}
                       initial={{ opacity: 0, y: 8 }}
@@ -1968,7 +1875,23 @@ export default function App() {
                       }}
                       className="w-full h-full flex flex-col min-h-0"
                     >
-                      {viewMode === 'pac-model' ? (
+                      {viewMode === 'practice' ? (
+                        <PracticeGuideView
+                          activeSectionIndex={currentSlideIndex}
+                          sectionJumpRequest={sectionJumpRequest}
+                          onSectionChange={handlePracticeSectionChange}
+                          onBackToLanding={() => handleSelectViewMode('minimal')}
+                          onGoToAbout={() => handleSelectViewMode('portrait')}
+                          onGoToPacModel={() => handleSelectViewMode('pac-model')}
+                          onGoToDramaTriangle={() => handleSelectViewMode('drama-triangle')}
+                          onCopyEmail={handleCopyEmail}
+                          copiedEmail={copiedEmail}
+                          onOpenPrivacy={() => setIsPrivacyOpen(true)}
+                          onOpenHelpline={() => setIsHelplineOpen(true)}
+                          onOpenLocation={() => setIsLocationOpen(true)}
+                          onOpenOverview={() => setIsOverviewOpen(true)}
+                        />
+                      ) : viewMode === 'pac-model' ? (
                         <PacModelPage
                           onBackToLanding={() => handleSelectViewMode('minimal')}
                           onNavigateToSlides={(slideIdx) => {

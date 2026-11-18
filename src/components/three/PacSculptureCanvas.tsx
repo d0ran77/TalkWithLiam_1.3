@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { RotateCcw } from 'lucide-react';
 import {
   PacTabId,
   CoreNodeId,
@@ -8,8 +7,9 @@ import {
 } from '../../data/pacModel.ts';
 import {
   createStudioRig,
-  createCeramicAndBrassPalette,
+  createCharcoalPaperPalette,
   createMedallionFaceTexture,
+  createHalfMedallionFaceTexture,
   createPaperShadowTexture,
   prefersReducedMotion,
   StudioRig,
@@ -25,16 +25,20 @@ interface PacSculptureCanvasProps {
   onSelectFunctionalNode: (id: FunctionalNodeId) => void;
 }
 
-interface DiscRuntime {
-  key: 'topLeft' | 'topRight' | 'center' | 'bottomLeft' | 'bottomRight';
+type InteractivePartKey = 'P' | 'A' | 'C' | 'CP' | 'NP' | 'AC' | 'FC';
+
+interface PartRuntime {
+  key: InteractivePartKey;
   group: THREE.Group;
-  ceramicMesh: THREE.Mesh;
-  brassRimMesh: THREE.Mesh;
-  frontFaceMesh: THREE.Mesh;
+  porcelainMesh: THREE.Mesh;
+  inkRimMesh: THREE.Mesh;
+  seamMesh?: THREE.Mesh;
   frontFaceMat: THREE.MeshStandardMaterial;
-  coreTexture: THREE.CanvasTexture | null;
-  functionalTexture: THREE.CanvasTexture;
-  activeTexture: THREE.CanvasTexture;
+  shadowMesh: THREE.Mesh;
+  baseTex: THREE.CanvasTexture;
+  activeTex: THREE.CanvasTexture;
+  baseX: number;
+  baseY: number;
   targetX: number;
   targetY: number;
   targetZ: number;
@@ -44,11 +48,12 @@ interface DiscRuntime {
   curZ: number;
   curScale: number;
   isVisibleTarget: boolean;
+  useForestOnActive: boolean;
 }
 
-function createTurnedPuckGeometry(radius: number, thickness: number): THREE.LatheGeometry {
+function createFullDiscGeometry(radius: number, thickness: number): THREE.LatheGeometry {
   const halfT = thickness / 2;
-  const bevel = Math.min(0.065, radius * 0.14);
+  const bevel = 0.036;
   const pts: THREE.Vector2[] = [
     new THREE.Vector2(0.001, -halfT),
     new THREE.Vector2(radius - bevel, -halfT),
@@ -57,8 +62,38 @@ function createTurnedPuckGeometry(radius: number, thickness: number): THREE.Lath
     new THREE.Vector2(radius - bevel, halfT),
     new THREE.Vector2(0.001, halfT),
   ];
-  const geo = new THREE.LatheGeometry(pts, 48);
-  geo.rotateX(Math.PI / 2); // Align disc flat face toward +Z viewer
+  const geo = new THREE.LatheGeometry(pts, 56);
+  geo.rotateX(Math.PI / 2);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function createHalfDiscGeometry(
+  radius: number,
+  thickness: number,
+  side: 'left' | 'right'
+): THREE.ExtrudeGeometry {
+  const innerR = radius - 0.02;
+  const shape = new THREE.Shape();
+  if (side === 'right') {
+    shape.moveTo(0, -innerR);
+    shape.absarc(0, 0, innerR, -Math.PI / 2, Math.PI / 2, false);
+    shape.lineTo(0, -innerR);
+  } else {
+    shape.moveTo(0, innerR);
+    shape.absarc(0, 0, innerR, Math.PI / 2, Math.PI * 1.5, false);
+    shape.lineTo(0, innerR);
+  }
+  const coreDepth = Math.max(0.04, thickness - 0.04);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: coreDepth,
+    bevelEnabled: true,
+    bevelThickness: 0.02,
+    bevelSize: 0.02,
+    bevelSegments: 3,
+    curveSegments: 40,
+  });
+  geo.translate(0, 0, -coreDepth / 2);
   geo.computeVertexNormals();
   return geo;
 }
@@ -72,12 +107,11 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rigRef = useRef<StudioRig | null>(null);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
-  const [hasOrbited, setHasOrbited] = useState(false);
 
   const stateRef = useRef<{
     activeTab: PacTabId;
     activeNode: PacActiveNode;
-    hoveredKey: DiscRuntime['key'] | null;
+    hoveredKey: InteractivePartKey | null;
   }>({
     activeTab,
     activeNode,
@@ -98,17 +132,6 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
     applyTargetsRef.current?.();
   }, [activeTab, activeNode]);
 
-  const handleResetView = useCallback(() => {
-    const rig = rigRef.current;
-    if (!rig) return;
-    playSoftThump('default');
-    rig.camera.position.set(0, 0.35, 7.3);
-    rig.controls.target.set(0, -0.05, 0);
-    rig.controls.update();
-    rig.requestRender();
-    setHasOrbited(false);
-  }, []);
-
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -116,13 +139,9 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
     let rig: StudioRig;
     try {
       rig = createStudioRig(container, {
-        fov: 35,
-        cameraPosition: [0, 0.35, 7.3],
-        controlsTarget: [0, -0.05, 0],
-        minDistance: 5.2,
-        maxDistance: 10.5,
-        minPolarAngle: Math.PI * 0.25,
-        maxPolarAngle: Math.PI * 0.68,
+        fov: 34,
+        cameraPosition: [0, 0, 7.6],
+        lookAtTarget: [0, 0, 0],
         onContextLost: () => setWebglUnavailable(true),
         onContextRestored: () => setWebglUnavailable(false),
       });
@@ -132,9 +151,9 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
     }
 
     rigRef.current = rig;
-    const { scene, camera, renderer, controls, maxAnisotropy } = rig;
+    const { scene, camera, renderer, maxAnisotropy } = rig;
 
-    const palette = createCeramicAndBrassPalette(maxAnisotropy);
+    const palette = createCharcoalPaperPalette(maxAnisotropy);
     const disposables: { dispose: () => void }[] = [];
     const track = <T extends { dispose: () => void }>(item: T): T => {
       disposables.push(item);
@@ -144,269 +163,289 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
     const sculptureRoot = new THREE.Group();
     scene.add(sculptureRoot);
 
-    // 1. Subtle radial contact shadow on paper plane
+    // Floating short charcoal ink dash marks centered cleanly in open air BETWEEN circles (zero touching rims)
+    const dashGeo = track(new THREE.CylinderGeometry(0.011, 0.011, 0.14, 12));
+    const upperDash = new THREE.Mesh(dashGeo, palette.graphiteInk);
+    upperDash.position.set(0, 0.72, -0.02);
+    const lowerDash = new THREE.Mesh(dashGeo, palette.graphiteInk);
+    lowerDash.position.set(0, -0.72, -0.02);
+    sculptureRoot.add(upperDash, lowerDash);
+
+    // Subtle floating neutral drop shadows
     const shadowTex = track(createPaperShadowTexture());
-    const shadowGeo = track(new THREE.PlaneGeometry(4.6, 2.3));
-    const shadowMat = track(
-      new THREE.MeshBasicMaterial({
-        map: shadowTex,
-        transparent: true,
-        depthWrite: false,
-      })
-    );
-    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.set(0, -2.36, 0);
-    sculptureRoot.add(shadowPlane);
+    const fullShadowGeo = track(new THREE.PlaneGeometry(1.42, 1.42));
+    const halfShadowGeo = track(new THREE.PlaneGeometry(0.92, 1.32));
 
-    // 2. Sculpted ceramic & brass base plinth + vertical brushed brass spine
-    const plinthCeramicGeo = track(new THREE.CylinderGeometry(0.95, 1.08, 0.14, 48));
-    const plinthCeramic = new THREE.Mesh(plinthCeramicGeo, palette.ceramicMatte);
-    plinthCeramic.position.set(0, -2.28, 0);
-    plinthCeramic.receiveShadow = true;
-    plinthCeramic.castShadow = !rig.isSoftwareWebGL;
-    sculptureRoot.add(plinthCeramic);
+    // Shared porcelain & charcoal ink geometries (radius 0.54, centered at y = +1.44, 0, -1.44 -> 0.36 gap)
+    const R = 0.54;
+    const T = 0.14;
+    const fullDiscGeo = track(createFullDiscGeometry(R, T));
+    const fullRimGeo = track(new THREE.TorusGeometry(R + 0.004, 0.014, 12, 56));
+    const fullFaceGeo = track(new THREE.CircleGeometry(R - 0.04, 56));
+    const fullBackGeo = track(new THREE.CircleGeometry(R - 0.06, 40));
+    fullBackGeo.rotateY(Math.PI);
 
-    const plinthCollarGeo = track(new THREE.CylinderGeometry(0.46, 0.56, 0.08, 40));
-    const plinthCollar = new THREE.Mesh(plinthCollarGeo, palette.brushedBrass);
-    plinthCollar.position.set(0, -2.18, 0);
-    sculptureRoot.add(plinthCollar);
+    const leftHalfGeo = track(createHalfDiscGeometry(R, T, 'left'));
+    const rightHalfGeo = track(createHalfDiscGeometry(R, T, 'right'));
+    const halfArcGeo = track(new THREE.TorusGeometry(R + 0.004, 0.014, 12, 40, Math.PI));
+    const seamLineGeo = track(new THREE.CylinderGeometry(0.01, 0.01, R * 1.94, 12));
+    const leftFaceGeo = track(new THREE.CircleGeometry(R - 0.04, 40, Math.PI / 2, Math.PI));
+    const rightFaceGeo = track(new THREE.CircleGeometry(R - 0.04, 40, -Math.PI / 2, Math.PI));
 
-    const spineGeo = track(new THREE.CylinderGeometry(0.055, 0.068, 4.02, 24));
-    const spine = new THREE.Mesh(spineGeo, palette.brushedBrass);
-    spine.position.set(0, -0.22, -0.14);
-    spine.castShadow = !rig.isSoftwareWebGL;
-    sculptureRoot.add(spine);
-
-    const finialGeo = track(new THREE.SphereGeometry(0.09, 24, 16));
-    const finial = new THREE.Mesh(finialGeo, palette.brushedBrass);
-    finial.position.set(0, 1.82, -0.14);
-    sculptureRoot.add(finial);
-
-    // 3. Horizontal telescoping brass yokes for Functional split (Parent & Child)
-    const yokeGeo = track(new THREE.CylinderGeometry(0.036, 0.036, 2.1, 20));
-    yokeGeo.rotateZ(Math.PI / 2);
-
-    const topYoke = new THREE.Mesh(yokeGeo, palette.brushedBrass);
-    topYoke.position.set(0, 1.24, -0.12);
-    topYoke.scale.set(0.01, 1, 1);
-    sculptureRoot.add(topYoke);
-
-    const bottomYoke = new THREE.Mesh(yokeGeo, palette.brushedBrass);
-    bottomYoke.position.set(0, -1.24, -0.12);
-    bottomYoke.scale.set(0.01, 1, 1);
-    sculptureRoot.add(bottomYoke);
-
-    // 4. Shared disc geometries (chamfered ceramic puck + brass rim + face medallion)
-    const puckGeo = track(createTurnedPuckGeometry(0.54, 0.24));
-    const rimGeo = track(new THREE.TorusGeometry(0.542, 0.024, 16, 48));
-    const faceGeo = track(new THREE.CircleGeometry(0.445, 48));
-    const backCapGeo = track(new THREE.CircleGeometry(0.32, 32));
-    backCapGeo.rotateY(Math.PI);
-
-    // Pre-generate all medallion textures cleanly once
+    // Textures
     const texP = track(createMedallionFaceTexture('P', 'Parent', 'cream', maxAnisotropy));
     const texPActive = track(createMedallionFaceTexture('P', 'Parent', 'charcoal', maxAnisotropy));
-
     const texA = track(createMedallionFaceTexture('A', 'Adult', 'cream', maxAnisotropy));
     const texAActive = track(createMedallionFaceTexture('A', 'Adult', 'forest', maxAnisotropy));
-
     const texC = track(createMedallionFaceTexture('C', 'Child', 'cream', maxAnisotropy));
     const texCActive = track(createMedallionFaceTexture('C', 'Child', 'charcoal', maxAnisotropy));
 
-    const texCP = track(createMedallionFaceTexture('CP', 'Critical', 'cream', maxAnisotropy));
-    const texCPActive = track(createMedallionFaceTexture('CP', 'Critical', 'charcoal', maxAnisotropy));
+    const texCP = track(createHalfMedallionFaceTexture('CP', 'Critical', 'left', 'cream', maxAnisotropy));
+    const texCPActive = track(createHalfMedallionFaceTexture('CP', 'Critical', 'left', 'charcoal', maxAnisotropy));
+    const texNP = track(createHalfMedallionFaceTexture('NP', 'Nurturing', 'right', 'cream', maxAnisotropy));
+    const texNPActive = track(createHalfMedallionFaceTexture('NP', 'Nurturing', 'right', 'forest', maxAnisotropy));
+    const texAC = track(createHalfMedallionFaceTexture('AC', 'Adapted', 'left', 'cream', maxAnisotropy));
+    const texACActive = track(createHalfMedallionFaceTexture('AC', 'Adapted', 'left', 'charcoal', maxAnisotropy));
+    const texFC = track(createHalfMedallionFaceTexture('FC', 'Free', 'right', 'cream', maxAnisotropy));
+    const texFCActive = track(createHalfMedallionFaceTexture('FC', 'Free', 'right', 'forest', maxAnisotropy));
 
-    const texNP = track(createMedallionFaceTexture('NP', 'Nurturing', 'cream', maxAnisotropy));
-    const texNPActive = track(createMedallionFaceTexture('NP', 'Nurturing', 'forest', maxAnisotropy));
-
-    const texAC = track(createMedallionFaceTexture('AC', 'Adapted', 'cream', maxAnisotropy));
-    const texACActive = track(createMedallionFaceTexture('AC', 'Adapted', 'charcoal', maxAnisotropy));
-
-    const texFC = track(createMedallionFaceTexture('FC', 'Free Child', 'cream', maxAnisotropy));
-    const texFCActive = track(createMedallionFaceTexture('FC', 'Free Child', 'forest', maxAnisotropy));
-
-    const createDisc = (
-      key: DiscRuntime['key'],
-      coreTexture: THREE.CanvasTexture | null,
-      functionalTexture: THREE.CanvasTexture,
-      activeTexture: THREE.CanvasTexture
-    ): DiscRuntime => {
+    const createFullPart = (
+      key: 'P' | 'A' | 'C',
+      yPos: number,
+      baseTex: THREE.CanvasTexture,
+      activeTex: THREE.CanvasTexture,
+      useForestOnActive: boolean
+    ): PartRuntime => {
       const group = new THREE.Group();
-      group.userData.discKey = key;
+      group.userData.partKey = key;
 
-      const ceramicMesh = new THREE.Mesh(puckGeo, palette.ceramicMatte);
-      ceramicMesh.castShadow = !rig.isSoftwareWebGL;
-      ceramicMesh.receiveShadow = true;
-      ceramicMesh.userData.discKey = key;
-      group.add(ceramicMesh);
+      const porcelainMesh = new THREE.Mesh(fullDiscGeo, palette.porcelainMatte);
+      porcelainMesh.castShadow = !rig.isSoftwareWebGL;
+      porcelainMesh.receiveShadow = true;
+      porcelainMesh.userData.partKey = key;
+      group.add(porcelainMesh);
 
-      const brassRimMesh = new THREE.Mesh(rimGeo, palette.brushedBrass);
-      brassRimMesh.userData.discKey = key;
-      group.add(brassRimMesh);
+      const inkRimMesh = new THREE.Mesh(fullRimGeo, palette.charcoalInk);
+      inkRimMesh.userData.partKey = key;
+      group.add(inkRimMesh);
 
       const frontFaceMat = track(
         new THREE.MeshStandardMaterial({
-          map: coreTexture ?? functionalTexture,
-          roughness: 0.62,
-          metalness: 0.04,
-          envMapIntensity: 0.75,
+          map: baseTex,
+          roughness: 0.72,
+          metalness: 0.02,
+          envMapIntensity: 0.45,
         })
       );
-      const frontFaceMesh = new THREE.Mesh(faceGeo, frontFaceMat);
-      frontFaceMesh.position.z = 0.123;
-      frontFaceMesh.userData.discKey = key;
-      group.add(frontFaceMesh);
+      const frontFace = new THREE.Mesh(fullFaceGeo, frontFaceMat);
+      frontFace.position.z = T / 2 + 0.003;
+      frontFace.userData.partKey = key;
+      group.add(frontFace);
 
-      const backCap = new THREE.Mesh(backCapGeo, palette.brushedBrass);
-      backCap.position.z = -0.122;
-      group.add(backCap);
+      const backFace = new THREE.Mesh(fullBackGeo, palette.porcelainMatte);
+      backFace.position.z = -T / 2 - 0.002;
+      group.add(backFace);
 
+      const shadowMat = track(
+        new THREE.MeshBasicMaterial({
+          map: shadowTex,
+          transparent: true,
+          opacity: 0.42,
+          depthWrite: false,
+        })
+      );
+      const shadowMesh = new THREE.Mesh(fullShadowGeo, shadowMat);
+      shadowMesh.position.set(0.02, yPos - 0.07, -0.16);
+      sculptureRoot.add(shadowMesh);
       sculptureRoot.add(group);
 
       return {
         key,
         group,
-        ceramicMesh,
-        brassRimMesh,
-        frontFaceMesh,
+        porcelainMesh,
+        inkRimMesh,
         frontFaceMat,
-        coreTexture,
-        functionalTexture,
-        activeTexture,
+        shadowMesh,
+        baseTex,
+        activeTex,
+        baseX: 0,
+        baseY: yPos,
         targetX: 0,
-        targetY: 0,
+        targetY: yPos,
         targetZ: 0,
         targetScale: 1,
         curX: 0,
-        curY: 0,
+        curY: yPos,
         curZ: 0,
         curScale: 1,
         isVisibleTarget: true,
+        useForestOnActive,
       };
     };
 
-    const discs: Record<DiscRuntime['key'], DiscRuntime> = {
-      topLeft: createDisc('topLeft', texP, texCP, texCPActive),
-      topRight: createDisc('topRight', null, texNP, texNPActive),
-      center: createDisc('center', texA, texA, texAActive),
-      bottomLeft: createDisc('bottomLeft', texC, texAC, texACActive),
-      bottomRight: createDisc('bottomRight', null, texFC, texFCActive),
+    const createHalfPart = (
+      key: 'CP' | 'NP' | 'AC' | 'FC',
+      side: 'left' | 'right',
+      yPos: number,
+      baseTex: THREE.CanvasTexture,
+      activeTex: THREE.CanvasTexture,
+      useForestOnActive: boolean
+    ): PartRuntime => {
+      const group = new THREE.Group();
+      group.userData.partKey = key;
+
+      const porcelainMesh = new THREE.Mesh(
+        side === 'left' ? leftHalfGeo : rightHalfGeo,
+        palette.porcelainMatte
+      );
+      porcelainMesh.castShadow = !rig.isSoftwareWebGL;
+      porcelainMesh.receiveShadow = true;
+      porcelainMesh.userData.partKey = key;
+      group.add(porcelainMesh);
+
+      const inkRimMesh = new THREE.Mesh(halfArcGeo, palette.charcoalInk);
+      inkRimMesh.rotation.z = side === 'right' ? -Math.PI / 2 : Math.PI / 2;
+      inkRimMesh.userData.partKey = key;
+      group.add(inkRimMesh);
+
+      const seamMesh = new THREE.Mesh(seamLineGeo, palette.charcoalInk);
+      seamMesh.position.set(side === 'left' ? -0.002 : 0.002, 0, T / 2 + 0.002);
+      seamMesh.userData.partKey = key;
+      group.add(seamMesh);
+
+      const frontFaceMat = track(
+        new THREE.MeshStandardMaterial({
+          map: baseTex,
+          roughness: 0.72,
+          metalness: 0.02,
+          envMapIntensity: 0.45,
+        })
+      );
+      const frontFace = new THREE.Mesh(
+        side === 'left' ? leftFaceGeo : rightFaceGeo,
+        frontFaceMat
+      );
+      frontFace.position.z = T / 2 + 0.004;
+      frontFace.userData.partKey = key;
+      group.add(frontFace);
+
+      const shadowMat = track(
+        new THREE.MeshBasicMaterial({
+          map: shadowTex,
+          transparent: true,
+          opacity: 0.36,
+          depthWrite: false,
+        })
+      );
+      const shadowMesh = new THREE.Mesh(halfShadowGeo, shadowMat);
+      shadowMesh.position.set(side === 'left' ? -0.22 : 0.22, yPos - 0.07, -0.16);
+      sculptureRoot.add(shadowMesh);
+      sculptureRoot.add(group);
+
+      const splitX = side === 'left' ? -0.032 : 0.032;
+
+      return {
+        key,
+        group,
+        porcelainMesh,
+        inkRimMesh,
+        seamMesh,
+        frontFaceMat,
+        shadowMesh,
+        baseTex,
+        activeTex,
+        baseX: splitX,
+        baseY: yPos,
+        targetX: splitX,
+        targetY: yPos,
+        targetZ: 0,
+        targetScale: 1,
+        curX: splitX,
+        curY: yPos,
+        curZ: 0,
+        curScale: 1,
+        isVisibleTarget: false,
+        useForestOnActive,
+      };
     };
 
-    const discList = Object.values(discs);
-    const raycastTargets = discList.map((d) => d.group);
+    const parts: Record<InteractivePartKey, PartRuntime> = {
+      P: createFullPart('P', 1.44, texP, texPActive, false),
+      A: createFullPart('A', 0, texA, texAActive, true),
+      C: createFullPart('C', -1.44, texC, texCActive, false),
+      CP: createHalfPart('CP', 'left', 1.44, texCP, texCPActive, false),
+      NP: createHalfPart('NP', 'right', 1.44, texNP, texNPActive, true),
+      AC: createHalfPart('AC', 'left', -1.44, texAC, texACActive, false),
+      FC: createHalfPart('FC', 'right', -1.44, texFC, texFCActive, true),
+    };
 
-    let targetYokeScale = 0.01;
-    let curYokeScale = 0.01;
+    const partList = Object.values(parts);
+    const raycastTargets = partList.map((p) => p.group);
+
+    let targetTiltX = 0;
+    let targetTiltY = 0;
+    let curTiltX = 0;
+    let curTiltY = 0;
 
     const applyTargets = () => {
       const { activeTab: tab, activeNode: node, hoveredKey } = stateRef.current;
       const isFunc = tab === 'functional';
 
-      targetYokeScale = isFunc ? 1 : 0.01;
+      parts.P.isVisibleTarget = !isFunc;
+      parts.C.isVisibleTarget = !isFunc;
+      parts.A.isVisibleTarget = true;
 
-      if (!isFunc) {
-        // Core Mode: P, A, C stacked cleanly on central column
-        discs.topLeft.targetX = 0;
-        discs.topLeft.targetY = 1.24;
-        discs.topLeft.isVisibleTarget = true;
+      parts.CP.isVisibleTarget = isFunc;
+      parts.NP.isVisibleTarget = isFunc;
+      parts.AC.isVisibleTarget = isFunc;
+      parts.FC.isVisibleTarget = isFunc;
 
-        discs.topRight.targetX = 0;
-        discs.topRight.targetY = 1.24;
-        discs.topRight.isVisibleTarget = false;
+      partList.forEach((p) => {
+        const isActive = p.isVisibleTarget && node === p.key;
+        const isHovered = p.isVisibleTarget && hoveredKey === p.key;
 
-        discs.center.targetX = 0;
-        discs.center.targetY = 0;
-        discs.center.isVisibleTarget = true;
-
-        discs.bottomLeft.targetX = 0;
-        discs.bottomLeft.targetY = -1.24;
-        discs.bottomLeft.isVisibleTarget = true;
-
-        discs.bottomRight.targetX = 0;
-        discs.bottomRight.targetY = -1.24;
-        discs.bottomRight.isVisibleTarget = false;
-      } else {
-        // Functional Mode: P splits to CP/NP, C splits to AC/FC
-        discs.topLeft.targetX = -0.98;
-        discs.topLeft.targetY = 1.24;
-        discs.topLeft.isVisibleTarget = true;
-
-        discs.topRight.targetX = 0.98;
-        discs.topRight.targetY = 1.24;
-        discs.topRight.isVisibleTarget = true;
-
-        discs.center.targetX = 0;
-        discs.center.targetY = 0;
-        discs.center.isVisibleTarget = true;
-
-        discs.bottomLeft.targetX = -0.98;
-        discs.bottomLeft.targetY = -1.24;
-        discs.bottomLeft.isVisibleTarget = true;
-
-        discs.bottomRight.targetX = 0.98;
-        discs.bottomRight.targetY = -1.24;
-        discs.bottomRight.isVisibleTarget = true;
-      }
-
-      const activeKey: DiscRuntime['key'] =
-        !isFunc
-          ? node === 'P'
-            ? 'topLeft'
-            : node === 'C'
-              ? 'bottomLeft'
-              : 'center'
-          : node === 'CP'
-            ? 'topLeft'
-            : node === 'NP'
-              ? 'topRight'
-              : node === 'AC'
-                ? 'bottomLeft'
-                : node === 'FC'
-                  ? 'bottomRight'
-                  : 'center';
-
-      discList.forEach((d) => {
-        const isActive = d.key === activeKey && d.isVisibleTarget;
-        const isHovered = d.key === hoveredKey && d.isVisibleTarget;
-
-        d.targetZ = !d.isVisibleTarget
-          ? -0.18
-          : isActive
-            ? 0.42
-            : isHovered
-              ? 0.14
+        // Functional halves start flush and separate subtly into one crisp split circle
+        const splitExtra =
+          p.key === 'CP' || p.key === 'AC'
+            ? isActive
+              ? -0.048
+              : -0.026
+            : p.key === 'NP' || p.key === 'FC'
+              ? isActive
+                ? 0.048
+                : 0.026
               : 0;
 
-        d.targetScale = !d.isVisibleTarget
+        p.targetX = p.baseX === 0 ? 0 : splitExtra;
+        p.targetY = p.baseY;
+        p.targetZ = !p.isVisibleTarget
+          ? -0.05
+          : isActive
+            ? 0.3
+            : isHovered
+              ? 0.09
+              : 0;
+        p.targetScale = !p.isVisibleTarget
           ? 0.001
           : isActive
-            ? 1.07
+            ? 1.05
             : isHovered
               ? 1.02
-              : 0.97;
+              : 1.0;
 
-        // Material & texture update
-        d.ceramicMesh.material = isActive
-          ? palette.ceramicActive
-          : palette.ceramicMatte;
-        d.brassRimMesh.material = isActive || isHovered
-          ? palette.brassHighlight
-          : palette.brushedBrass;
+        p.porcelainMesh.material = isActive
+          ? p.useForestOnActive
+            ? palette.porcelainForest
+            : palette.porcelainActive
+          : palette.porcelainMatte;
 
-        if (!isFunc) {
-          if (d.key === 'topLeft') {
-            d.frontFaceMat.map = isActive ? texPActive : texP;
-          } else if (d.key === 'center') {
-            d.frontFaceMat.map = isActive ? texAActive : texA;
-          } else if (d.key === 'bottomLeft') {
-            d.frontFaceMat.map = isActive ? texCActive : texC;
-          }
-        } else {
-          d.frontFaceMat.map = isActive ? d.activeTexture : d.functionalTexture;
-        }
-        d.frontFaceMat.needsUpdate = true;
+        const rimMat =
+          isActive && p.useForestOnActive ? palette.forestInk : palette.charcoalInk;
+        p.inkRimMesh.material = rimMat;
+        if (p.seamMesh) p.seamMesh.material = rimMat;
+
+        p.frontFaceMat.map = isActive ? p.activeTex : p.baseTex;
+        p.frontFaceMat.needsUpdate = true;
       });
 
       rig.requestRender();
@@ -415,77 +454,80 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
     applyTargetsRef.current = applyTargets;
     applyTargets();
 
-    // Initialize current state immediately on first mount so it renders clean without initial jump
-    discList.forEach((d) => {
-      d.curX = d.targetX;
-      d.curY = d.targetY;
-      d.curZ = d.targetZ;
-      d.curScale = d.targetScale;
-      d.group.position.set(d.curX, d.curY, d.curZ);
-      d.group.scale.setScalar(d.curScale);
-      d.group.visible = d.curScale > 0.02;
+    // Clean initial settle
+    partList.forEach((p) => {
+      p.curX = p.targetX;
+      p.curY = p.targetY;
+      p.curZ = p.targetZ;
+      p.curScale = p.targetScale;
+      p.group.position.set(p.curX, p.curY, p.curZ);
+      p.group.scale.setScalar(Math.max(0.001, p.curScale));
+      p.group.visible = p.isVisibleTarget;
+      p.shadowMesh.visible = p.isVisibleTarget;
     });
-    curYokeScale = targetYokeScale;
-    topYoke.scale.x = curYokeScale;
-    bottomYoke.scale.x = curYokeScale;
-    topYoke.visible = curYokeScale > 0.05;
-    bottomYoke.visible = curYokeScale > 0.05;
 
     const reduced = prefersReducedMotion();
 
     rig.setUpdateCallback((dt) => {
       let moving = false;
-      const dampLambda = reduced ? 60 : 8.5;
+      const dampLambda = reduced ? 60 : 9.0;
+      const tiltLambda = reduced ? 60 : 6.5;
 
-      const nextYoke = reduced
-        ? targetYokeScale
-        : THREE.MathUtils.damp(curYokeScale, targetYokeScale, dampLambda, dt);
-      if (Math.abs(nextYoke - targetYokeScale) > 0.001) moving = true;
-      curYokeScale = Math.abs(nextYoke - targetYokeScale) <= 0.001 ? targetYokeScale : nextYoke;
+      const ntx = reduced ? 0 : THREE.MathUtils.damp(curTiltX, targetTiltX, tiltLambda, dt);
+      const nty = reduced ? 0 : THREE.MathUtils.damp(curTiltY, targetTiltY, tiltLambda, dt);
+      if (Math.abs(ntx - targetTiltX) > 0.0005 || Math.abs(nty - targetTiltY) > 0.0005) {
+        moving = true;
+      }
+      curTiltX = Math.abs(ntx - targetTiltX) <= 0.0005 ? targetTiltX : ntx;
+      curTiltY = Math.abs(nty - targetTiltY) <= 0.0005 ? targetTiltY : nty;
+      sculptureRoot.rotation.x = curTiltX;
+      sculptureRoot.rotation.y = curTiltY;
 
-      topYoke.scale.x = Math.max(0.001, curYokeScale);
-      bottomYoke.scale.x = Math.max(0.001, curYokeScale);
-      topYoke.visible = curYokeScale > 0.03;
-      bottomYoke.visible = curYokeScale > 0.03;
-
-      for (let i = 0; i < discList.length; i++) {
-        const d = discList[i];
-        const nx = reduced ? d.targetX : THREE.MathUtils.damp(d.curX, d.targetX, dampLambda, dt);
-        const ny = reduced ? d.targetY : THREE.MathUtils.damp(d.curY, d.targetY, dampLambda, dt);
-        const nz = reduced ? d.targetZ : THREE.MathUtils.damp(d.curZ, d.targetZ, dampLambda, dt);
+      for (let i = 0; i < partList.length; i++) {
+        const p = partList[i];
+        const nx = reduced ? p.targetX : THREE.MathUtils.damp(p.curX, p.targetX, dampLambda, dt);
+        const ny = reduced ? p.targetY : THREE.MathUtils.damp(p.curY, p.targetY, dampLambda, dt);
+        const nz = reduced ? p.targetZ : THREE.MathUtils.damp(p.curZ, p.targetZ, dampLambda, dt);
         const ns = reduced
-          ? d.targetScale
-          : THREE.MathUtils.damp(d.curScale, d.targetScale, dampLambda, dt);
+          ? p.targetScale
+          : THREE.MathUtils.damp(p.curScale, p.targetScale, dampLambda, dt);
 
         if (
-          Math.abs(nx - d.targetX) > 0.001 ||
-          Math.abs(ny - d.targetY) > 0.001 ||
-          Math.abs(nz - d.targetZ) > 0.001 ||
-          Math.abs(ns - d.targetScale) > 0.001
+          Math.abs(nx - p.targetX) > 0.001 ||
+          Math.abs(ny - p.targetY) > 0.001 ||
+          Math.abs(nz - p.targetZ) > 0.001 ||
+          Math.abs(ns - p.targetScale) > 0.001
         ) {
           moving = true;
         }
 
-        d.curX = Math.abs(nx - d.targetX) <= 0.001 ? d.targetX : nx;
-        d.curY = Math.abs(ny - d.targetY) <= 0.001 ? d.targetY : ny;
-        d.curZ = Math.abs(nz - d.targetZ) <= 0.001 ? d.targetZ : nz;
-        d.curScale = Math.abs(ns - d.targetScale) <= 0.001 ? d.targetScale : ns;
+        p.curX = Math.abs(nx - p.targetX) <= 0.001 ? p.targetX : nx;
+        p.curY = Math.abs(ny - p.targetY) <= 0.001 ? p.targetY : ny;
+        p.curZ = Math.abs(nz - p.targetZ) <= 0.001 ? p.targetZ : nz;
+        p.curScale = Math.abs(ns - p.targetScale) <= 0.001 ? p.targetScale : ns;
 
-        d.group.position.set(d.curX, d.curY, d.curZ);
-        d.group.scale.setScalar(Math.max(0.001, d.curScale));
-        d.group.visible = d.curScale > 0.03;
+        p.group.position.set(p.curX, p.curY, p.curZ);
+        p.group.scale.setScalar(Math.max(0.001, p.curScale));
+        p.group.visible = p.curScale > 0.04;
+
+        const shadowOffset = p.key === 'CP' || p.key === 'AC' ? -0.22 : p.key === 'NP' || p.key === 'FC' ? 0.22 : 0.02;
+        p.shadowMesh.position.set(p.curX + shadowOffset, p.curY - 0.07, -0.16);
+        p.shadowMesh.scale.setScalar(Math.max(0.001, p.curScale) * (1 + p.curZ * 0.22));
+        p.shadowMesh.visible = p.group.visible;
       }
 
       return moving;
     });
 
-    // Raycasting & Pointer Selection (pre-allocated zero-GC)
+    // Raycasting + Desktop Mouse Parallax + Mobile Touch Drag-to-Tilt
     const raycaster = new THREE.Raycaster();
     const pointerNdc = new THREE.Vector2();
+    let isDragging = false;
     let downX = 0;
     let downY = 0;
+    let totalMoveDist = 0;
 
-    const pickDiscKey = (clientX: number, clientY: number): DiscRuntime['key'] | null => {
+    const pickPartKey = (clientX: number, clientY: number): InteractivePartKey | null => {
       const rect = renderer.domElement.getBoundingClientRect();
       if (!rect.width || !rect.height) return null;
       pointerNdc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -495,8 +537,8 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
       for (let i = 0; i < hits.length; i++) {
         let obj: THREE.Object3D | null = hits[i].object;
         while (obj) {
-          if (obj.userData?.discKey && obj.visible) {
-            return obj.userData.discKey as DiscRuntime['key'];
+          if (obj.userData?.partKey && obj.visible) {
+            return obj.userData.partKey as InteractivePartKey;
           }
           obj = obj.parent;
         }
@@ -504,66 +546,113 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
       return null;
     };
 
-    const onPointerMove = (e: PointerEvent) => {
-      const hitKey = pickDiscKey(e.clientX, e.clientY);
-      renderer.domElement.style.cursor = hitKey ? 'pointer' : 'grab';
-      if (stateRef.current.hoveredKey !== hitKey) {
-        stateRef.current.hoveredKey = hitKey;
-        applyTargets();
-      }
-    };
-
-    const onPointerLeave = () => {
-      renderer.domElement.style.cursor = 'grab';
-      if (stateRef.current.hoveredKey !== null) {
-        stateRef.current.hoveredKey = null;
-        applyTargets();
+    const selectKey = (key: InteractivePartKey) => {
+      playSoftThump('bright');
+      if (stateRef.current.activeTab === 'core') {
+        if (key === 'P' || key === 'A' || key === 'C') {
+          callbacksRef.current.onSelectCoreNode(key);
+        }
+      } else {
+        if (key === 'CP' || key === 'NP' || key === 'A' || key === 'AC' || key === 'FC') {
+          callbacksRef.current.onSelectFunctionalNode(key);
+        }
       }
     };
 
     const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
       downX = e.clientX;
       downY = e.clientY;
+      totalMoveDist = 0;
+      try {
+        renderer.domElement.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore if unsupported
+      }
     };
 
-    const onPointerUp = (e: PointerEvent) => {
-      const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
-      if (dist > 6) {
-        setHasOrbited(true);
+    const onPointerMove = (e: PointerEvent) => {
+      if (isDragging && !reduced) {
+        const dx = e.clientX - downX;
+        const dy = e.clientY - downY;
+        totalMoveDist = Math.max(totalMoveDist, Math.hypot(dx, dy));
+        // Direct tactile drag-to-tilt for touch & mouse (±15 deg)
+        targetTiltY = THREE.MathUtils.clamp((dx / 110) * 0.26, -0.26, 0.26);
+        targetTiltX = THREE.MathUtils.clamp((dy / 110) * 0.22, -0.22, 0.22);
+        rig.requestRender();
         return;
       }
-      const hitKey = pickDiscKey(e.clientX, e.clientY);
-      if (!hitKey) return;
 
-      playSoftThump('bright');
-      if (stateRef.current.activeTab === 'core') {
-        if (hitKey === 'topLeft') callbacksRef.current.onSelectCoreNode('P');
-        else if (hitKey === 'center') callbacksRef.current.onSelectCoreNode('A');
-        else if (hitKey === 'bottomLeft') callbacksRef.current.onSelectCoreNode('C');
-      } else {
-        if (hitKey === 'topLeft') callbacksRef.current.onSelectFunctionalNode('CP');
-        else if (hitKey === 'topRight') callbacksRef.current.onSelectFunctionalNode('NP');
-        else if (hitKey === 'center') callbacksRef.current.onSelectFunctionalNode('A');
-        else if (hitKey === 'bottomLeft') callbacksRef.current.onSelectFunctionalNode('AC');
-        else if (hitKey === 'bottomRight') callbacksRef.current.onSelectFunctionalNode('FC');
+      const hitKey = pickPartKey(e.clientX, e.clientY);
+      renderer.domElement.style.cursor = hitKey ? 'pointer' : 'default';
+      if (stateRef.current.hoveredKey !== hitKey) {
+        stateRef.current.hoveredKey = hitKey;
+        applyTargets();
+      }
+
+      if (e.pointerType === 'mouse' && !reduced) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        if (rect.width && rect.height) {
+          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+          targetTiltY = THREE.MathUtils.clamp(nx * 0.085, -0.09, 0.09);
+          targetTiltX = THREE.MathUtils.clamp(ny * 0.065, -0.07, 0.07);
+          rig.requestRender();
+        }
       }
     };
 
-    const onControlsStart = () => setHasOrbited(true);
+    const endDragAndTap = (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      targetTiltX = 0;
+      targetTiltY = 0;
+      rig.requestRender();
+      try {
+        renderer.domElement.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
 
-    controls.addEventListener('start', onControlsStart);
-    renderer.domElement.addEventListener('pointermove', onPointerMove);
-    renderer.domElement.addEventListener('pointerleave', onPointerLeave);
+      if (totalMoveDist <= 10) {
+        const hitKey = pickPartKey(e.clientX, e.clientY);
+        if (hitKey) selectKey(hitKey);
+      }
+    };
+
+    const onPointerCancel = () => {
+      isDragging = false;
+      targetTiltX = 0;
+      targetTiltY = 0;
+      rig.requestRender();
+    };
+
+    const onPointerLeave = () => {
+      if (isDragging) return;
+      renderer.domElement.style.cursor = 'default';
+      targetTiltX = 0;
+      targetTiltY = 0;
+      if (stateRef.current.hoveredKey !== null) {
+        stateRef.current.hoveredKey = null;
+        applyTargets();
+      } else {
+        rig.requestRender();
+      }
+    };
+
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
-    renderer.domElement.addEventListener('pointerup', onPointerUp);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('pointerup', endDragAndTap);
+    renderer.domElement.addEventListener('pointercancel', onPointerCancel);
+    renderer.domElement.addEventListener('pointerleave', onPointerLeave);
 
     return () => {
       applyTargetsRef.current = null;
-      controls.removeEventListener('start', onControlsStart);
-      renderer.domElement.removeEventListener('pointermove', onPointerMove);
-      renderer.domElement.removeEventListener('pointerleave', onPointerLeave);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
-      renderer.domElement.removeEventListener('pointerup', onPointerUp);
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointerup', endDragAndTap);
+      renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
+      renderer.domElement.removeEventListener('pointerleave', onPointerLeave);
       disposables.forEach((d) => d.dispose());
       palette.dispose();
       rig.dispose();
@@ -573,56 +662,43 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
 
   if (webglUnavailable) {
     return (
-      <div className="w-full h-[260px] sm:h-[310px] flex flex-col items-center justify-center bg-[#FAF9F5] select-none px-4">
+      <div className="w-full h-[230px] sm:h-[265px] lg:h-[340px] flex flex-col items-center justify-center bg-[#FAF9F5] select-none px-4">
         <div className="flex flex-col items-center gap-3">
           {activeTab === 'core' ? (
             <>
-              <button
-                type="button"
-                onClick={() => onSelectCoreNode('P')}
-                className={`w-16 h-16 rounded-full border transition-all font-serif text-xl cursor-pointer ${
-                  activeNode === 'P'
-                    ? 'bg-[#18181B] text-[#FAF9F5] border-[#B89656]'
-                    : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
-                }`}
-              >
-                P
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectCoreNode('A')}
-                className={`w-16 h-16 rounded-full border transition-all font-serif text-xl cursor-pointer ${
-                  activeNode === 'A'
-                    ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#B89656]'
-                    : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
-                }`}
-              >
-                A
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectCoreNode('C')}
-                className={`w-16 h-16 rounded-full border transition-all font-serif text-xl cursor-pointer ${
-                  activeNode === 'C'
-                    ? 'bg-[#18181B] text-[#FAF9F5] border-[#B89656]'
-                    : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
-                }`}
-              >
-                C
-              </button>
+              {(['P', 'A', 'C'] as CoreNodeId[]).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onSelectCoreNode(id)}
+                  className={`w-14 h-14 rounded-full border font-serif text-lg cursor-pointer transition-colors ${
+                    activeNode === id
+                      ? id === 'A'
+                        ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
+                        : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B]'
+                      : 'bg-[#FAF9F5] text-[#18181B] border-[#18181B]'
+                  }`}
+                >
+                  {id}
+                </button>
+              ))}
             </>
           ) : (
             <div className="flex flex-col items-center gap-3">
-              <div className="flex items-center gap-6">
-                {(['CP', 'NP'] as FunctionalNodeId[]).map((id) => (
+              <div className="inline-flex rounded-full border border-[#18181B] overflow-hidden">
+                {(['CP', 'NP'] as FunctionalNodeId[]).map((id, i) => (
                   <button
                     key={id}
                     type="button"
                     onClick={() => onSelectFunctionalNode(id)}
-                    className={`w-15 h-15 rounded-full border font-serif text-base cursor-pointer ${
+                    className={`w-10 h-14 font-serif text-xs cursor-pointer ${
+                      i === 0 ? 'border-r border-[#18181B]' : ''
+                    } ${
                       activeNode === id
-                        ? 'bg-[#18181B] text-[#FAF9F5] border-[#B89656]'
-                        : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
+                        ? id === 'NP'
+                          ? 'bg-[#2D5A43] text-[#FAF9F5]'
+                          : 'bg-[#18181B] text-[#FAF9F5]'
+                        : 'bg-[#FAF9F5] text-[#18181B]'
                     }`}
                   >
                     {id}
@@ -632,24 +708,28 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectFunctionalNode('A')}
-                className={`w-15 h-15 rounded-full border font-serif text-base cursor-pointer ${
+                className={`w-14 h-14 rounded-full border font-serif text-lg cursor-pointer ${
                   activeNode === 'A'
-                    ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#B89656]'
-                    : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
+                    ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
+                    : 'bg-[#FAF9F5] text-[#18181B] border-[#18181B]'
                 }`}
               >
                 A
               </button>
-              <div className="flex items-center gap-6">
-                {(['AC', 'FC'] as FunctionalNodeId[]).map((id) => (
+              <div className="inline-flex rounded-full border border-[#18181B] overflow-hidden">
+                {(['AC', 'FC'] as FunctionalNodeId[]).map((id, i) => (
                   <button
                     key={id}
                     type="button"
                     onClick={() => onSelectFunctionalNode(id)}
-                    className={`w-15 h-15 rounded-full border font-serif text-base cursor-pointer ${
+                    className={`w-10 h-14 font-serif text-xs cursor-pointer ${
+                      i === 0 ? 'border-r border-[#18181B]' : ''
+                    } ${
                       activeNode === id
-                        ? 'bg-[#18181B] text-[#FAF9F5] border-[#B89656]'
-                        : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
+                        ? id === 'FC'
+                          ? 'bg-[#2D5A43] text-[#FAF9F5]'
+                          : 'bg-[#18181B] text-[#FAF9F5]'
+                        : 'bg-[#FAF9F5] text-[#18181B]'
                     }`}
                   >
                     {id}
@@ -664,30 +744,15 @@ export const PacSculptureCanvas: React.FC<PacSculptureCanvasProps> = ({
   }
 
   return (
-    <div className="relative w-full h-[270px] sm:h-[330px] lg:h-[360px] select-none">
+    <div className="relative w-full h-[230px] sm:h-[265px] lg:h-[340px] select-none">
       <div
         ref={mountRef}
         className="w-full h-full"
-        aria-label="Interactive 3D ceramic and brushed brass PAC Model sculpture. Drag to rotate or click a disc to inspect."
+        aria-label="Interactive charcoal ink PAC circles. Drag to tilt or tap any circle or split half."
       />
-
-      {/* Quiet solid-paper reset button (no backdrop-filter over WebGL) */}
-      <div className="absolute bottom-2 right-2 flex items-center gap-2 pointer-events-none">
-        <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-stone-400">
-          Drag to orbit · Click disc
-        </span>
-        {hasOrbited && (
-          <button
-            type="button"
-            onClick={handleResetView}
-            className="pointer-events-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAF9F5] border border-stone-200 text-[10px] font-mono uppercase tracking-[0.14em] text-stone-600 hover:text-stone-950 hover:border-stone-400 transition-colors cursor-pointer"
-            aria-label="Reset 3D camera angle"
-          >
-            <RotateCcw className="w-2.5 h-2.5" />
-            <span>Reset</span>
-          </button>
-        )}
-      </div>
+      <p className="pointer-events-none absolute bottom-1 inset-x-0 text-center text-[9.5px] font-mono uppercase tracking-[0.16em] text-stone-400">
+        Drag to tilt · Tap any {activeTab === 'functional' ? 'half' : 'circle'}
+      </p>
     </div>
   );
 };

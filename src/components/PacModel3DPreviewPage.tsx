@@ -74,7 +74,7 @@ export const PacModel3DPreviewPage: React.FC<PacModel3DPreviewPageProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#FAF9F5] text-[#18181B] overflow-y-auto custom-scrollbar">
+    <div className="w-full h-full flex flex-col bg-transparent text-[#18181B] overflow-y-auto custom-scrollbar">
       {/* Uniform Mobile Header (< lg) */}
       <div className="px-2.5 sm:px-6 pt-1 shrink-0 lg:hidden">
         <MobileBrandHeader
@@ -89,25 +89,22 @@ export const PacModel3DPreviewPage: React.FC<PacModel3DPreviewPageProps> = ({
         />
       </div>
 
-      <div className="w-full max-w-3xl mx-auto px-5 sm:px-8 pt-4 lg:pt-8 pb-20 sm:pb-12 flex flex-col gap-6">
-        {/* Quiet 3D Preview Switcher Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-stone-200/80">
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-stone-400">
-              3D Preview
-            </span>
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 pt-2 lg:pt-7 pb-16 sm:pb-10 flex-1 flex flex-col">
+        {/* Compact Top Bar: Model Preview Switch + Mode Toggle on Mobile / Clean Preview Switch on Desktop */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 lg:pb-3.5 border-b border-stone-200/80 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div
               role="tablist"
-              aria-label="Switch 3D theory preview"
-              className="inline-flex items-center p-0.5 rounded-full bg-stone-100 border border-stone-200/80"
+              aria-label="Switch 3D theory page"
+              className="inline-flex items-center p-0.5 rounded-full bg-stone-100 border border-stone-200/90"
             >
               <button
                 type="button"
                 role="tab"
                 aria-selected={true}
-                className="px-3 py-1 rounded-full text-[11px] font-medium bg-[#18181B] text-[#FAF9F5] cursor-default"
+                className="px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-medium bg-[#18181B] text-[#FAF9F5] cursor-default"
               >
-                PAC Model
+                PAC
               </button>
               <button
                 type="button"
@@ -117,9 +114,43 @@ export const PacModel3DPreviewPage: React.FC<PacModel3DPreviewPageProps> = ({
                   playSoftThump('bright');
                   onSwitchToTriangle3D();
                 }}
-                className="px-3 py-1 rounded-full text-[11px] font-medium text-stone-600 hover:text-stone-950 transition-colors cursor-pointer"
+                className="px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-medium text-stone-600 hover:text-stone-950 transition-colors cursor-pointer"
               >
-                Drama Triangle
+                Triangle
+              </button>
+            </div>
+
+            {/* Compact Core / Functional toggle visible cleanly right in mobile top bar */}
+            <div
+              role="tablist"
+              aria-label="PAC detail level"
+              className="lg:hidden inline-flex items-center p-0.5 rounded-full bg-stone-100 border border-stone-200/90"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'core'}
+                onClick={() => handleTabSwitch('core')}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
+                  activeTab === 'core'
+                    ? 'bg-[#18181B] text-[#FAF9F5]'
+                    : 'text-stone-600 hover:text-stone-950'
+                }`}
+              >
+                Core
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'functional'}
+                onClick={() => handleTabSwitch('functional')}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
+                  activeTab === 'functional'
+                    ? 'bg-[#18181B] text-[#FAF9F5]'
+                    : 'text-stone-600 hover:text-stone-950'
+                }`}
+              >
+                Split
               </button>
             </div>
           </div>
@@ -130,215 +161,231 @@ export const PacModel3DPreviewPage: React.FC<PacModel3DPreviewPageProps> = ({
               playSoftThump('default');
               onBackToLanding();
             }}
-            className="text-[11px] font-mono uppercase tracking-[0.14em] text-stone-400 hover:text-stone-900 transition-colors cursor-pointer"
+            className="text-[10.5px] font-mono uppercase tracking-[0.14em] text-stone-400 hover:text-[#18181B] transition-colors cursor-pointer"
           >
             Back home
           </button>
         </div>
 
-        {/* Minimal Editorial Title */}
-        <header className="text-center max-w-xl mx-auto space-y-2">
-          <p className="text-[10.5px] font-mono uppercase tracking-[0.2em] text-stone-400">
-            Transactional Analysis
-          </p>
-          <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-[#18181B]">
-            The PAC Model
-          </h1>
-          <p className="text-sm sm:text-[15px] text-stone-600 font-light leading-relaxed">
-            How internalised Parent rules, grounded Adult awareness, and felt Child emotion shift in everyday moments.
-          </p>
-        </header>
-
-        {/* Quiet Mode Toggle + Scenario Triggers */}
-        <div className="flex flex-col items-center gap-4">
-          <div
-            role="tablist"
-            aria-label="PAC sculpture detail level"
-            className="inline-flex items-center p-1 rounded-full bg-stone-100 border border-stone-200/90"
+        {/* Main Responsive Grid: Compact Top-to-Bottom on Mobile, Side-by-Side Split on Desktop */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-center pt-3 lg:pt-6">
+          {/* LEFT COLUMN (Desktop) / TOP ZONE (Mobile): Interactive Charcoal Ink 3D PAC + Direct Node Selector */}
+          <section
+            aria-label="Interactive PAC circles"
+            className="lg:col-span-6 flex flex-col items-center justify-center"
           >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'core'}
-              onClick={() => handleTabSwitch('core')}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                activeTab === 'core'
-                  ? 'bg-[#18181B] text-[#FAF9F5]'
-                  : 'text-stone-600 hover:text-stone-950'
-              }`}
-            >
-              Core (3)
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'functional'}
-              onClick={() => handleTabSwitch('functional')}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                activeTab === 'functional'
-                  ? 'bg-[#18181B] text-[#FAF9F5]'
-                  : 'text-stone-600 hover:text-stone-950'
-              }`}
-            >
-              Functional (5)
-            </button>
-          </div>
+            <PacSculptureCanvas
+              activeTab={activeTab}
+              activeNode={activeNodeId}
+              onSelectCoreNode={setSelectedCoreNode}
+              onSelectFunctionalNode={setSelectedFunctionalNode}
+            />
 
-          <div
-            role="group"
-            aria-label="Everyday scenarios"
-            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
-          >
-            {PAC_SCENARIOS.map((scenario) => {
-              const isSelected = scenario.id === activeScenarioId;
-              return (
-                <button
-                  key={scenario.id}
-                  type="button"
-                  onClick={() => {
-                    playSoftThump('default');
-                    setActiveScenarioId(scenario.id);
-                  }}
-                  aria-pressed={isSelected}
-                  className={`pb-1 text-xs sm:text-[13px] transition-colors border-b cursor-pointer ${
-                    isSelected
-                      ? 'border-[#18181B] text-[#18181B] font-medium'
-                      : 'border-transparent text-stone-500 hover:text-stone-800'
-                  }`}
+            {/* Synchronized Crisp Ink Node Tabs */}
+            <div
+              role="tablist"
+              aria-label="Select ego state"
+              className="mt-2 flex flex-wrap items-center justify-center gap-1.5"
+            >
+              {activeTab === 'core'
+                ? CORE_NODES.map((node) => {
+                    const isActive = node.id === selectedCoreNode;
+                    return (
+                      <button
+                        key={node.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        onClick={() => {
+                          playSoftThump('bright');
+                          setSelectedCoreNode(node.id);
+                        }}
+                        className={`px-3 py-1 rounded-full text-[11.5px] font-medium transition-all cursor-pointer border ${
+                          isActive
+                            ? node.id === 'A'
+                              ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
+                              : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B]'
+                            : 'bg-[#FAF9F5] text-stone-600 border-stone-300 hover:border-[#18181B] hover:text-[#18181B]'
+                        }`}
+                      >
+                        <span className="font-serif mr-1">{node.letter}</span>
+                        <span>{node.circleSubLabel}</span>
+                      </button>
+                    );
+                  })
+                : FUNCTIONAL_NODES.map((node) => {
+                    const isActive = node.id === selectedFunctionalNode;
+                    const useForest = node.id === 'A' || node.id === 'NP' || node.id === 'FC';
+                    return (
+                      <button
+                        key={node.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        onClick={() => {
+                          playSoftThump('bright');
+                          setSelectedFunctionalNode(node.id);
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-[11.5px] font-medium transition-all cursor-pointer border ${
+                          isActive
+                            ? useForest
+                              ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
+                              : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B]'
+                            : 'bg-[#FAF9F5] text-stone-600 border-stone-300 hover:border-[#18181B] hover:text-[#18181B]'
+                        }`}
+                      >
+                        <span className="font-serif mr-1">{node.letter}</span>
+                        <span>{node.circleSubLabel}</span>
+                      </button>
+                    );
+                  })}
+            </div>
+          </section>
+
+          {/* RIGHT COLUMN (Desktop) / BOTTOM ZONE (Mobile): Title, Toggle, Scenarios & Live Quote */}
+          <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5 lg:pl-2">
+            {/* Editorial Title + Desktop Core/Functional Switch */}
+            <header className="space-y-2 w-full">
+              <div className="hidden lg:flex items-center justify-between gap-4">
+                <p className="text-[10.5px] font-mono uppercase tracking-[0.2em] text-stone-400">
+                  Transactional Analysis
+                </p>
+                <div
+                  role="tablist"
+                  aria-label="PAC detail level"
+                  className="inline-flex items-center p-0.5 rounded-full bg-stone-100 border border-stone-200/90"
                 >
-                  {scenario.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'core'}
+                    onClick={() => handleTabSwitch('core')}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                      activeTab === 'core'
+                        ? 'bg-[#18181B] text-[#FAF9F5]'
+                        : 'text-stone-600 hover:text-stone-950'
+                    }`}
+                  >
+                    Core (3)
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'functional'}
+                    onClick={() => handleTabSwitch('functional')}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                      activeTab === 'functional'
+                        ? 'bg-[#18181B] text-[#FAF9F5]'
+                        : 'text-stone-600 hover:text-stone-950'
+                    }`}
+                  >
+                    Functional (Split)
+                  </button>
+                </div>
+              </div>
 
-        {/* Interactive 3D Warm Ceramic & Brushed Brass Sculpture */}
-        <section aria-label="3D PAC sculpture" className="w-full flex flex-col items-center">
-          <PacSculptureCanvas
-            activeTab={activeTab}
-            activeNode={activeNodeId}
-            onSelectCoreNode={setSelectedCoreNode}
-            onSelectFunctionalNode={setSelectedFunctionalNode}
-          />
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight text-[#18181B]">
+                The PAC Model
+              </h1>
+              <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed max-w-md mx-auto lg:mx-0">
+                {activeTab === 'core'
+                  ? 'Internalised Parent rules, here-and-now Adult clarity, and felt Child emotion.'
+                  : 'Parent and Child each split down the middle—showing protective control vs. warmth, and compliance vs. honest spontaneity.'}
+              </p>
+            </header>
 
-          {/* Accessible Synchronized Node Selector Index */}
-          <div
-            role="tablist"
-            aria-label="Select ego state"
-            className="mt-2 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2"
-          >
-            {activeTab === 'core'
-              ? CORE_NODES.map((node) => {
-                  const isActive = node.id === selectedCoreNode;
+            {/* Live Distilled Quote Card */}
+            <AnimatePresence mode="wait">
+              <motion.article
+                key={`${activeTab}-${activeScenarioId}-${activeNodeId}`}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.24, ease: BREATH_EASE },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: -4,
+                  transition: { duration: 0.14, ease: BREATH_EASE },
+                }}
+                className="w-full py-4 border-y border-stone-200/80 space-y-2.5"
+              >
+                <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-stone-400">
+                  {activeNodeMeta.title}
+                </p>
+
+                <blockquote className="font-serif italic text-lg sm:text-xl lg:text-[22px] text-[#18181B] leading-relaxed text-balance">
+                  &ldquo;{activeEntry.quote}&rdquo;
+                </blockquote>
+
+                <p className="text-xs sm:text-[13.5px] text-stone-600 font-light leading-relaxed">
+                  {activeEntry.explanation}
+                </p>
+              </motion.article>
+            </AnimatePresence>
+
+            {/* Compact Scenario Picker */}
+            <div className="w-full space-y-2">
+              <p className="text-[9.5px] font-mono uppercase tracking-[0.18em] text-stone-400">
+                Try a moment
+              </p>
+              <div
+                role="group"
+                aria-label="Everyday scenarios"
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2"
+              >
+                {PAC_SCENARIOS.map((scenario) => {
+                  const isSelected = scenario.id === activeScenarioId;
                   return (
                     <button
-                      key={node.id}
+                      key={scenario.id}
                       type="button"
-                      role="tab"
-                      aria-selected={isActive}
                       onClick={() => {
-                        playSoftThump('bright');
-                        setSelectedCoreNode(node.id);
+                        playSoftThump('default');
+                        setActiveScenarioId(scenario.id);
                       }}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
-                        isActive
-                          ? node.id === 'A'
-                            ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
-                            : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B]'
-                          : 'bg-white/70 text-stone-600 border-stone-200/90 hover:border-stone-400 hover:text-stone-950'
+                      aria-pressed={isSelected}
+                      className={`pb-0.5 text-xs transition-colors border-b cursor-pointer ${
+                        isSelected
+                          ? 'border-[#18181B] text-[#18181B] font-medium'
+                          : 'border-transparent text-stone-500 hover:text-[#18181B]'
                       }`}
                     >
-                      <span className="font-serif mr-1.5">{node.letter}</span>
-                      <span>{node.circleSubLabel}</span>
-                    </button>
-                  );
-                })
-              : FUNCTIONAL_NODES.map((node) => {
-                  const isActive = node.id === selectedFunctionalNode;
-                  const useForest = node.id === 'A' || node.id === 'NP' || node.id === 'FC';
-                  return (
-                    <button
-                      key={node.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
-                      onClick={() => {
-                        playSoftThump('bright');
-                        setSelectedFunctionalNode(node.id);
-                      }}
-                      className={`px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
-                        isActive
-                          ? useForest
-                            ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
-                            : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B]'
-                          : 'bg-white/70 text-stone-600 border-stone-200/90 hover:border-stone-400 hover:text-stone-950'
-                      }`}
-                    >
-                      <span className="font-serif mr-1.5">{node.letter}</span>
-                      <span>{node.circleSubLabel}</span>
+                      {scenario.label}
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Quiet Footer Links */}
+            <footer className="w-full pt-2 flex flex-wrap items-center justify-between gap-4 text-xs text-stone-500">
+              <button
+                type="button"
+                onClick={() => {
+                  playSoftThump('bright');
+                  onSwitchToTriangle3D();
+                }}
+                className="inline-flex items-center gap-1.5 text-[#18181B] hover:text-stone-600 font-medium transition-colors cursor-pointer"
+              >
+                <span>Next: The Drama Triangle</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playSoftThump('default');
+                  onGoToContact();
+                }}
+                className="text-stone-500 hover:text-[#18181B] underline underline-offset-4 decoration-stone-300 hover:decoration-[#18181B] transition-colors cursor-pointer"
+              >
+                Free initial chat
+              </button>
+            </footer>
           </div>
-        </section>
-
-        {/* Distilled Quote & Single Grounding Reflection */}
-        <AnimatePresence mode="wait">
-          <motion.article
-            key={`${activeTab}-${activeScenarioId}-${activeNodeId}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              transition: { duration: 0.28, ease: BREATH_EASE },
-            }}
-            exit={{
-              opacity: 0,
-              y: -4,
-              transition: { duration: 0.16, ease: BREATH_EASE },
-            }}
-            className="max-w-xl mx-auto w-full text-center pt-4 border-t border-stone-200/80 space-y-3"
-          >
-            <p className="text-[10.5px] font-mono uppercase tracking-[0.2em] text-stone-400">
-              {activeNodeMeta.title}
-            </p>
-
-            <blockquote className="font-serif italic text-xl sm:text-2xl text-[#18181B] leading-relaxed text-balance">
-              &ldquo;{activeEntry.quote}&rdquo;
-            </blockquote>
-
-            <p className="text-sm text-stone-600 font-light leading-relaxed max-w-md mx-auto">
-              {activeEntry.explanation}
-            </p>
-          </motion.article>
-        </AnimatePresence>
-
-        {/* Discreet Practice Footer Links */}
-        <footer className="pt-4 border-t border-stone-200/70 flex flex-wrap items-center justify-between gap-4 text-xs text-stone-500">
-          <button
-            type="button"
-            onClick={() => {
-              playSoftThump('bright');
-              onSwitchToTriangle3D();
-            }}
-            className="inline-flex items-center gap-1.5 text-stone-700 hover:text-[#18181B] font-medium transition-colors cursor-pointer"
-          >
-            <span>Next: The Drama Triangle 3D</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              playSoftThump('default');
-              onGoToContact();
-            }}
-            className="text-stone-500 hover:text-[#18181B] underline underline-offset-4 decoration-stone-300 hover:decoration-stone-700 transition-colors cursor-pointer"
-          >
-            Book a free initial chat
-          </button>
-        </footer>
+        </div>
       </div>
     </div>
   );

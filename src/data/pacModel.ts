@@ -26,7 +26,7 @@ export interface PacScenario {
 
 export const PAC_YOUTUBE_SHORT = {
   id: '5w9D2VWeX9I',
-  watchUrl: 'https://www.youtube.com/shorts/5w9D2VWeX9I',
+  watchUrl: 'https://youtube.com/shorts/5w9D2VWeX9I?si=KR88QuKxniVfazU-',
   embedUrl: 'https://www.youtube-nocookie.com/embed/5w9D2VWeX9I?rel=0',
   thumbnailUrl: 'https://i.ytimg.com/vi/5w9D2VWeX9I/hqdefault.jpg',
   title: 'Liam Doran explains the Parent-Adult-Child (PAC) model in Transactional Analysis',
@@ -63,9 +63,9 @@ export const FUNCTIONAL_NODES: PacNodeMeta<FunctionalNodeId>[] = [
   {
     id: 'CP',
     letter: 'CP',
-    circleSubLabel: 'Critical',
-    fullName: 'Critical / Controlling Parent',
-    title: 'CRITICAL / CONTROLLING PARENT',
+    circleSubLabel: 'Control',
+    fullName: 'Controlling Parent',
+    title: 'CONTROLLING PARENT',
     tag: 'PROTECTIVE CONTROL',
   },
   {

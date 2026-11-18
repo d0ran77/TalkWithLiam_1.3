@@ -79,7 +79,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
         <div className="space-y-4 sm:space-y-5">
           <BreathReveal enabled={animate} delay={0} yOffset={14}>
             <div
-              className={`p-4 sm:p-5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2 ${
+              className={`p-4 sm:p-5 rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] space-y-2 ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300/90 transition-all duration-300' : ''
               }`}
             >
@@ -102,7 +102,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
 
           <BreathReveal enabled={animate} delay={0.09} yOffset={14}>
             <div
-              className={`p-4 sm:p-5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2 ${
+              className={`p-4 sm:p-5 rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] space-y-2 ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300/90 transition-all duration-300' : ''
               }`}
             >
@@ -125,7 +125,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
 
           <BreathReveal enabled={animate} delay={0.18} yOffset={14}>
             <div
-              className={`p-4 sm:p-5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2 ${
+              className={`p-4 sm:p-5 rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] space-y-2 ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300/90 transition-all duration-300' : ''
               }`}
             >
@@ -165,7 +165,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
             <BreathReveal enabled={animate} delay={0} yOffset={12} className="h-full">
               <div
                 className={`h-full p-3.5 sm:p-4 rounded-xl border border-stone-200/80 space-y-1 ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50/80'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50/80'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">
@@ -179,7 +179,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
             <BreathReveal enabled={animate} delay={0.07} yOffset={12} className="h-full">
               <div
                 className={`h-full p-3.5 sm:p-4 rounded-xl border border-stone-200/80 space-y-1 ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50/80'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50/80'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">
@@ -193,7 +193,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
             <BreathReveal enabled={animate} delay={0.14} yOffset={12} className="h-full">
               <div
                 className={`h-full p-3.5 sm:p-4 rounded-xl border border-stone-200/80 space-y-1 ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50/80'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50/80'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ export const SlideApproach: React.FC<SlideApproachProps> = ({
             <BreathReveal enabled={animate} delay={0.21} yOffset={12} className="h-full">
               <div
                 className={`h-full p-3.5 sm:p-4 rounded-xl border border-stone-200/80 space-y-1 ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50/80'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50/80'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">

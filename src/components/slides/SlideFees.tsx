@@ -69,7 +69,7 @@ export const SlideFees: React.FC<SlideFeesProps> = ({
           {/* In-Person Card */}
           <BreathReveal enabled={animate} delay={0} yOffset={14} className="h-full">
             <div
-              className={`h-full p-5 sm:p-6 lg:p-7 rounded-2xl sm:rounded-3xl bg-white border border-stone-200/90 shadow-2xs flex flex-col justify-between space-y-3.5 ${
+              className={`h-full p-5 sm:p-6 lg:p-7 rounded-2xl sm:rounded-3xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] flex flex-col justify-between space-y-3.5 ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300 transition-all duration-300' : ''
               }`}
             >
@@ -113,7 +113,7 @@ export const SlideFees: React.FC<SlideFeesProps> = ({
           <BreathReveal enabled={animate} delay={0.1} yOffset={14} className="h-full">
             <div
               className={`h-full p-5 sm:p-6 lg:p-7 rounded-2xl sm:rounded-3xl border shadow-2xs flex flex-col justify-between space-y-3.5 ${
-                flowMode ? 'bg-white border-stone-200/90' : 'bg-[#FAF9F5] border-stone-200/80'
+                flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)]' : 'bg-[#FAF9F5] border-stone-200/80'
               } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300 transition-all duration-300' : ''}`}
             >
               <div className="space-y-2.5">
@@ -152,7 +152,7 @@ export const SlideFees: React.FC<SlideFeesProps> = ({
             <BreathReveal enabled={animate} delay={0} yOffset={12} className="h-full">
               <div
                 className={`h-full p-4 sm:p-4.5 rounded-xl border border-stone-200/75 space-y-1.5 flex flex-col justify-between ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">
@@ -165,7 +165,7 @@ export const SlideFees: React.FC<SlideFeesProps> = ({
             <BreathReveal enabled={animate} delay={0.08} yOffset={12} className="h-full">
               <div
                 className={`h-full p-4 sm:p-4.5 rounded-xl border border-stone-200/75 space-y-1.5 flex flex-col justify-between ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">
@@ -178,7 +178,7 @@ export const SlideFees: React.FC<SlideFeesProps> = ({
             <BreathReveal enabled={animate} delay={0.16} yOffset={12} className="h-full">
               <div
                 className={`h-full p-4 sm:p-4.5 rounded-xl border border-stone-200/75 space-y-1.5 flex flex-col justify-between ${
-                  flowMode ? 'bg-white/95 shadow-2xs' : 'bg-stone-50'
+                  flowMode ? 'bg-white/45 border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]' : 'bg-stone-50'
                 } ${animate ? 'hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300' : ''}`}
               >
                 <div className="flex items-center justify-between">

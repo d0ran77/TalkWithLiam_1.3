@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { RotateCcw } from 'lucide-react';
 import {
   TriangleMode,
   DramaRoleId,
@@ -8,7 +7,7 @@ import {
 } from '../../data/dramaTriangle.ts';
 import {
   createStudioRig,
-  createCeramicAndBrassPalette,
+  createCharcoalPaperPalette,
   createMedallionFaceTexture,
   createPaperShadowTexture,
   prefersReducedMotion,
@@ -29,24 +28,23 @@ interface StationSlotRuntime {
   dramaId: DramaRoleId;
   winnerId: WinnerRoleId;
   group: THREE.Group;
-  ceramicMesh: THREE.Mesh;
-  brassRimMesh: THREE.Mesh;
+  porcelainMesh: THREE.Mesh;
+  inkRimMesh: THREE.Mesh;
   frontFaceMat: THREE.MeshStandardMaterial;
+  shadowMesh: THREE.Mesh;
   dramaTex: THREE.CanvasTexture;
   dramaActiveTex: THREE.CanvasTexture;
   winnerTex: THREE.CanvasTexture;
   winnerActiveTex: THREE.CanvasTexture;
-  baseX: number;
-  baseY: number;
   targetZ: number;
   targetScale: number;
   curZ: number;
   curScale: number;
 }
 
-function createBeveledStationPuck(radius: number, thickness: number): THREE.LatheGeometry {
+function createSlimStationDisc(radius: number, thickness: number): THREE.LatheGeometry {
   const halfT = thickness / 2;
-  const bevel = Math.min(0.068, radius * 0.14);
+  const bevel = 0.036;
   const pts: THREE.Vector2[] = [
     new THREE.Vector2(0.001, -halfT),
     new THREE.Vector2(radius - bevel, -halfT),
@@ -55,19 +53,27 @@ function createBeveledStationPuck(radius: number, thickness: number): THREE.Lath
     new THREE.Vector2(radius - bevel, halfT),
     new THREE.Vector2(0.001, halfT),
   ];
-  const geo = new THREE.LatheGeometry(pts, 48);
+  const geo = new THREE.LatheGeometry(pts, 56);
   geo.rotateX(Math.PI / 2);
   geo.computeVertexNormals();
   return geo;
 }
 
-function createConnectingRod(
+/**
+ * Builds an inset charcoal-ink connecting segment floating strictly in the open space
+ * BETWEEN two vertex discs, leaving generous breathing space so lines never touch a circle rim.
+ */
+function createInsetTriangleLine(
   p1: THREE.Vector3,
   p2: THREE.Vector3,
-  radius: number
+  circleRadius: number,
+  gapClearance: number,
+  lineRadius: number
 ): THREE.CylinderGeometry {
-  const dist = p1.distanceTo(p2);
-  const geo = new THREE.CylinderGeometry(radius, radius, dist, 20);
+  const totalDist = p1.distanceTo(p2);
+  const trim = circleRadius + gapClearance;
+  const lineLen = Math.max(0.2, totalDist - trim * 2);
+  const geo = new THREE.CylinderGeometry(lineRadius, lineRadius, lineLen, 12);
   const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
   const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
   const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
@@ -84,7 +90,6 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rigRef = useRef<StudioRig | null>(null);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
-  const [hasOrbited, setHasOrbited] = useState(false);
 
   const stateRef = useRef<{
     mode: TriangleMode;
@@ -107,17 +112,6 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
     applyTargetsRef.current?.();
   }, [mode, activeRole]);
 
-  const handleResetView = useCallback(() => {
-    const rig = rigRef.current;
-    if (!rig) return;
-    playSoftThump('default');
-    rig.camera.position.set(0, 0.28, 7.2);
-    rig.controls.target.set(0, 0, 0);
-    rig.controls.update();
-    rig.requestRender();
-    setHasOrbited(false);
-  }, []);
-
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -125,13 +119,9 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
     let rig: StudioRig;
     try {
       rig = createStudioRig(container, {
-        fov: 35,
-        cameraPosition: [0, 0.28, 7.2],
-        controlsTarget: [0, 0, 0],
-        minDistance: 5.0,
-        maxDistance: 10.5,
-        minPolarAngle: Math.PI * 0.24,
-        maxPolarAngle: Math.PI * 0.72,
+        fov: 34,
+        cameraPosition: [0, 0, 7.6],
+        lookAtTarget: [0, 0, 0],
         onContextLost: () => setWebglUnavailable(true),
         onContextRestored: () => setWebglUnavailable(false),
       });
@@ -141,70 +131,46 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
     }
 
     rigRef.current = rig;
-    const { scene, camera, renderer, controls, maxAnisotropy } = rig;
+    const { scene, camera, renderer, maxAnisotropy } = rig;
 
-    const palette = createCeramicAndBrassPalette(maxAnisotropy);
+    const palette = createCharcoalPaperPalette(maxAnisotropy);
     const disposables: { dispose: () => void }[] = [];
     const track = <T extends { dispose: () => void }>(item: T): T => {
       disposables.push(item);
       return item;
     };
 
-    // Subtle radial paper contact shadow
-    const shadowTex = track(createPaperShadowTexture());
-    const shadowGeo = track(new THREE.PlaneGeometry(5.2, 2.5));
-    const shadowMat = track(
-      new THREE.MeshBasicMaterial({
-        map: shadowTex,
-        transparent: true,
-        depthWrite: false,
-      })
-    );
-    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.set(0, -1.96, 0);
-    scene.add(shadowPlane);
+    const parallaxRoot = new THREE.Group();
+    scene.add(parallaxRoot);
 
-    // Kinetic rotating chassis (flips cleanly 180 deg between Drama point-down and Winner upright)
     const chassis = new THREE.Group();
-    scene.add(chassis);
+    parallaxRoot.add(chassis);
 
-    // Equilateral vertex positions (in Drama point-down local coords)
-    const R = 1.56;
-    const v0 = new THREE.Vector3(Math.cos((150 * Math.PI) / 180) * R, Math.sin((150 * Math.PI) / 180) * R, -0.06);
-    const v1 = new THREE.Vector3(Math.cos((30 * Math.PI) / 180) * R, Math.sin((30 * Math.PI) / 180) * R, -0.06);
-    const v2 = new THREE.Vector3(0, -R, -0.06);
+    // Equilateral triangle vertices with generous spacing so inset lines leave crisp gaps
+    const triRadius = 1.62;
+    const circleR = 0.54;
+    const v0 = new THREE.Vector3(Math.cos((150 * Math.PI) / 180) * triRadius, Math.sin((150 * Math.PI) / 180) * triRadius, 0);
+    const v1 = new THREE.Vector3(Math.cos((30 * Math.PI) / 180) * triRadius, Math.sin((30 * Math.PI) / 180) * triRadius, 0);
+    const v2 = new THREE.Vector3(0, -triRadius, 0);
 
-    // Three brushed-brass connecting rods
-    const rod01Geo = track(createConnectingRod(v0, v1, 0.038));
-    const rod12Geo = track(createConnectingRod(v1, v2, 0.038));
-    const rod20Geo = track(createConnectingRod(v2, v0, 0.038));
+    // Crisp charcoal-ink edges strictly inset BETWEEN circles (never touching any circle rim)
+    const edge01Geo = track(createInsetTriangleLine(v0, v1, circleR, 0.24, 0.012));
+    const edge12Geo = track(createInsetTriangleLine(v1, v2, circleR, 0.24, 0.012));
+    const edge20Geo = track(createInsetTriangleLine(v2, v0, circleR, 0.24, 0.012));
 
-    const rod01 = new THREE.Mesh(rod01Geo, palette.darkBronze);
-    const rod12 = new THREE.Mesh(rod12Geo, palette.darkBronze);
-    const rod20 = new THREE.Mesh(rod20Geo, palette.darkBronze);
-    rod01.castShadow = !rig.isSoftwareWebGL;
-    rod12.castShadow = !rig.isSoftwareWebGL;
-    rod20.castShadow = !rig.isSoftwareWebGL;
-    chassis.add(rod01, rod12, rod20);
+    const edge01 = new THREE.Mesh(edge01Geo, palette.charcoalInk);
+    const edge12 = new THREE.Mesh(edge12Geo, palette.charcoalInk);
+    const edge20 = new THREE.Mesh(edge20Geo, palette.charcoalInk);
+    chassis.add(edge01, edge12, edge20);
 
-    // Delicate concentric brass compass ring inside triangle
-    const innerRingGeo = track(new THREE.TorusGeometry(0.66, 0.02, 16, 64));
-    const innerRing = new THREE.Mesh(innerRingGeo, palette.brushedBrass);
-    innerRing.position.set(0, 0, -0.09);
-    chassis.add(innerRing);
+    const shadowTex = track(createPaperShadowTexture());
+    const shadowPlaneGeo = track(new THREE.PlaneGeometry(1.44, 1.44));
 
-    const centerPinGeo = track(new THREE.CylinderGeometry(0.085, 0.085, 0.14, 28));
-    centerPinGeo.rotateX(Math.PI / 2);
-    const centerPin = new THREE.Mesh(centerPinGeo, palette.brushedBrass);
-    centerPin.position.set(0, 0, -0.09);
-    chassis.add(centerPin);
-
-    // Shared ceramic station geometry
-    const puckGeo = track(createBeveledStationPuck(0.56, 0.25));
-    const rimGeo = track(new THREE.TorusGeometry(0.562, 0.025, 16, 48));
-    const faceGeo = track(new THREE.CircleGeometry(0.465, 48));
-    const backCapGeo = track(new THREE.CircleGeometry(0.32, 32));
+    const T = 0.14;
+    const puckGeo = track(createSlimStationDisc(circleR, T));
+    const rimGeo = track(new THREE.TorusGeometry(circleR + 0.004, 0.014, 12, 56));
+    const faceGeo = track(new THREE.CircleGeometry(circleR - 0.04, 56));
+    const backCapGeo = track(new THREE.CircleGeometry(circleR - 0.06, 40));
     backCapGeo.rotateY(Math.PI);
 
     const slotSpecs: {
@@ -267,32 +233,44 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
       group.position.set(spec.pos.x, spec.pos.y, 0);
       group.userData.slotIndex = spec.slotIndex;
 
-      const ceramicMesh = new THREE.Mesh(puckGeo, palette.ceramicMatte);
-      ceramicMesh.castShadow = !rig.isSoftwareWebGL;
-      ceramicMesh.receiveShadow = true;
-      ceramicMesh.userData.slotIndex = spec.slotIndex;
-      group.add(ceramicMesh);
+      const porcelainMesh = new THREE.Mesh(puckGeo, palette.porcelainMatte);
+      porcelainMesh.castShadow = !rig.isSoftwareWebGL;
+      porcelainMesh.receiveShadow = true;
+      porcelainMesh.userData.slotIndex = spec.slotIndex;
+      group.add(porcelainMesh);
 
-      const brassRimMesh = new THREE.Mesh(rimGeo, palette.brushedBrass);
-      brassRimMesh.userData.slotIndex = spec.slotIndex;
-      group.add(brassRimMesh);
+      const inkRimMesh = new THREE.Mesh(rimGeo, palette.charcoalInk);
+      inkRimMesh.userData.slotIndex = spec.slotIndex;
+      group.add(inkRimMesh);
 
       const frontFaceMat = track(
         new THREE.MeshStandardMaterial({
           map: dramaTex,
-          roughness: 0.62,
-          metalness: 0.04,
-          envMapIntensity: 0.78,
+          roughness: 0.72,
+          metalness: 0.02,
+          envMapIntensity: 0.45,
         })
       );
       const frontFace = new THREE.Mesh(faceGeo, frontFaceMat);
-      frontFace.position.z = 0.128;
+      frontFace.position.z = T / 2 + 0.003;
       frontFace.userData.slotIndex = spec.slotIndex;
       group.add(frontFace);
 
-      const backCap = new THREE.Mesh(backCapGeo, palette.brushedBrass);
-      backCap.position.z = -0.128;
+      const backCap = new THREE.Mesh(backCapGeo, palette.porcelainMatte);
+      backCap.position.z = -T / 2 - 0.002;
       group.add(backCap);
+
+      const shadowMat = track(
+        new THREE.MeshBasicMaterial({
+          map: shadowTex,
+          transparent: true,
+          opacity: 0.4,
+          depthWrite: false,
+        })
+      );
+      const shadowMesh = new THREE.Mesh(shadowPlaneGeo, shadowMat);
+      shadowMesh.position.set(spec.pos.x + 0.02, spec.pos.y - 0.07, -0.16);
+      chassis.add(shadowMesh);
 
       chassis.add(group);
 
@@ -301,15 +279,14 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
         dramaId: spec.dramaId,
         winnerId: spec.winnerId,
         group,
-        ceramicMesh,
-        brassRimMesh,
+        porcelainMesh,
+        inkRimMesh,
         frontFaceMat,
+        shadowMesh,
         dramaTex,
         dramaActiveTex,
         winnerTex,
         winnerActiveTex,
-        baseX: spec.pos.x,
-        baseY: spec.pos.y,
         targetZ: 0,
         targetScale: 1,
         curZ: 0,
@@ -322,36 +299,37 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
     let targetRotZ = 0;
     let curRotZ = 0;
 
+    let targetTiltX = 0;
+    let targetTiltY = 0;
+    let curTiltX = 0;
+    let curTiltY = 0;
+
     const applyTargets = () => {
       const { mode: m, activeRole: role, hoveredSlot } = stateRef.current;
       const isWinner = m === 'winner';
 
       targetRotZ = isWinner ? Math.PI : 0;
 
-      // Update structural brass/bronze finish for mode
-      const rodMat = isWinner ? palette.brushedBrass : palette.darkBronze;
-      rod01.material = rodMat;
-      rod12.material = rodMat;
-      rod20.material = rodMat;
-      innerRing.material = isWinner ? palette.brassHighlight : palette.brushedBrass;
+      const edgeMat = isWinner ? palette.forestInk : palette.charcoalInk;
+      edge01.material = edgeMat;
+      edge12.material = edgeMat;
+      edge20.material = edgeMat;
 
       stations.forEach((s) => {
         const expectedRole = isWinner ? s.winnerId : s.dramaId;
         const isActive = role === expectedRole;
         const isHovered = hoveredSlot === s.slotIndex;
 
-        s.targetZ = isActive ? 0.36 : isHovered ? 0.12 : 0;
-        s.targetScale = isActive ? 1.08 : isHovered ? 1.02 : 0.96;
+        s.targetZ = isActive ? 0.3 : isHovered ? 0.09 : 0;
+        s.targetScale = isActive ? 1.05 : isHovered ? 1.02 : 1.0;
 
-        s.ceramicMesh.material = isActive
+        s.porcelainMesh.material = isActive
           ? isWinner
-            ? palette.ceramicForest
-            : palette.ceramicActive
-          : palette.ceramicMatte;
+            ? palette.porcelainForest
+            : palette.porcelainActive
+          : palette.porcelainMatte;
 
-        s.brassRimMesh.material = isActive || isHovered
-          ? palette.brassHighlight
-          : palette.brushedBrass;
+        s.inkRimMesh.material = isWinner ? palette.forestInk : palette.charcoalInk;
 
         s.frontFaceMat.map = isWinner
           ? isActive
@@ -369,7 +347,7 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
     applyTargetsRef.current = applyTargets;
     applyTargets();
 
-    // Initialize clean rest state immediately
+    // Clean initial settle
     curRotZ = targetRotZ;
     chassis.rotation.z = curRotZ;
     stations.forEach((s) => {
@@ -378,14 +356,26 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
       s.group.position.z = s.curZ;
       s.group.scale.setScalar(s.curScale);
       s.group.rotation.z = -curRotZ;
+      s.shadowMesh.scale.setScalar(s.curScale * (1 + s.curZ * 0.22));
     });
 
     const reduced = prefersReducedMotion();
 
     rig.setUpdateCallback((dt) => {
       let moving = false;
-      const rotLambda = reduced ? 60 : 6.2;
-      const posLambda = reduced ? 60 : 8.5;
+      const rotLambda = reduced ? 60 : 6.4;
+      const posLambda = reduced ? 60 : 9.0;
+      const tiltLambda = reduced ? 60 : 6.5;
+
+      const ntx = reduced ? 0 : THREE.MathUtils.damp(curTiltX, targetTiltX, tiltLambda, dt);
+      const nty = reduced ? 0 : THREE.MathUtils.damp(curTiltY, targetTiltY, tiltLambda, dt);
+      if (Math.abs(ntx - targetTiltX) > 0.0005 || Math.abs(nty - targetTiltY) > 0.0005) {
+        moving = true;
+      }
+      curTiltX = Math.abs(ntx - targetTiltX) <= 0.0005 ? targetTiltX : ntx;
+      curTiltY = Math.abs(nty - targetTiltY) <= 0.0005 ? targetTiltY : nty;
+      parallaxRoot.rotation.x = curTiltX;
+      parallaxRoot.rotation.y = curTiltY;
 
       const nextRot = reduced
         ? targetRotZ
@@ -394,9 +384,8 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
       curRotZ = Math.abs(nextRot - targetRotZ) <= 0.001 ? targetRotZ : nextRot;
 
       chassis.rotation.z = curRotZ;
-      // Subtle 3D architectural yaw during inversion so brass bevels catch studio light
       const normProgress = curRotZ / Math.PI;
-      chassis.rotation.y = reduced ? 0 : Math.sin(normProgress * Math.PI) * 0.24;
+      chassis.rotation.y = reduced ? 0 : Math.sin(normProgress * Math.PI) * 0.16;
 
       for (let i = 0; i < stations.length; i++) {
         const s = stations[i];
@@ -415,16 +404,19 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
 
         s.group.position.z = s.curZ;
         s.group.scale.setScalar(s.curScale);
+        s.shadowMesh.scale.setScalar(s.curScale * (1 + s.curZ * 0.22));
       }
 
       return moving;
     });
 
-    // Raycast station picking (zero-GC)
+    // Raycasting + Mouse Parallax + Mobile Touch Drag-to-Tilt
     const raycaster = new THREE.Raycaster();
     const pointerNdc = new THREE.Vector2();
+    let isDragging = false;
     let downX = 0;
     let downY = 0;
+    let totalMoveDist = 0;
 
     const pickSlotIndex = (clientX: number, clientY: number): number | null => {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -445,59 +437,107 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
       return null;
     };
 
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      downX = e.clientX;
+      downY = e.clientY;
+      totalMoveDist = 0;
+      try {
+        renderer.domElement.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+    };
+
     const onPointerMove = (e: PointerEvent) => {
+      if (isDragging && !reduced) {
+        const dx = e.clientX - downX;
+        const dy = e.clientY - downY;
+        totalMoveDist = Math.max(totalMoveDist, Math.hypot(dx, dy));
+        targetTiltY = THREE.MathUtils.clamp((dx / 110) * 0.26, -0.26, 0.26);
+        targetTiltX = THREE.MathUtils.clamp((dy / 110) * 0.22, -0.22, 0.22);
+        rig.requestRender();
+        return;
+      }
+
       const hitSlot = pickSlotIndex(e.clientX, e.clientY);
-      renderer.domElement.style.cursor = hitSlot !== null ? 'pointer' : 'grab';
+      renderer.domElement.style.cursor = hitSlot !== null ? 'pointer' : 'default';
       if (stateRef.current.hoveredSlot !== hitSlot) {
         stateRef.current.hoveredSlot = hitSlot;
         applyTargets();
       }
+
+      if (e.pointerType === 'mouse' && !reduced) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        if (rect.width && rect.height) {
+          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+          targetTiltY = THREE.MathUtils.clamp(nx * 0.085, -0.09, 0.09);
+          targetTiltX = THREE.MathUtils.clamp(ny * 0.065, -0.07, 0.07);
+          rig.requestRender();
+        }
+      }
+    };
+
+    const endDragAndTap = (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      targetTiltX = 0;
+      targetTiltY = 0;
+      rig.requestRender();
+      try {
+        renderer.domElement.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+
+      if (totalMoveDist <= 10) {
+        const hitSlot = pickSlotIndex(e.clientX, e.clientY);
+        if (hitSlot !== null) {
+          const station = stations[hitSlot];
+          if (station) {
+            playSoftThump('bright');
+            onSelectRef.current(
+              stateRef.current.mode === 'winner' ? station.winnerId : station.dramaId
+            );
+          }
+        }
+      }
+    };
+
+    const onPointerCancel = () => {
+      isDragging = false;
+      targetTiltX = 0;
+      targetTiltY = 0;
+      rig.requestRender();
     };
 
     const onPointerLeave = () => {
-      renderer.domElement.style.cursor = 'grab';
+      if (isDragging) return;
+      renderer.domElement.style.cursor = 'default';
+      targetTiltX = 0;
+      targetTiltY = 0;
       if (stateRef.current.hoveredSlot !== null) {
         stateRef.current.hoveredSlot = null;
         applyTargets();
+      } else {
+        rig.requestRender();
       }
     };
 
-    const onPointerDown = (e: PointerEvent) => {
-      downX = e.clientX;
-      downY = e.clientY;
-    };
-
-    const onPointerUp = (e: PointerEvent) => {
-      const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
-      if (dist > 6) {
-        setHasOrbited(true);
-        return;
-      }
-      const hitSlot = pickSlotIndex(e.clientX, e.clientY);
-      if (hitSlot === null) return;
-      const station = stations[hitSlot];
-      if (!station) return;
-      playSoftThump('bright');
-      onSelectRef.current(
-        stateRef.current.mode === 'winner' ? station.winnerId : station.dramaId
-      );
-    };
-
-    const onControlsStart = () => setHasOrbited(true);
-
-    controls.addEventListener('start', onControlsStart);
-    renderer.domElement.addEventListener('pointermove', onPointerMove);
-    renderer.domElement.addEventListener('pointerleave', onPointerLeave);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
-    renderer.domElement.addEventListener('pointerup', onPointerUp);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('pointerup', endDragAndTap);
+    renderer.domElement.addEventListener('pointercancel', onPointerCancel);
+    renderer.domElement.addEventListener('pointerleave', onPointerLeave);
 
     return () => {
       applyTargetsRef.current = null;
-      controls.removeEventListener('start', onControlsStart);
-      renderer.domElement.removeEventListener('pointermove', onPointerMove);
-      renderer.domElement.removeEventListener('pointerleave', onPointerLeave);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
-      renderer.domElement.removeEventListener('pointerup', onPointerUp);
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointerup', endDragAndTap);
+      renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
+      renderer.domElement.removeEventListener('pointerleave', onPointerLeave);
       disposables.forEach((d) => d.dispose());
       palette.dispose();
       rig.dispose();
@@ -520,8 +560,8 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
           ];
 
     return (
-      <div className="w-full h-[260px] sm:h-[310px] flex items-center justify-center bg-[#FAF9F5] select-none px-4">
-        <div className="flex flex-wrap items-center justify-center gap-4">
+      <div className="w-full h-[230px] sm:h-[265px] lg:h-[340px] flex items-center justify-center bg-[#FAF9F5] select-none px-4">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           {fallbackRoles.map((r) => {
             const isActive = activeRole === r.id;
             return (
@@ -529,12 +569,12 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
                 key={r.id}
                 type="button"
                 onClick={() => onSelectRole(r.id)}
-                className={`px-4 py-2.5 rounded-full border font-serif text-sm cursor-pointer transition-all ${
+                className={`px-4 py-2 rounded-full border font-serif text-sm cursor-pointer transition-colors ${
                   isActive
                     ? mode === 'winner'
-                      ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#B89656]'
-                      : 'bg-[#18181B] text-[#FAF9F5] border-[#B89656]'
-                    : 'bg-[#F2EFE9] text-[#18181B] border-[#C29D59]/60'
+                      ? 'bg-[#2D5A43] text-[#FAF9F5] border-[#2D5A43]'
+                      : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B]'
+                    : 'bg-[#FAF9F5] text-[#18181B] border-[#18181B]'
                 }`}
               >
                 {r.label}
@@ -547,30 +587,15 @@ export const TriangleSculptureCanvas: React.FC<TriangleSculptureCanvasProps> = (
   }
 
   return (
-    <div className="relative w-full h-[270px] sm:h-[330px] lg:h-[360px] select-none">
+    <div className="relative w-full h-[230px] sm:h-[265px] lg:h-[340px] select-none">
       <div
         ref={mountRef}
         className="w-full h-full"
-        aria-label="Interactive 3D ceramic and brushed brass Drama and Winner's Triangle sculpture. Drag to rotate or click a station to inspect."
+        aria-label="Interactive charcoal ink Drama and Winner's Triangle. Drag to tilt or tap any station."
       />
-
-      {/* Quiet solid-paper reset button (no backdrop-filter over WebGL) */}
-      <div className="absolute bottom-2 right-2 flex items-center gap-2 pointer-events-none">
-        <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-stone-400">
-          Drag to orbit · Click station
-        </span>
-        {hasOrbited && (
-          <button
-            type="button"
-            onClick={handleResetView}
-            className="pointer-events-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAF9F5] border border-stone-200 text-[10px] font-mono uppercase tracking-[0.14em] text-stone-600 hover:text-stone-950 hover:border-stone-400 transition-colors cursor-pointer"
-            aria-label="Reset 3D camera angle"
-          >
-            <RotateCcw className="w-2.5 h-2.5" />
-            <span>Reset</span>
-          </button>
-        )}
-      </div>
+      <p className="pointer-events-none absolute bottom-1 inset-x-0 text-center text-[9.5px] font-mono uppercase tracking-[0.16em] text-stone-400">
+        Drag to tilt · Tap any station
+      </p>
     </div>
   );
 };

@@ -53,17 +53,35 @@ const SIZE_VARIANTS = [
   'text-2xl sm:text-4xl md:text-6xl 2xl:text-7xl 3xl:text-8xl tracking-tighter font-semibold px-8 py-3.5 sm:px-10 sm:py-4.5 2xl:px-14 2xl:py-6 rounded-2xl 2xl:rounded-3xl',
 ];
 
-export const AmbientNegativeSpaceWords: React.FC = () => {
+interface AmbientNegativeSpaceWordsProps {
+  variant?: 'landing' | 'backdrop';
+}
+
+export const AmbientNegativeSpaceWords: React.FC<AmbientNegativeSpaceWordsProps> = ({
+  variant = 'landing',
+}) => {
   const [activeWords, setActiveWords] = useState<FloatingWordInstance[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevWordRef = useRef<string>('');
 
   // Computes safe spawn coordinates strictly outside the bounds of the H1, subtitle, and icons
   const getSafeCoordinates = useCallback((): { x: number; y: number } => {
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+
+    if (variant === 'backdrop') {
+      return isDesktop
+        ? {
+            x: 16 + Math.random() * 70, // 16% to 86% across backdrop (behind sidebar & glass stage)
+            y: 14 + Math.random() * 72, // 14% to 86% height
+          }
+        : {
+            x: 18 + Math.random() * 64, // 18% to 82% width on mobile
+            y: 12 + Math.random() * 76, // 12% to 88% height on mobile
+          };
+    }
+
     const container = containerRef.current || document.getElementById('main-stage-container');
     const heroBlock = document.getElementById('minimal-hero-brand-block');
-
-    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
 
     if (container && heroBlock) {
       const containerRect = container.getBoundingClientRect();
@@ -129,7 +147,7 @@ export const AmbientNegativeSpaceWords: React.FC = () => {
         y: isTop ? 8 + Math.random() * 10 : 82 + Math.random() * 8,
       };
     }
-  }, []);
+  }, [variant]);
 
   useEffect(() => {
     const spawnWord = () => {
@@ -146,8 +164,11 @@ export const AmbientNegativeSpaceWords: React.FC = () => {
       const sizeIndex = Math.floor(Math.random() * SIZE_VARIANTS.length);
       const sizeClass = SIZE_VARIANTS[sizeIndex];
 
-      // Soft ambient transparency: max opacity between 0.14 and 0.28
-      const maxOpacity = 0.14 + Math.random() * 0.14;
+      // Soft ambient transparency (richer behind frosted glassmorphism containers so blur refraction reads clearly)
+      const maxOpacity =
+        variant === 'backdrop'
+          ? 0.28 + Math.random() * 0.14
+          : 0.14 + Math.random() * 0.14;
       const rotationDeg = (Math.random() - 0.5) * 3.5; // subtle natural tilt
       const duration = 14.0 + Math.random() * 4.0; // 14s to 18s serene slow float
 
@@ -169,17 +190,20 @@ export const AmbientNegativeSpaceWords: React.FC = () => {
       });
     };
 
-    // Initial slow spawn after 1200ms
-    const initialTimer = setTimeout(spawnWord, 1200);
+    // Quick initial spawn on backdrop mode so glass refraction is visible immediately
+    const initialTimer = setTimeout(spawnWord, variant === 'backdrop' ? 180 : 1200);
+    const secondTimer =
+      variant === 'backdrop' ? setTimeout(spawnWord, 900) : null;
 
     // Spawn every 10.5s so words emerge slowly from distance and never rush
     const interval = setInterval(spawnWord, 10500);
 
     return () => {
       clearTimeout(initialTimer);
+      if (secondTimer) clearTimeout(secondTimer);
       clearInterval(interval);
     };
-  }, [getSafeCoordinates]);
+  }, [getSafeCoordinates, variant]);
 
   return (
     <div

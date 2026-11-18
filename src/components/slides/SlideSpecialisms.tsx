@@ -82,7 +82,7 @@ export const SlideSpecialisms: React.FC<SlideSpecialismsProps> = ({
               </p>
 
               {/* Box Highlight for In the Room */}
-              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/90' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
+              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/45' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
                 <div className="text-[13px] sm:text-[14.5px] text-stone-700 leading-relaxed">
                   <span className="editorial-mark text-[10.5px] sm:text-[11.5px] font-medium mr-2 tracking-wide uppercase">
                     In the room
@@ -113,7 +113,7 @@ export const SlideSpecialisms: React.FC<SlideSpecialismsProps> = ({
               </p>
 
               {/* Box Highlight for In the Room */}
-              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/90' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
+              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/45' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
                 <div className="text-[13px] sm:text-[14.5px] text-stone-700 leading-relaxed">
                   <span className="editorial-mark text-[10.5px] sm:text-[11.5px] font-medium mr-2 tracking-wide uppercase">
                     In the room
@@ -144,7 +144,7 @@ export const SlideSpecialisms: React.FC<SlideSpecialismsProps> = ({
               </p>
 
               {/* Box Highlight for In the Room */}
-              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/90' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
+              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/45' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
                 <div className="text-[13px] sm:text-[14.5px] text-stone-700 leading-relaxed">
                   <span className="editorial-mark text-[10.5px] sm:text-[11.5px] font-medium mr-2 tracking-wide uppercase">
                     In the room
@@ -174,7 +174,7 @@ export const SlideSpecialisms: React.FC<SlideSpecialismsProps> = ({
               </p>
 
               {/* Box Highlight for In the Room */}
-              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/90' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
+              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/45' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
                 <div className="text-[13px] sm:text-[14.5px] text-stone-700 leading-relaxed">
                   <span className="editorial-mark text-[10.5px] sm:text-[11.5px] font-medium mr-2 tracking-wide uppercase">
                     In the room
@@ -203,7 +203,7 @@ export const SlideSpecialisms: React.FC<SlideSpecialismsProps> = ({
               </p>
 
               {/* Box Highlight for In the Room */}
-              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/90' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
+              <div className={`sm:ml-7 p-3.5 sm:p-4 rounded-r-xl rounded-l-xs ${flowMode ? 'bg-white/45' : 'bg-[#FAF9F5]'} border-l-2 border-l-[#18181B] border-y border-r border-stone-200/70 space-y-1`}>
                 <div className="text-[13px] sm:text-[14.5px] text-stone-700 leading-relaxed">
                   <span className="editorial-mark text-[10.5px] sm:text-[11.5px] font-medium mr-2 tracking-wide uppercase">
                     In the room

@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  ExternalLink,
   Repeat,
   Shield,
   Heart,
@@ -22,6 +23,7 @@ import {
   DRAMA_SCENARIOS,
   DRAMA_TO_WINNER,
   WINNER_TO_DRAMA,
+  DRAMA_YOUTUBE_SHORT,
 } from '../data/dramaTriangle.ts';
 
 const SCENARIOS = DRAMA_SCENARIOS;
@@ -197,12 +199,12 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
   return (
     <div
       id="drama-triangle-dedicated-page"
-      className="w-full flex-1 h-full min-h-0 flex flex-col relative overflow-hidden bg-[#FAF9F5] text-[#18181B] select-text font-sans"
+      className="w-full flex-1 h-full min-h-0 flex flex-col relative overflow-hidden bg-transparent text-[#18181B] select-text font-sans"
     >
       {/* Scrollable Main Canvas */}
       <div className="flex-1 w-full min-h-0 overflow-y-auto custom-scrollbar">
         {/* Uniform Mobile Header (< lg): Identical to About Me */}
-        <div className="lg:hidden px-3 pt-1 pb-2 border-b border-[#E4E4E7]/80 bg-[#FAF9F5]">
+        <div className="lg:hidden px-3 pt-1 pb-2 border-b border-[#E4E4E7]/80 bg-transparent">
           <MobileBrandHeader
             activeView="drama-triangle"
             onBrandClick={() => onBackToLanding?.()}
@@ -249,7 +251,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
             <div
               role="tablist"
               aria-label="Switch between The Drama Triangle and The Winner's Triangle"
-              className="inline-flex items-center p-1 rounded-full bg-[#FFFFFF] border border-[#E4E4E7] shadow-[0_1px_4px_rgba(24,24,27,0.03)] max-w-full"
+              className="inline-flex items-center p-1 rounded-full bg-white/55 border border-white/85 ring-1 ring-[#18181B]/[0.06] shadow-[0_2px_8px_rgba(24,24,27,0.04)] max-w-full"
             >
               <button
                 type="button"
@@ -307,7 +309,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
             className="mt-7 sm:mt-9 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-9 items-stretch"
           >
             {/* Left / Top Column: Interactive SVG Triangle Diagram */}
-            <div className="lg:col-span-5 bg-[#FFFFFF] border border-[#E4E4E7] rounded-2xl p-4 sm:p-6 flex flex-col justify-between">
+            <div className="lg:col-span-5 bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] rounded-2xl p-4 sm:p-6 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-2 pb-2">
                 <span
                   className={`font-mono text-[10.5px] uppercase tracking-[0.18em] font-medium transition-colors duration-300 ${
@@ -434,8 +436,8 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
                             ? 'bg-[#2D5A43] text-[#FFFFFF] border-[#2D5A43] shadow-[0_8px_22px_rgba(45,90,67,0.28)] scale-[1.04] focus-visible:ring-[#2D5A43]'
                             : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_8px_22px_rgba(24,24,27,0.22)] scale-[1.04] focus-visible:ring-[#18181B]'
                           : isWinner
-                            ? 'bg-[#FFFFFF] text-[#18181B] border-[#2D5A43]/35 hover:border-[#2D5A43] hover:bg-[#FAF9F5] shadow-[0_2px_8px_rgba(24,24,27,0.05)] focus-visible:ring-[#2D5A43]'
-                            : 'bg-[#FFFFFF] text-[#18181B] border-[#E4E4E7] hover:border-[#18181B] hover:bg-[#FAF9F5] shadow-[0_2px_8px_rgba(24,24,27,0.05)] focus-visible:ring-[#18181B]'
+                            ? 'bg-white/75 text-[#18181B] border-[#2D5A43]/35 hover:border-[#2D5A43] hover:bg-white/95 shadow-[0_2px_8px_rgba(24,24,27,0.05)] focus-visible:ring-[#2D5A43]'
+                            : 'bg-white/75 text-[#18181B] border-stone-300/80 hover:border-[#18181B] hover:bg-white/95 shadow-[0_2px_8px_rgba(24,24,27,0.05)] focus-visible:ring-[#18181B]'
                       }`}
                     >
                       <span className="flex items-center justify-center gap-1.5 text-[12.5px] sm:text-[13.5px] font-semibold tracking-tight leading-none whitespace-nowrap">
@@ -468,8 +470,8 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
             {/* Right / Bottom Column: Role Breakdown Panel */}
             <div
               aria-live="polite"
-              className={`lg:col-span-7 bg-[#FFFFFF] border rounded-2xl p-5 sm:p-8 flex flex-col justify-between transition-colors duration-300 ${
-                isWinner ? 'border-[#2D5A43]/35' : 'border-[#E4E4E7]'
+              className={`lg:col-span-7 bg-white/45 border ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] rounded-2xl p-5 sm:p-8 flex flex-col justify-between transition-colors duration-300 ${
+                isWinner ? 'border-[#2D5A43]/35' : 'border-white/80'
               }`}
             >
               <div className="space-y-5">
@@ -506,7 +508,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
                   className={`p-4 rounded-xl border transition-colors duration-200 ${
                     isWinner
                       ? 'bg-[#2D5A43]/[0.05] border-[#2D5A43]/25'
-                      : 'bg-[#FAF9F5] border-[#E4E4E7]'
+                      : 'bg-[#FAF9F5]/65 border-[#E4E4E7]/85'
                   }`}
                 >
                   <p
@@ -541,7 +543,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
                   <button
                     type="button"
                     onClick={() => handleCompareDrama(selectedWinnerRole)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#E4E4E7] bg-[#FAF9F5] hover:border-[#18181B] text-[13px] font-medium text-[#18181B] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18181B]"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#E4E4E7] bg-[#FAF9F5]/75 hover:bg-white/80 hover:border-[#18181B] text-[13px] font-medium text-[#18181B] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18181B]"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>
@@ -589,7 +591,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
                         ? isWinner
                           ? 'bg-[#2D5A43] text-[#FFFFFF] border-[#2D5A43] shadow-[0_4px_12px_rgba(45,90,67,0.2)] focus-visible:ring-[#2D5A43]'
                           : 'bg-[#18181B] text-[#FAF9F5] border-[#18181B] shadow-[0_4px_12px_rgba(24,24,27,0.16)] focus-visible:ring-[#18181B]'
-                        : 'bg-[#FFFFFF] text-[#71717A] border-[#E4E4E7] hover:text-[#18181B] hover:border-[#18181B] focus-visible:ring-[#18181B]'
+                        : 'bg-white/55 text-[#71717A] border-white/80 ring-1 ring-[#18181B]/[0.06] hover:text-[#18181B] hover:border-[#18181B] focus-visible:ring-[#18181B]'
                     }`}
                   >
                     {scenario.label}
@@ -599,7 +601,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
             </div>
 
             {/* Compact 3-Step Dialogue Comparison Card */}
-            <div className="bg-[#FFFFFF] border border-[#E4E4E7] rounded-2xl p-5 sm:p-7 space-y-5">
+            <div className="bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] rounded-2xl p-5 sm:p-7 space-y-5">
               <div className="pb-4 border-b border-[#E4E4E7] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <p className="text-[14.5px] sm:text-[15.5px] text-[#18181B] font-medium">
                   {activeScenario.context}
@@ -614,8 +616,8 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
                 <div
                   className={`rounded-xl p-4 sm:p-5 border transition-colors duration-200 space-y-4 ${
                     mode === 'drama'
-                      ? 'bg-[#FAF9F5] border-[#18181B]/35'
-                      : 'bg-[#FAF9F5]/55 border-[#E4E4E7]'
+                      ? 'bg-[#FAF9F5]/65 border-[#18181B]/35'
+                      : 'bg-[#FAF9F5]/45 border-[#E4E4E7]/85'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -680,6 +682,48 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
               <p className="pt-3 border-t border-[#E4E4E7] text-[13.5px] sm:text-[14.5px] leading-[1.65] text-[#71717A]">
                 {activeScenario.takeaway}
               </p>
+            </div>
+          </section>
+
+          {/* Short Video Explainer Section (Liam's YouTube Short) */}
+          <section
+            aria-label="Short video explainer on the Drama Triangle"
+            className="mt-12 sm:mt-14 pt-8 sm:pt-10 border-t border-[#E4E4E7] grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center"
+          >
+            <div className="md:col-span-7 space-y-3">
+              <p className="font-mono text-[10.5px] sm:text-[11px] uppercase tracking-[0.2em] text-[#71717A] font-medium">
+                SHORT EXPLAINER VIDEO
+              </p>
+              <h2 className="text-[20px] sm:text-[24px] font-medium tracking-tight text-[#18181B]">
+                Hearing the Drama Triangle in plain English.
+              </h2>
+              <p className="text-[14.5px] sm:text-[15.5px] leading-[1.7] text-[#71717A] max-w-[54ch]">
+                Prefer to hear it explained directly? Watch this brief clip from my YouTube channel looking at how the Drama Triangle plays out and how we step into the Winner&apos;s Triangle. I&apos;ve made these videos using Gemini Notebook, created directly from academic papers and books on Transactional Analysis.
+              </p>
+              <div className="pt-1">
+                <a
+                  href={DRAMA_YOUTUBE_SHORT.watchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[13.5px] sm:text-[14px] font-medium text-[#18181B] hover:text-[#71717A] border-b border-[#18181B] hover:border-[#71717A] pb-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18181B]"
+                >
+                  <span>Watch on YouTube</span>
+                  <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                </a>
+              </div>
+            </div>
+
+            <div className="md:col-span-5 flex justify-start md:justify-end">
+              <div className="w-[220px] sm:w-[240px] aspect-[9/16] rounded-2xl overflow-hidden border border-[#18181B]/20 bg-[#18181B]/5 shadow-[0_8px_24px_rgba(24,24,27,0.08)]">
+                <iframe
+                  src={DRAMA_YOUTUBE_SHORT.embedUrl}
+                  title={DRAMA_YOUTUBE_SHORT.title}
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              </div>
             </div>
           </section>
 

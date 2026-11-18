@@ -10,7 +10,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+const portFlagIndex = process.argv.indexOf('--port');
+const cliPort = portFlagIndex !== -1 ? Number(process.argv[portFlagIndex + 1]) : NaN;
+const PORT =
+  Number.isFinite(cliPort) && cliPort > 0
+    ? cliPort
+    : process.env.NODE_ENV !== 'production' &&
+        process.env.PORT &&
+        process.env.PORT === process.env.NGINX_PORT
+      ? Number(process.env.DEFAULT_APP_PORT) || 3000
+      : Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 
@@ -306,12 +315,17 @@ app.get('/api/health', (req, res) => {
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
-    const vitePromise = import('vite').then(({ createServer: createViteServer }) =>
-      createViteServer({
-        server: { middlewareMode: true },
-        appType: 'spa',
-      }),
-    );
+    const vitePromise = import('vite')
+      .then(({ createServer: createViteServer }) =>
+        createViteServer({
+          server: { middlewareMode: true },
+          appType: 'spa',
+        }),
+      )
+      .catch((err) => {
+        console.error('Failed to initialize Vite dev server:', err);
+        throw err;
+      });
 
     app.use(async (req, res, next) => {
       try {

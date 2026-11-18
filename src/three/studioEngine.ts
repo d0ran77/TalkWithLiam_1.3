@@ -1,13 +1,11 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 export const PAPER_BG_HEX = '#FAF9F5';
 export const FOREST_GREEN_HEX = '#2D5A43';
 export const CHARCOAL_INK_HEX = '#18181B';
-export const WARM_BRASS_HEX = '#C29D59';
-export const DARK_BRONZE_HEX = '#35322E';
-export const MATTE_CERAMIC_HEX = '#F2EFE9';
+export const GRAPHITE_LINE_HEX = '#71717A';
+export const MATTE_PORCELAIN_HEX = '#F5F3EC';
 
 let cachedSoftwareWebGL: boolean | null = null;
 
@@ -49,9 +47,6 @@ export function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-/**
- * Deterministic PRNG for procedural ceramic speckles and brushed metal grain.
- */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
@@ -63,17 +58,17 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-export interface CeramicBrassPalette {
-  ceramicMatte: THREE.MeshPhysicalMaterial;
-  ceramicActive: THREE.MeshPhysicalMaterial;
-  ceramicForest: THREE.MeshPhysicalMaterial;
-  brushedBrass: THREE.MeshStandardMaterial;
-  brassHighlight: THREE.MeshStandardMaterial;
-  darkBronze: THREE.MeshStandardMaterial;
+export interface CharcoalPaperPalette {
+  porcelainMatte: THREE.MeshPhysicalMaterial;
+  porcelainActive: THREE.MeshPhysicalMaterial;
+  porcelainForest: THREE.MeshPhysicalMaterial;
+  charcoalInk: THREE.MeshStandardMaterial;
+  graphiteInk: THREE.MeshStandardMaterial;
+  forestInk: THREE.MeshStandardMaterial;
   dispose: () => void;
 }
 
-function createCeramicSpeckleTextures(maxAnisotropy: number) {
+function createPaperPorcelainTextures(maxAnisotropy: number) {
   const size = 256;
   const colorCanvas = document.createElement('canvas');
   colorCanvas.width = size;
@@ -88,29 +83,27 @@ function createCeramicSpeckleTextures(maxAnisotropy: number) {
   const rand = mulberry32(41927);
 
   if (ctx && rCtx) {
-    ctx.fillStyle = MATTE_CERAMIC_HEX;
+    ctx.fillStyle = MATTE_PORCELAIN_HEX;
     ctx.fillRect(0, 0, size, size);
 
-    rCtx.fillStyle = '#B8B8B8'; // ~0.72 base matte stoneware roughness
+    rCtx.fillStyle = '#C8C8C8';
     rCtx.fillRect(0, 0, size, size);
 
-    // Soft mineral clay mottling
-    for (let i = 0; i < 650; i++) {
+    // Subtle fine cotton-paper / matte porcelain grain
+    for (let i = 0; i < 520; i++) {
       const x = rand() * size;
       const y = rand() * size;
-      const radius = 0.4 + rand() * 1.1;
+      const radius = 0.4 + rand() * 0.9;
       const tone = rand();
       ctx.fillStyle =
         tone > 0.65
-          ? 'rgba(255, 253, 248, 0.35)'
-          : tone > 0.2
-            ? 'rgba(214, 206, 193, 0.28)'
-            : 'rgba(130, 118, 102, 0.16)';
+          ? 'rgba(255, 255, 255, 0.35)'
+          : 'rgba(113, 113, 122, 0.08)';
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
 
-      const rShade = Math.floor(165 + rand() * 45);
+      const rShade = Math.floor(185 + rand() * 35);
       rCtx.fillStyle = `rgb(${rShade},${rShade},${rShade})`;
       rCtx.fillRect(x, y, 1.5, 1.5);
     }
@@ -132,152 +125,81 @@ function createCeramicSpeckleTextures(maxAnisotropy: number) {
   return { colorMap, roughnessMap };
 }
 
-function createBrushedBrassTextures(maxAnisotropy: number) {
-  const size = 256;
-  const colorCanvas = document.createElement('canvas');
-  colorCanvas.width = size;
-  colorCanvas.height = size;
-  const ctx = colorCanvas.getContext('2d');
+export function createCharcoalPaperPalette(maxAnisotropy: number): CharcoalPaperPalette {
+  const paperTex = createPaperPorcelainTextures(maxAnisotropy);
 
-  const roughCanvas = document.createElement('canvas');
-  roughCanvas.width = size;
-  roughCanvas.height = size;
-  const rCtx = roughCanvas.getContext('2d');
-
-  const rand = mulberry32(99173);
-
-  if (ctx && rCtx) {
-    ctx.fillStyle = WARM_BRASS_HEX;
-    ctx.fillRect(0, 0, size, size);
-
-    rCtx.fillStyle = '#525252';
-    rCtx.fillRect(0, 0, size, size);
-
-    // Fine directional horizontal hairline brushing
-    for (let y = 0; y < size; y++) {
-      const alpha = 0.04 + rand() * 0.1;
-      ctx.fillStyle =
-        rand() > 0.5
-          ? `rgba(244, 224, 178, ${alpha})`
-          : `rgba(128, 96, 44, ${alpha})`;
-      ctx.fillRect(0, y, size, 1);
-
-      const rv = Math.floor(66 + rand() * 44);
-      rCtx.fillStyle = `rgb(${rv},${rv},${rv})`;
-      rCtx.fillRect(0, y, size, 1);
-    }
-  }
-
-  const colorMap = new THREE.CanvasTexture(colorCanvas);
-  colorMap.colorSpace = THREE.SRGBColorSpace;
-  colorMap.wrapS = THREE.RepeatWrapping;
-  colorMap.wrapT = THREE.RepeatWrapping;
-  colorMap.repeat.set(2, 1);
-  colorMap.anisotropy = maxAnisotropy;
-
-  const roughnessMap = new THREE.CanvasTexture(roughCanvas);
-  roughnessMap.wrapS = THREE.RepeatWrapping;
-  roughnessMap.wrapT = THREE.RepeatWrapping;
-  roughnessMap.repeat.set(2, 1);
-  roughnessMap.anisotropy = maxAnisotropy;
-
-  return { colorMap, roughnessMap };
-}
-
-export function createCeramicAndBrassPalette(maxAnisotropy: number): CeramicBrassPalette {
-  const ceramicTex = createCeramicSpeckleTextures(maxAnisotropy);
-  const brassTex = createBrushedBrassTextures(maxAnisotropy);
-
-  const ceramicMatte = new THREE.MeshPhysicalMaterial({
+  const porcelainMatte = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color('#FFFFFF'),
-    map: ceramicTex.colorMap,
-    roughnessMap: ceramicTex.roughnessMap,
-    roughness: 0.78,
-    metalness: 0.02,
-    clearcoat: 0.08,
-    clearcoatRoughness: 0.65,
-    envMapIntensity: 0.85,
+    map: paperTex.colorMap,
+    roughnessMap: paperTex.roughnessMap,
+    roughness: 0.84,
+    metalness: 0.0,
+    clearcoat: 0.04,
+    clearcoatRoughness: 0.78,
+    envMapIntensity: 0.55,
   });
 
-  const ceramicActive = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#FFFDF8'),
-    map: ceramicTex.colorMap,
-    roughnessMap: ceramicTex.roughnessMap,
-    roughness: 0.56,
-    metalness: 0.02,
-    clearcoat: 0.16,
-    clearcoatRoughness: 0.42,
-    emissive: new THREE.Color('#F3ECDD'),
-    emissiveIntensity: 0.08,
-    envMapIntensity: 1.0,
+  const porcelainActive = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(CHARCOAL_INK_HEX),
+    roughness: 0.62,
+    metalness: 0.04,
+    clearcoat: 0.06,
+    clearcoatRoughness: 0.55,
+    envMapIntensity: 0.65,
   });
 
-  const ceramicForest = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#E3ECE6'),
-    map: ceramicTex.colorMap,
-    roughnessMap: ceramicTex.roughnessMap,
+  const porcelainForest = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(FOREST_GREEN_HEX),
+    roughness: 0.62,
+    metalness: 0.04,
+    clearcoat: 0.06,
+    clearcoatRoughness: 0.55,
+    envMapIntensity: 0.65,
+  });
+
+  const charcoalInk = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(CHARCOAL_INK_HEX),
     roughness: 0.58,
-    metalness: 0.03,
-    clearcoat: 0.16,
-    clearcoatRoughness: 0.4,
-    emissive: new THREE.Color(FOREST_GREEN_HEX),
-    emissiveIntensity: 0.06,
-    envMapIntensity: 0.95,
+    metalness: 0.06,
+    envMapIntensity: 0.5,
   });
 
-  const brushedBrass = new THREE.MeshStandardMaterial({
-    color: new THREE.Color('#FFFFFF'),
-    map: brassTex.colorMap,
-    roughnessMap: brassTex.roughnessMap,
-    metalness: 0.88,
-    roughness: 0.28,
-    envMapIntensity: 1.35,
+  const graphiteInk = new THREE.MeshStandardMaterial({
+    color: new THREE.Color('#A1A1AA'),
+    roughness: 0.66,
+    metalness: 0.04,
+    envMapIntensity: 0.45,
   });
 
-  const brassHighlight = new THREE.MeshStandardMaterial({
-    color: new THREE.Color('#E6C987'),
-    map: brassTex.colorMap,
-    roughnessMap: brassTex.roughnessMap,
-    metalness: 0.9,
-    roughness: 0.22,
-    emissive: new THREE.Color('#8E6B29'),
-    emissiveIntensity: 0.16,
-    envMapIntensity: 1.45,
-  });
-
-  const darkBronze = new THREE.MeshStandardMaterial({
-    color: new THREE.Color('#5A534B'),
-    roughnessMap: brassTex.roughnessMap,
-    metalness: 0.72,
-    roughness: 0.42,
-    envMapIntensity: 1.05,
+  const forestInk = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(FOREST_GREEN_HEX),
+    roughness: 0.56,
+    metalness: 0.06,
+    envMapIntensity: 0.55,
   });
 
   return {
-    ceramicMatte,
-    ceramicActive,
-    ceramicForest,
-    brushedBrass,
-    brassHighlight,
-    darkBronze,
+    porcelainMatte,
+    porcelainActive,
+    porcelainForest,
+    charcoalInk,
+    graphiteInk,
+    forestInk,
     dispose: () => {
-      ceramicTex.colorMap.dispose();
-      ceramicTex.roughnessMap.dispose();
-      brassTex.colorMap.dispose();
-      brassTex.roughnessMap.dispose();
-      ceramicMatte.dispose();
-      ceramicActive.dispose();
-      ceramicForest.dispose();
-      brushedBrass.dispose();
-      brassHighlight.dispose();
-      darkBronze.dispose();
+      paperTex.colorMap.dispose();
+      paperTex.roughnessMap.dispose();
+      porcelainMatte.dispose();
+      porcelainActive.dispose();
+      porcelainForest.dispose();
+      charcoalInk.dispose();
+      graphiteInk.dispose();
+      forestInk.dispose();
     },
   };
 }
 
 /**
- * Generates an inlaid ceramic/brass medallion face texture with crisp typography
- * so letters and station titles sit directly on the physical 3D sculpture.
+ * Crisp charcoal ink & paper medallion face texture (zero brass).
  */
 export function createMedallionFaceTexture(
   primaryText: string,
@@ -297,25 +219,24 @@ export function createMedallionFaceTexture(
 
     const bg =
       variant === 'charcoal'
-        ? '#1C1C20'
+        ? CHARCOAL_INK_HEX
         : variant === 'forest'
-          ? '#2D5A43'
-          : '#F7F4EC';
-    const fg = variant === 'cream' ? '#18181B' : '#FAF9F5';
-    const subFg = variant === 'cream' ? '#71717A' : 'rgba(250, 249, 245, 0.78)';
+          ? FOREST_GREEN_HEX
+          : '#FAF9F5';
+    const fg = variant === 'cream' ? CHARCOAL_INK_HEX : '#FAF9F5';
+    const subFg = variant === 'cream' ? GRAPHITE_LINE_HEX : 'rgba(250, 249, 245, 0.78)';
     const ringFg =
       variant === 'cream'
-        ? 'rgba(184, 150, 86, 0.65)'
-        : 'rgba(218, 190, 132, 0.72)';
+        ? 'rgba(24, 24, 27, 0.22)'
+        : 'rgba(250, 249, 245, 0.28)';
 
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, size, size);
 
-    // Subtle hairline brass inlay circle inside disc face
     ctx.strokeStyle = ringFg;
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(cx, cy, size * 0.42, 0, Math.PI * 2);
+    ctx.arc(cx, cy, size * 0.43, 0, Math.PI * 2);
     ctx.stroke();
 
     ctx.textAlign = 'center';
@@ -325,12 +246,12 @@ export function createMedallionFaceTexture(
       ctx.fillStyle = fg;
       const fontSize =
         primaryText.length <= 2
-          ? 128
+          ? 124
           : primaryText.length <= 6
-            ? 72
+            ? 70
             : primaryText.length <= 8
-              ? 58
-              : 46;
+              ? 56
+              : 44;
       ctx.font = `600 ${fontSize}px Georgia, "Times New Roman", serif`;
       ctx.fillText(primaryText, cx, cy - 18);
 
@@ -339,7 +260,7 @@ export function createMedallionFaceTexture(
       ctx.fillText(secondaryText.toUpperCase(), cx, cy + 56);
     } else {
       ctx.fillStyle = fg;
-      ctx.font = '600 132px Georgia, "Times New Roman", serif';
+      ctx.font = '600 128px Georgia, "Times New Roman", serif';
       ctx.fillText(primaryText, cx, cy);
     }
   }
@@ -352,7 +273,60 @@ export function createMedallionFaceTexture(
 }
 
 /**
- * Generates a whisper-soft radial contact shadow texture on #FAF9F5 paper.
+ * Generates a split-circle half-face texture mapped cleanly onto Three.js CircleGeometry
+ * semicircle UVs (left half samples u in [0, 0.5]; right half samples u in [0.5, 1]).
+ */
+export function createHalfMedallionFaceTexture(
+  letter: string,
+  subLabel: string,
+  side: 'left' | 'right',
+  variant: 'cream' | 'charcoal' | 'forest',
+  maxAnisotropy: number
+): THREE.CanvasTexture {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  if (ctx) {
+    const bg =
+      variant === 'charcoal'
+        ? CHARCOAL_INK_HEX
+        : variant === 'forest'
+          ? FOREST_GREEN_HEX
+          : '#FAF9F5';
+    const fg = variant === 'cream' ? CHARCOAL_INK_HEX : '#FAF9F5';
+    const subFg = variant === 'cream' ? GRAPHITE_LINE_HEX : 'rgba(250, 249, 245, 0.8)';
+
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, size, size);
+
+    // Center each label cleanly inside the semicircular quadrant centroid
+    const xCenter = side === 'left' ? size * 0.28 : size * 0.72;
+    const yCenter = size * 0.5;
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.fillStyle = fg;
+    ctx.font = '600 74px Georgia, "Times New Roman", serif';
+    ctx.fillText(letter, xCenter, yCenter - 20);
+
+    ctx.fillStyle = subFg;
+    ctx.font = '600 20px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillText(subLabel.toUpperCase(), xCenter, yCenter + 40);
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = maxAnisotropy;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/**
+ * Generates a soft neutral contact shadow gradient for #FAF9F5 paper.
  */
 export function createPaperShadowTexture(): THREE.CanvasTexture {
   const size = 256;
@@ -363,8 +337,8 @@ export function createPaperShadowTexture(): THREE.CanvasTexture {
   if (ctx) {
     const cx = size / 2;
     const grad = ctx.createRadialGradient(cx, cx, 8, cx, cx, cx);
-    grad.addColorStop(0, 'rgba(24, 24, 27, 0.16)');
-    grad.addColorStop(0.45, 'rgba(24, 24, 27, 0.06)');
+    grad.addColorStop(0, 'rgba(24, 24, 27, 0.14)');
+    grad.addColorStop(0.5, 'rgba(24, 24, 27, 0.05)');
     grad.addColorStop(1, 'rgba(24, 24, 27, 0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
@@ -377,11 +351,7 @@ export function createPaperShadowTexture(): THREE.CanvasTexture {
 export interface StudioRigOptions {
   fov?: number;
   cameraPosition?: [number, number, number];
-  controlsTarget?: [number, number, number];
-  minDistance?: number;
-  maxDistance?: number;
-  minPolarAngle?: number;
-  maxPolarAngle?: number;
+  lookAtTarget?: [number, number, number];
   afterDraw?: () => void;
   onContextLost?: () => void;
   onContextRestored?: () => void;
@@ -391,7 +361,6 @@ export interface StudioRig {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
-  controls: OrbitControls;
   isSoftwareWebGL: boolean;
   maxAnisotropy: number;
   requestRender: () => void;
@@ -400,8 +369,8 @@ export interface StudioRig {
 }
 
 /**
- * Sets up a calm warm-paper Three.js studio rig with RoomEnvironment reflections,
- * warm studio key light, soft shadows, OrbitControls, coalesced on-demand rendering,
+ * Sets up a clean paper-and-ink Three.js studio rig with RoomEnvironment reflections,
+ * soft studio light, fixed architectural framing, touch-ready coalesced rendering,
  * software-WebGL protection, and ResizeObserver responsiveness.
  */
 export function createStudioRig(
@@ -409,18 +378,19 @@ export function createStudioRig(
   options: StudioRigOptions = {}
 ): StudioRig {
   const isSoftwareWebGL = detectSoftwareWebGL();
-  const reducedMotion = prefersReducedMotion();
 
   const width = Math.max(container.clientWidth || 320, 1);
-  const height = Math.max(container.clientHeight || 280, 1);
+  const height = Math.max(container.clientHeight || 240, 1);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(PAPER_BG_HEX);
   scene.fog = new THREE.Fog(PAPER_BG_HEX, 11, 22);
 
-  const camera = new THREE.PerspectiveCamera(options.fov ?? 36, width / height, 0.1, 40);
-  const camPos = options.cameraPosition ?? [0, 0.65, 7.6];
+  const camera = new THREE.PerspectiveCamera(options.fov ?? 34, width / height, 0.1, 40);
+  const camPos = options.cameraPosition ?? [0, 0, 7.1];
+  const lookAt = options.lookAtTarget ?? [0, 0, 0];
   camera.position.set(camPos[0], camPos[1], camPos[2]);
+  camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
 
   const renderer = new THREE.WebGLRenderer({
     antialias: !isSoftwareWebGL,
@@ -431,7 +401,7 @@ export function createStudioRig(
   renderer.setSize(width, height, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.06;
+  renderer.toneMappingExposure = 1.04;
   renderer.shadowMap.enabled = !isSoftwareWebGL;
   if (!isSoftwareWebGL) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -441,12 +411,12 @@ export function createStudioRig(
   renderer.domElement.style.height = '100%';
   renderer.domElement.style.display = 'block';
   renderer.domElement.style.outline = 'none';
-  renderer.domElement.style.touchAction = 'pan-y';
+  // Allow smooth single-finger interactive tilt directly on canvas while keeping outside page scroll
+  renderer.domElement.style.touchAction = 'none';
   container.appendChild(renderer.domElement);
 
   const maxAnisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy() || 1);
 
-  // Environment IBL via RoomEnvironment + PMREMGenerator (authentic brass highlights)
   const pmrem = new THREE.PMREMGenerator(renderer);
   pmrem.compileEquirectangularShader();
   const roomEnv = new RoomEnvironment();
@@ -455,12 +425,11 @@ export function createStudioRig(
   roomEnv.dispose();
   pmrem.dispose();
 
-  // Studio Lighting (Key, Hemisphere Fill, Subtle Back Rim)
-  const hemiLight = new THREE.HemisphereLight('#FFFDF8', '#D8D0C2', 0.85);
+  const hemiLight = new THREE.HemisphereLight('#FFFFFF', '#E4E0D8', 0.95);
   scene.add(hemiLight);
 
-  const keyLight = new THREE.DirectionalLight('#FFF8EC', 1.65);
-  keyLight.position.set(3.8, 5.4, 4.6);
+  const keyLight = new THREE.DirectionalLight('#FFFDF9', 1.35);
+  keyLight.position.set(2.8, 4.4, 5.6);
   if (!isSoftwareWebGL) {
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(1024, 1024);
@@ -476,23 +445,9 @@ export function createStudioRig(
   }
   scene.add(keyLight);
 
-  const rimLight = new THREE.DirectionalLight('#F4EFE4', 0.72);
-  rimLight.position.set(-4.0, 2.2, -3.8);
+  const rimLight = new THREE.DirectionalLight('#F4F4F5', 0.52);
+  rimLight.position.set(-3.4, 1.8, -3.5);
   scene.add(rimLight);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
-  const target = options.controlsTarget ?? [0, 0, 0];
-  controls.target.set(target[0], target[1], target[2]);
-  controls.enablePan = false;
-  controls.enableDamping = !isSoftwareWebGL && !reducedMotion;
-  controls.dampingFactor = 0.075;
-  controls.minDistance = options.minDistance ?? 4.8;
-  controls.maxDistance = options.maxDistance ?? 11.0;
-  controls.minPolarAngle = options.minPolarAngle ?? Math.PI * 0.24;
-  controls.maxPolarAngle = options.maxPolarAngle ?? Math.PI * 0.72;
-  controls.rotateSpeed = 0.72;
-  controls.zoomSpeed = 0.65;
-  controls.update();
 
   let rafId = 0;
   let dirty = true;
@@ -508,7 +463,6 @@ export function createStudioRig(
     const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
     lastTime = now;
 
-    const controlsMoving = controls.update();
     const animRunning = updateCallback ? updateCallback(dt) : false;
 
     renderer.render(scene, camera);
@@ -522,7 +476,7 @@ export function createStudioRig(
       }
     }
 
-    dirty = Boolean(controlsMoving || animRunning);
+    dirty = Boolean(animRunning);
     if (dirty && !disposed) {
       rafId = window.requestAnimationFrame(drawNow);
     }
@@ -537,15 +491,10 @@ export function createStudioRig(
     }
   };
 
-  const onControlsChange = () => {
-    requestRender();
-  };
-  controls.addEventListener('change', onControlsChange);
-
   const handleResize = () => {
     if (disposed) return;
     const w = Math.max(container.clientWidth || 320, 1);
-    const h = Math.max(container.clientHeight || 280, 1);
+    const h = Math.max(container.clientHeight || 240, 1);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
@@ -577,7 +526,6 @@ export function createStudioRig(
     scene,
     camera,
     renderer,
-    controls,
     isSoftwareWebGL,
     maxAnisotropy,
     requestRender,
@@ -590,8 +538,6 @@ export function createStudioRig(
       if (rafId) window.cancelAnimationFrame(rafId);
       if (afterDrawTimer !== null) window.clearTimeout(afterDrawTimer);
       resizeObserver.disconnect();
-      controls.removeEventListener('change', onControlsChange);
-      controls.dispose();
       renderer.domElement.removeEventListener('webglcontextlost', onLost);
       renderer.domElement.removeEventListener('webglcontextrestored', onRestored);
       envRenderTarget.dispose();

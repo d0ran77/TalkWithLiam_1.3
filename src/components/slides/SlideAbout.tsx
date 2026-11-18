@@ -78,7 +78,7 @@ export const SlideAbout: React.FC<SlideAboutProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4.5 pt-1 flex-1">
           <BreathReveal enabled={animate} delay={0} yOffset={14} className="h-full">
             <div
-              className={`h-full p-4 sm:p-5 lg:p-5.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2 flex flex-col justify-between ${
+              className={`h-full p-4 sm:p-5 lg:p-5.5 rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] space-y-2 flex flex-col justify-between ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300/90 transition-all duration-300' : ''
               }`}
             >
@@ -101,7 +101,7 @@ export const SlideAbout: React.FC<SlideAboutProps> = ({
 
           <BreathReveal enabled={animate} delay={0.09} yOffset={14} className="h-full">
             <div
-              className={`h-full p-4 sm:p-5 lg:p-5.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2 flex flex-col justify-between ${
+              className={`h-full p-4 sm:p-5 lg:p-5.5 rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] space-y-2 flex flex-col justify-between ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300/90 transition-all duration-300' : ''
               }`}
             >
@@ -124,7 +124,7 @@ export const SlideAbout: React.FC<SlideAboutProps> = ({
 
           <BreathReveal enabled={animate} delay={0.18} yOffset={14} className="h-full">
             <div
-              className={`h-full p-4 sm:p-5 lg:p-5.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2 flex flex-col justify-between ${
+              className={`h-full p-4 sm:p-5 lg:p-5.5 rounded-2xl bg-white/45 border border-white/80 ring-1 ring-[#18181B]/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_16px_-6px_rgba(24,24,27,0.05)] space-y-2 flex flex-col justify-between ${
                 animate ? 'hover:-translate-y-0.5 hover:shadow-xs hover:border-stone-300/90 transition-all duration-300' : ''
               }`}
             >
