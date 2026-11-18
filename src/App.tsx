@@ -42,6 +42,7 @@ import { DramaTriangle3DPreviewPage } from './components/DramaTriangle3DPreviewP
 import { FloatingConnectSpeedDial } from './components/FloatingConnectSpeedDial.tsx';
 import { PracticeGuideView, PracticeGuideSectionJump } from './components/PracticeGuideView.tsx';
 import { MobileBrandHeader } from './components/MobileBrandHeader.tsx';
+import { WillerbyRouteGuideProvider } from './hooks/useWillerbyRouteGuide.tsx';
 import {
   BREATH_EASE,
   PAGE_BREATH_INITIAL,
@@ -708,6 +709,7 @@ export default function App() {
   );
 
   return (
+    <WillerbyRouteGuideProvider>
     <MotionConfig reducedMotion="user">
     <div
       id="app-root-viewport"
@@ -1970,6 +1972,7 @@ export default function App() {
       />
     </div>
     </MotionConfig>
+    </WillerbyRouteGuideProvider>
   );
 }
 

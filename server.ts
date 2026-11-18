@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import ical from 'node-ical';
 import dotenv from 'dotenv';
+import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
@@ -300,6 +301,249 @@ app.get('/api/calendar/availability', async (req, res) => {
     res.status(500).json({
       error: 'Failed to retrieve calendar availability',
       details: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+// Willerby Practice Coordinates (1b The Square, Willerby, East Yorkshire, HU10 7UA)
+const CLINIC_LAT_LNG = {
+  latitude: 53.7570982,
+  longitude: -0.4464255,
+};
+
+interface GroundedPlaceSource {
+  title: string;
+  uri: string;
+  placeId?: string;
+  reviewSnippets?: string[];
+}
+
+interface RouteGuidePayload {
+  origin: string;
+  mode: 'driving' | 'bus';
+  summaryMarkdown: string;
+  sources: GroundedPlaceSource[];
+  generatedAt: string;
+}
+
+const routeGuideCache = new Map<string, { timestamp: number; data: RouteGuidePayload }>();
+const ROUTE_CACHE_TTL_MS = 20 * 60 * 1000; // 20 minutes
+
+function extractGroundedMapsSources(response: any): GroundedPlaceSource[] {
+  const chunks = response?.candidates?.[0]?.groundingMetadata?.groundingChunks;
+  if (!Array.isArray(chunks)) return [];
+
+  const seenUris = new Set<string>();
+  const sources: GroundedPlaceSource[] = [];
+
+  for (const chunk of chunks) {
+    const maps = chunk?.maps;
+    const uri = typeof maps?.uri === 'string' ? maps.uri.trim() : '';
+    const title = typeof maps?.title === 'string' ? maps.title.trim() : '';
+    if (!uri || seenUris.has(uri)) continue;
+    seenUris.add(uri);
+
+    const rawSnippets = maps?.placeAnswerSources?.reviewSnippets;
+    const reviewSnippets: string[] = [];
+    if (Array.isArray(rawSnippets)) {
+      for (const s of rawSnippets) {
+        const text =
+          typeof s === 'string'
+            ? s.trim()
+            : typeof s?.content === 'string'
+              ? s.content.trim()
+              : typeof s?.text === 'string'
+                ? s.text.trim()
+                : '';
+        if (text && reviewSnippets.length < 2) {
+          reviewSnippets.push(text);
+        }
+      }
+    }
+
+    sources.push({
+      title: title || 'Google Maps Location',
+      uri,
+      placeId: typeof maps?.placeId === 'string' ? maps.placeId : undefined,
+      reviewSnippets: reviewSnippets.length > 0 ? reviewSnippets : undefined,
+    });
+  }
+
+  return sources;
+}
+
+// API Route: Live Willerby Route, Parking & Bus Grounding (Gemini Maps Grounding)
+app.post('/api/maps/route-guide', async (req, res) => {
+  try {
+    const rawOrigin = typeof req.body?.origin === 'string' ? req.body.origin.trim() : '';
+    const mode: 'driving' | 'bus' = req.body?.mode === 'bus' ? 'bus' : 'driving';
+
+    if (!rawOrigin || rawOrigin.length < 2) {
+      res.status(400).json({
+        error: 'Please enter a valid UK postcode, village, or town (for example, HU5 2AA or Beverley).',
+      });
+      return;
+    }
+
+    if (rawOrigin.length > 90) {
+      res.status(400).json({
+        error: 'Starting location is too long. Please enter a concise postcode or town name.',
+      });
+      return;
+    }
+
+    const cacheKey = `${mode}:${rawOrigin.toLowerCase().replace(/\s+/g, ' ')}`;
+    const cached = routeGuideCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < ROUTE_CACHE_TTL_MS) {
+      res.json({ ...cached.data, cached: true });
+      return;
+    }
+
+    const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+    if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
+      res.status(503).json({
+        error:
+          'Live Google Maps route lookup requires GEMINI_API_KEY to be configured in Settings > Secrets.',
+      });
+      return;
+    }
+
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+
+    const prompt =
+      mode === 'driving'
+        ? `A counselling client is travelling by car from "${rawOrigin}" to Talk With Liam at 1b The Square, Willerby, East Yorkshire, HU10 7UA (second floor clinic above/beside The Square).
+
+Use Google Maps data to provide a calm, factual, practical arrival guide formatted cleanly in Markdown with these exact headings:
+
+### Route & Estimated Time
+- Main road approach from ${rawOrigin} to Willerby Square / Main Street (HU10 7UA) and realistic driving time or distance.
+
+### Verified Free Parking & Walking Time
+- Verified free public parking or car parks immediately around Willerby Square / Main Street / Sainsbury's Local (noting restrictions if any) and the approximate walking minutes to 1b The Square.
+
+### Landmarks On Arrival
+- Nearby recognisable landmarks right around Willerby Square so a first-time visitor knows they have found the right spot.
+
+Keep the tone warm, concise, plain English, and grounded strictly in Google Maps places.`
+        : `A counselling client is travelling by public bus from "${rawOrigin}" to Talk With Liam at 1b The Square, Willerby, East Yorkshire, HU10 7UA.
+
+Use Google Maps data to provide a calm, factual, practical arrival guide formatted cleanly in Markdown with these exact headings:
+
+### East Yorkshire Bus Routes & Stops
+- Relevant East Yorkshire bus routes or stop names serving Willerby Square / Main Street from ${rawOrigin} and approximate journey time.
+
+### Walking Time From The Stop
+- Short walking directions and estimated walking minutes from the Willerby Square / Main Street stop to 1b The Square.
+
+### Landmarks On Arrival
+- Nearby recognisable landmarks right around Willerby Square (such as Sainsbury's Local or neighbouring shops) so a first-time visitor can orient easily.
+
+Keep the tone warm, concise, plain English, and grounded strictly in Google Maps places.`;
+
+    let response: any;
+    let lastError: any = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents: prompt,
+          config: {
+            tools: [{ googleMaps: {} }],
+            toolConfig: {
+              retrievalConfig: {
+                latLng: CLINIC_LAT_LNG,
+              },
+            },
+          },
+        });
+        lastError = null;
+        break;
+      } catch (err: any) {
+        lastError = err;
+        const errStatus =
+          typeof err?.status === 'number'
+            ? err.status
+            : typeof err?.statusCode === 'number'
+              ? err.statusCode
+              : 500;
+        const msg = err instanceof Error ? err.message : String(err);
+        const isTransient = errStatus === 429 || errStatus === 503 || msg.includes('RESOURCE_EXHAUSTED');
+        if (attempt === 0 && isTransient) {
+          await new Promise((resolve) => setTimeout(resolve, 1100));
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (lastError) {
+      throw lastError;
+    }
+
+    const summaryMarkdown = (response?.text || '').trim();
+    if (!summaryMarkdown) {
+      res.status(502).json({
+        error: 'Unable to retrieve route details for that starting point right now. Please try a nearby postcode or town.',
+      });
+      return;
+    }
+
+    const sources = extractGroundedMapsSources(response);
+    const payload: RouteGuidePayload = {
+      origin: rawOrigin,
+      mode,
+      summaryMarkdown,
+      sources,
+      generatedAt: new Date().toISOString(),
+    };
+
+    routeGuideCache.set(cacheKey, {
+      timestamp: Date.now(),
+      data: payload,
+    });
+
+    res.json(payload);
+  } catch (error: any) {
+    console.error('Error in /api/maps/route-guide:', error);
+    const status =
+      typeof error?.status === 'number'
+        ? error.status
+        : typeof error?.statusCode === 'number'
+          ? error.statusCode
+          : 500;
+    const rawMsg = error instanceof Error ? error.message : String(error);
+
+    if (
+      status === 400 ||
+      status === 403 ||
+      rawMsg.includes('API_KEY') ||
+      rawMsg.includes('PERMISSION_DENIED')
+    ) {
+      res.status(502).json({
+        error:
+          'Google Maps route lookup could not authenticate with Gemini. Please check GEMINI_API_KEY in Settings > Secrets.',
+      });
+      return;
+    }
+
+    if (status === 429 || rawMsg.includes('RESOURCE_EXHAUSTED')) {
+      res.status(429).json({
+        error:
+          'Live Google Maps route lookup is temporarily busy (rate limit reached). Please wait a moment and try again.',
+      });
+      return;
+    }
+
+    res.status(500).json({
+      error: 'Unable to reach live Google Maps route data right now. Please try again in a moment.',
     });
   }
 });
