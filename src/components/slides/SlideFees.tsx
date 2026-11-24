@@ -90,7 +90,7 @@ export const SlideFees: React.FC<SlideFeesProps> = ({
                 </div>
 
                 <p className="text-[13px] sm:text-[14px] text-stone-500 leading-relaxed pt-2 border-t border-stone-100">
-                  A calm, confidential room in <strong className="text-[#18181B] font-semibold">Willerby, East Yorkshire</strong>. Free parking nearby; easy access from Hull, Cottingham, Hessle, and Beverley.
+                  A calm, confidential room near <strong className="text-[#18181B] font-semibold">Willerby Square</strong> with free adjacent parking, easy to reach from Willerby, Hull, Cottingham, Hessle, Anlaby, and Kirk Ella.
                 </p>
 
                 {onOpenLocation && (

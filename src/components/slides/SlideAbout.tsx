@@ -148,15 +148,20 @@ export const SlideAbout: React.FC<SlideAboutProps> = ({
 
         {/* Ways to Meet Badges */}
         <BreathReveal enabled={animate} delay={0.1} yOffset={10}>
-          <div className="pt-2 sm:pt-2.5 flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-stone-600">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 border border-stone-200/80 text-[#18181B] font-medium">
-              <MapPin className="w-3.5 h-3.5 text-stone-700" />
-              In-Person: The Willerby Practice (East Yorkshire)
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 border border-stone-200/80 text-[#18181B] font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
-              Online: UK-Wide via Google Meet
-            </span>
+          <div className="pt-2 sm:pt-2.5 space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-stone-600">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 border border-stone-200/80 text-[#18181B] font-medium">
+                <MapPin className="w-3.5 h-3.5 text-stone-700" />
+                In-Person: The Willerby Practice (East Yorkshire)
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 border border-stone-200/80 text-[#18181B] font-medium">
+                <ShieldCheck className="w-3.5 h-3.5 text-stone-700" />
+                Online: UK-Wide via Google Meet
+              </span>
+            </div>
+            <p className="text-stone-500 text-xs sm:text-[13.5px] leading-relaxed">
+              The quiet room near Willerby Square has free parking right beside it and is an easy drive or bus ride from Willerby, Cottingham, Hessle, Anlaby, and Kirk Ella.
+            </p>
           </div>
         </BreathReveal>
       </div>

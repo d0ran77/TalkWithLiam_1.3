@@ -24,6 +24,24 @@ const PORT =
 
 app.use(express.json());
 
+// Enforce canonical non-trailing-slash URLs across all non-root GET/HEAD routes with HTTP 301
+app.use((req, res, next) => {
+  if (
+    (req.method === 'GET' || req.method === 'HEAD') &&
+    req.path.length > 1 &&
+    req.path.endsWith('/') &&
+    !req.path.startsWith('/api/') &&
+    !req.path.startsWith('/@')
+  ) {
+    const cleanPath = req.path.replace(/\/+$/, '') || '/';
+    const queryIndex = req.originalUrl.indexOf('?');
+    const querySuffix = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+    res.redirect(301, `${cleanPath}${querySuffix}`);
+    return;
+  }
+  next();
+});
+
 // Default iCal URL provided by Liam for live Google Calendar sync
 const DEFAULT_ICAL_FEED_URL =
   'https://calendar.google.com/calendar/ical/liamsdoran77%40gmail.com/private-e0aff45375e93608134bcbebf75c438a/basic.ics';

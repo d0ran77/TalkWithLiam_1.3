@@ -84,7 +84,7 @@ function renderHowWeWorkBody(): string {
       </section>
       <section>
         <h2>Where We Meet</h2>
-        <p>In-person counselling at The Willerby Practice, 1b The Square, Willerby, East Yorkshire (HU10 7UA)—convenient for Hull, Cottingham, Hessle, Anlaby, North Ferriby, Swanland, and Beverley—and UK-wide online therapy via Google Meet.</p>
+        <p>The quiet room near Willerby Square has free parking right beside it and is an easy drive or bus ride from Willerby, Cottingham, Hessle, Anlaby, and Kirk Ella. Online therapy via Google Meet is also available across the UK.</p>
       </section>
     </article>
   `;
@@ -177,9 +177,9 @@ function renderFeesBody(): string {
       </section>
       <section>
         <h2>In-Person &amp; Online Formats</h2>
-        <h3>In-Person Therapy &mdash; £30 per 50-minute session</h3>
+        <h3>In-Person Therapy (£30 per 50-minute session)</h3>
         <address>The Willerby Practice, 1b The Square, Willerby, East Yorkshire, HU10 7UA</address>
-        <p>A calm, discreet consulting room on the second floor (access via stairs; no lift). Free parking is available in Willerby Square beside Sainsbury&rsquo;s Local and along adjacent bays, with quick links from Hull, Cottingham, Hessle, Kirk Ella, Anlaby, North Ferriby, Swanland, and Beverley (bus routes 54, 56, 66, 154, X46).</p>
+        <p>A calm, confidential room near Willerby Square with free adjacent parking, easy to reach from Willerby, Hull, Cottingham, Hessle, Anlaby, and Kirk Ella. Second floor room accessed via stairs (bus routes 54, 56, 66, 154, X46).</p>
         <h3>Online Therapy UK-Wide &mdash; £30 per 50-minute session</h3>
         <p>Secure, confidential video counselling via Google Meet across the United Kingdom, offering identical depth without travel.</p>
       </section>
@@ -311,6 +311,10 @@ function renderPacModelBody(): string {
         <h2>Short Video Explainer</h2>
         <p><a href="${escapeHtml(PAC_YOUTUBE_SHORT.watchUrl)}">${escapeHtml(PAC_YOUTUBE_SHORT.title)}</a></p>
       </section>
+      <section>
+        <h2>Exploring These Patterns in Therapy</h2>
+        <p>If you recognise some of these patterns in your own life and want space to look at them slowly, you are welcome to <a href="/contact">book a free initial consultation</a> in Willerby or online, or look through <a href="/fees">fees and practicalities</a> in your own time.</p>
+      </section>
     </article>
   `;
 }
@@ -389,7 +393,7 @@ function renderDramaTriangleBody(): string {
       </section>
       <section>
         <h2>Working With Relationship Loops in Therapy</h2>
-        <p>Spotting which corner of the triangle you reach for under pressure isn&rsquo;t about judging yourself. Sessions are £30 (in-person at The Willerby Practice, HU10 7UA or online UK-wide), starting with a free initial chat.</p>
+        <p>Spotting which corner of the triangle you reach for under pressure isn&rsquo;t something you have to untangle alone. If you would like to explore these patterns in your own life, you can read through <a href="/fees">fees and practicalities</a> or arrange a <a href="/contact">free initial consultation</a> in Willerby or online.</p>
       </section>
     </article>
   `;

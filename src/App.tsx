@@ -251,7 +251,20 @@ export default function App() {
   // Synchronize browser address bar with active viewMode and chapter route
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
+    const rawPathname = window.location.pathname;
+    if (rawPathname.length > 1 && rawPathname.endsWith('/')) {
+      const strippedPath = rawPathname.replace(/\/+$/, '') || '/';
+      try {
+        window.history.replaceState(
+          window.history.state,
+          '',
+          `${strippedPath}${window.location.search}${window.location.hash}`
+        );
+      } catch {
+        // ignore
+      }
+    }
+    const currentPath = rawPathname.replace(/\/+$/, '').toLowerCase() || '/';
     const currentHash = window.location.hash.toLowerCase();
 
     if (viewMode === 'portrait') {
@@ -1888,6 +1901,7 @@ export default function App() {
                           }}
                           onGoToAboutLiam={() => handleSelectViewMode('portrait')}
                           onGoToDramaTriangle={() => handleSelectViewMode('drama-triangle')}
+                          onGoToFees={() => goToSlide(3)}
                           onGoToContact={handleMailClick}
                         />
                       ) : viewMode === 'drama-triangle' ? (
@@ -1896,6 +1910,7 @@ export default function App() {
                           onGoToAboutLiam={() => handleSelectViewMode('portrait')}
                           onGoToPractice={() => goToSlide(0)}
                           onGoToPacModel={() => handleSelectViewMode('pac-model')}
+                          onGoToFees={() => goToSlide(3)}
                           onGoToContact={handleMailClick}
                         />
                       ) : viewMode === 'pac-model-3d' ? (

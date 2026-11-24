@@ -14,14 +14,14 @@ export const SITE_BASE_URL = 'https://talkwithliam.co.uk';
 export const ROOT_SEO_META: SeoRouteMeta = {
   route: '',
   breadcrumbLabel: 'Home',
-  title: 'Talk with Liam — Psychotherapeutic Counselling',
+  title: 'Counselling in Hull & Willerby | Talk With Liam - Psychotherapeutic Counselling',
   description:
-    'Two humans in a room. Grounded relational counselling in Willerby, Hull & UK-wide online with Liam Doran, UKCP trainee. £30 sessions; free intro chat.',
-  heading: 'Talk with Liam — Psychotherapeutic Counselling',
+    'Grounded, Adult-to-Adult psychotherapeutic counselling in Willerby (near Hull) and UK-wide online. £30 per session with a free initial consultation. No waiting lists.',
+  heading: 'Talk With Liam - Psychotherapeutic Counselling',
   summary:
     'Grounded, direct, and relational psychotherapeutic counselling in Willerby, East Yorkshire (HU10 7UA) and UK-wide online with Liam Doran, UKCP Trainee Member.',
   ogImage: `${SITE_BASE_URL}/favicon1.jpeg`,
-  ogImageAlt: 'Talk with Liam — Psychotherapeutic Counselling',
+  ogImageAlt: 'Talk With Liam - Psychotherapeutic Counselling',
 };
 
 export const PUBLIC_ROUTE_PAGES: SeoRouteMeta[] = [
@@ -40,9 +40,9 @@ export const PUBLIC_ROUTE_PAGES: SeoRouteMeta[] = [
   {
     route: 'how-we-work',
     breadcrumbLabel: 'How We Work',
-    title: 'How We Work | Talk with Liam Counselling Willerby',
+    title: 'How We Work | Transactional Analysis Therapy in Hull & Online | Talk With Liam',
     description:
-      'Two humans in a room. No pedestals and no scripts—grounded, equal Adult-to-Adult relational counselling in Willerby, East Yorkshire & UK-wide online.',
+      'Straightforward, human-to-human Transactional Analysis psychotherapy. Learn how sessions work in-person at Willerby Square or online across the UK.',
     heading: 'Two Humans in a Room',
     summary:
       'No pedestals and no scripts. Equal adult-to-adult relational therapy in Willerby, East Yorkshire and online across the UK.',
@@ -70,9 +70,9 @@ export const PUBLIC_ROUTE_PAGES: SeoRouteMeta[] = [
   {
     route: 'fees',
     breadcrumbLabel: 'Fees & Practice',
-    title: '£30 Counselling Fees & Willerby Practice | Liam',
+    title: 'Counselling Fees & Free Initial Consultation | Talk With Liam (Hull & Online)',
     description:
-      'Transparent £30 per 50-minute session at 1b The Square, Willerby (HU10 7UA) & UK-wide online via Google Meet. Concessions & free intro consultation.',
+      'Transparent therapy fees: £30 per 50-minute session, concession slots available, and a free initial consultation in Willerby, Hull or online across the UK.',
     heading: 'Fees, Space & Our Mutual Agreement',
     summary:
       '£30 per 50-minute session in person at 1b The Square, Willerby (HU10 7UA) or online UK-wide. Free introductory consultation available.',

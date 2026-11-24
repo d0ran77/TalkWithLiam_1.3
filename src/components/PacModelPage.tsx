@@ -20,6 +20,7 @@ interface PacModelPageProps {
   onNavigateToSlides: (slideIndex?: number) => void;
   onGoToAboutLiam: () => void;
   onGoToDramaTriangle?: () => void;
+  onGoToFees?: () => void;
   onGoToContact: () => void;
 }
 
@@ -28,6 +29,7 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
   onNavigateToSlides,
   onGoToAboutLiam,
   onGoToDramaTriangle,
+  onGoToFees,
   onGoToContact,
 }) => {
   const [activeTab, setActiveTab] = useState<PacTabId>('core');
@@ -570,20 +572,68 @@ export const PacModelPage: React.FC<PacModelPageProps> = ({
             className="mt-12 sm:mt-14 pt-8 sm:pt-10 border-t border-[#A1A1AA]/60 max-w-3xl space-y-4"
           >
             <p className="text-[15px] sm:text-[16.5px] leading-[1.7] text-[#71717A]">
-              Therapy isn&apos;t about fixing you: it&apos;s about two humans in a room looking honestly at your life. Sessions are £30 (in-person in Willerby or online UK-wide), starting with a free initial chat.
+              If you recognise some of these patterns in your own life and want space to look at them slowly, you are welcome to{' '}
+              <a
+                href="/contact"
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    playSoftThump('bright');
+                    onGoToContact();
+                  }
+                }}
+                className="text-[#18181B] border-b border-[#18181B]/45 hover:border-[#18181B] transition-colors"
+              >
+                book a free initial consultation
+              </a>{' '}
+              in Willerby or online, or look through{' '}
+              <a
+                href="/fees"
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    playSoftThump('default');
+                    if (onGoToFees) onGoToFees();
+                    else onNavigateToSlides(3);
+                  }
+                }}
+                className="text-[#18181B] border-b border-[#18181B]/45 hover:border-[#18181B] transition-colors"
+              >
+                fees and practicalities
+              </a>{' '}
+              in your own time.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <button
-                type="button"
-                onClick={() => {
-                  playSoftThump('bright');
-                  onGoToContact();
+              <a
+                href="/contact"
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    playSoftThump('bright');
+                    onGoToContact();
+                  }
                 }}
                 className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-medium text-[#18181B] hover:text-[#71717A] border-b border-[#18181B] hover:border-[#71717A] pb-0.5 transition-colors cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
               >
-                <span>Book a free initial chat</span>
+                <span>Book a free initial consultation</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" />
-              </button>
+              </a>
+
+              <a
+                href="/fees"
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    playSoftThump('default');
+                    if (onGoToFees) onGoToFees();
+                    else onNavigateToSlides(3);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#71717A] hover:text-[#18181B] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+              >
+                <span>View fees (£30)</span>
+                <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+              </a>
 
               {onGoToDramaTriangle && (
                 <button

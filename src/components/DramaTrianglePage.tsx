@@ -33,6 +33,7 @@ export interface DramaTrianglePageProps {
   onGoToAboutLiam?: () => void;
   onGoToPractice?: () => void;
   onGoToPacModel?: () => void;
+  onGoToFees?: () => void;
   onGoToContact?: () => void;
 }
 
@@ -41,6 +42,7 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
   onGoToAboutLiam,
   onGoToPractice,
   onGoToPacModel,
+  onGoToFees,
   onGoToContact,
 }) => {
   const [mode, setMode] = useState<TriangleMode>('drama');
@@ -728,28 +730,76 @@ export const DramaTrianglePage: React.FC<DramaTrianglePageProps> = ({
           </section>
 
           {/* Closing Practice Note & CTA */}
-          {(onGoToContact || onGoToPacModel) && (
+          {(onGoToContact || onGoToFees || onGoToPacModel) && (
             <section
               aria-label="Closing note and initial chat"
               className="mt-10 sm:mt-12 pt-8 border-t border-[#E4E4E7] max-w-3xl space-y-4"
             >
               <p className="text-[15px] sm:text-[16px] leading-[1.7] text-[#71717A]">
-                Spotting which corner of the triangle you reach for under pressure isn&apos;t about judging yourself. In therapy, we look at those patterns slowly together so you have more choice in the room. Sessions are £30 (in-person in Willerby or online UK-wide), starting with a free initial chat.
+                Spotting which corner of the triangle you reach for under pressure isn&apos;t something you have to untangle alone. If you would like to explore these patterns in your own life, you can read through{' '}
+                <a
+                  href="/fees"
+                  onClick={(e) => {
+                    if (onGoToFees && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                      e.preventDefault();
+                      playSoftThump('pill');
+                      onGoToFees();
+                    }
+                  }}
+                  className="text-[#18181B] border-b border-[#18181B]/45 hover:border-[#18181B] transition-colors"
+                >
+                  fees and practicalities
+                </a>{' '}
+                or arrange a{' '}
+                <a
+                  href="/contact"
+                  onClick={(e) => {
+                    if (onGoToContact && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                      e.preventDefault();
+                      playSoftThump('winner');
+                      onGoToContact();
+                    }
+                  }}
+                  className="text-[#18181B] border-b border-[#18181B]/45 hover:border-[#18181B] transition-colors"
+                >
+                  free initial consultation
+                </a>{' '}
+                in Willerby or online.
               </p>
 
               <div className="flex flex-wrap items-center gap-6">
                 {onGoToContact && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playSoftThump('winner');
-                      onGoToContact();
+                  <a
+                    href="/contact"
+                    onClick={(e) => {
+                      if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        playSoftThump('winner');
+                        onGoToContact();
+                      }
                     }}
                     className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-medium text-[#18181B] hover:text-[#2D5A43] border-b border-[#18181B] hover:border-[#2D5A43] pb-0.5 transition-colors cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18181B]"
                   >
-                    <span>Book a free initial chat</span>
+                    <span>Book a free initial consultation</span>
                     <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true" />
-                  </button>
+                  </a>
+                )}
+
+                {onGoToFees && (
+                  <a
+                    href="/fees"
+                    onClick={(e) => {
+                      if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        playSoftThump('pill');
+                        onGoToFees();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#71717A] hover:text-[#18181B] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18181B]"
+                  >
+                    <span>View fees (£30)</span>
+                    <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                  </a>
                 )}
 
                 {onGoToPacModel && (
